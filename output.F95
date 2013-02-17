@@ -59,9 +59,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 #ifdef OUT_TEST
 ! *** binary output
-!      flagascii = 1
+      flagascii = 1
 ! *** ascii output
-      flagascii = 0
+!      flagascii = 0
 #else
 ! *** binary output: no other choice ***
       flagascii = 1
@@ -555,7 +555,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
             endif
 
             npjrmax=0
-            do i=0,nprocs-1
+            do ip=0,nprocs-1
               if(npjrmax.lt.npjr(ip)) then
                 npjrmax=npjr(ip)
               endif
@@ -949,7 +949,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** output integer values ***
 
             npjrmax=0
-            do i=0,nprocs-1
+            do ip=0,nprocs-1
               if(npjrmax.lt.npjr(ip)) then
                 npjrmax=npjr(ip)
               endif

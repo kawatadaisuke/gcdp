@@ -153,7 +153,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         endif
 
         npjrmax=0
-        do i=0,nprocs-1
+        do ip=0,nprocs-1
           if(npjrmax.lt.npjr(ip)) then
             npjrmax=npjr(ip)
           endif
@@ -658,7 +658,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 ! *** output integer variables ***
 
         npjrmax=0
-        do i=0,nprocs-1
+        do ip=0,nprocs-1
           if(npjrmax.lt.npjr(ip)) then
             npjrmax=npjr(ip)
           endif
