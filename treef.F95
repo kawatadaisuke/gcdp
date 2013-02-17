@@ -183,6 +183,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i
@@ -196,6 +197,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -218,7 +220,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -581,7 +582,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
 
 ! * update not-finished particle list *
       tnlist = nlist
@@ -630,6 +630,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -651,7 +652,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -1013,7 +1013,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
 
 ! * update not-finished particle list *
       tnlist = nlist
@@ -1062,6 +1061,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -1083,7 +1083,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -1445,7 +1444,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
 
 ! * update not-finished particle list *
       tnlist = nlist
