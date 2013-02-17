@@ -1,0 +1,352 @@
+!
+! *** TIME in subroutine
+#define WTIME
+! #define WTIMESUB
+!
+! *** cosmological simulation
+#define COSM
+#define MULTI_LEV
+!
+! *** hydrodynamics
+#define GAS
+!
+! *** self-gravity
+#define SGRAV
+!
+! *** DM
+#define DM
+!
+! *** metal 
+#define METAL
+!
+! *** radiative cooling
+#define COOL
+!
+! *** star 
+#define STAR
+!
+! *** star formation
+#define SF
+!
+! *** SNe energy feedback
+#define SF_EFD
+! *** turn on dt constraints from feedback energy
+! #define DTFD
+! *** mass feedback and metal enrichment
+#define SF_ZFD
+! *** core dw/ds for pressure gradient
+#define COREDW
+! #undef COREDW
+! *** gas softening limitter (default: no limitter)
+! #define GEPSLIM_G
+! #undef GEPSLIM_G
+! *** gas softening limitter, and no h limitter
+#define GEPSLIM_VH
+! #undef GEPSLIM_VH
+!
+! *** thermal energy limit 
+#define UTHLIM_JM
+! #undef UTHLIM_JM
+!
+! *** metal diffusion
+#define METALDIFF
+! #define CSZDIFF
+!
+! *** stop particles at the specified radius works in updatevn
+! #define MAXR
+! 
+! *** for external potential setting M(<r)
+! #define MEXT
+!
+! *** fix the centre of tree at 0,0,0
+! #define CENTRE0
+!
+! *** fixed softening for DM
+! #define FIXEDDMEPS
+!
+! *** DM softening limit to SI_eps*(m_dm**1/3) (default: limit)
+#define DMEPSLIM_G
+!
+! *** move particles azimuthally at randam
+! see fraction in update.F
+#define RANAZ
+#undef RANAZ
+!
+! *** turn on Quadrupole moment on for tree
+! This has to be off since pv34.3gtodm
+#define QPTREEF
+! #undef QPTREEF
+!
+! *** turn on FAST (Saitoh & Makino 2010)
+#define FASTG
+!
+! *** turn on dt from |a|/|da/dt|
+#define DTDADT
+#undef DTDADT
+!
+!  *** set TM_dt for particles affected by feedback
+#define MINDT_SFD
+! undef MINDT_SFD is faster, but underestimate feedback energy a lot.
+! #undef MINDT_SFD 
+!
+! *** turn off AC
+! #define NOAC
+! #undef NOAC
+! 
+! *** turn off AV switch
+#define NOAVSWITCH
+! use V_ALPHAINI and constant
+#undef NOAVSWITCH
+!
+! *** fix particles withing input id range *** not for stars ***
+#define FIXEDP
+#undef FIXEDP
+!
+! *** fix DM particles withing input id range
+#define FIXEDDMP
+#undef FIXEDDMP
+!
+! *** accelerate particle to the opposite direction
+#define GLASS
+! set FGLASS in define.F
+#undef GLASS
+!
+! *** artificial acceleration for DM particles (Widrow 2008)
+#define ARTFDM
+#undef ARTFDM
+
+! *** output format for test simulation ***
+! *** output for test simulation : detailed output
+#define OUT_TEST
+! *** Input time is GCD+ unit, no initial rho calculation ***
+! #define RHOINI
+! *** use original pressure and change u
+! #define PINI
+! *** no UVB heating  (assume lognh=0.0)
+! #define NOUVB
+
+! *** isolated galaxy
+! #define MAXR
+! #define MEXT
+! #define CENTRE0
+!
+! #undef COSM
+! #undef MULTI_LEV
+! #undef DM
+! #undef GAS
+! *** adiabati! ***
+! #undef COOL
+! #undef STAR
+! #undef SF
+! #undef METAL
+! #undef SF_EFD
+! #undef SF_ZFD
+! #undef METALDIFF
+! #undef UTHLIM_JM
+! #undef UTHLIM_POLY
+
+! *** for test simulation ****
+! *** no individual timestep
+#define NOIDT
+#undef NOIDT
+! *** Feedback test without Gravity ***
+! #define SFDNOGRAV
+! #define CONSTFDE
+! *** Noh test ***
+! #define ADTESTSIM
+! #undef SGRAV
+! #undef DM
+! #define SIM2D
+! *** B85 test adding Fext in calc_dv_du.F ***
+! #define B85TEST
+! #define ADTESTSIM
+! #undef GEPSLIM_G
+! #undef GEPSLIM_VH
+! #undef FIXEDDMEPS
+! *** 3D Shocktube test
+! #define STUB3D
+! #undef SGRAV
+! *** 1D Shocktube test
+#define STUB1D
+! *** Wind tunnel KHI test and Sedov test
+! #define WTUN
+! *** Wind tunnel KHI test 2D
+! #define WTUN2D
+! #define FIXEDP
+! *** 1D Wave test
+! #define WAVE1D
+
+! *** definitions of test simulations ***
+
+! *** Feedback test without gravity
+#ifdef SFDNOGRAV
+!
+#undef DM
+#undef SGRAV
+#undef MEXT
+#undef MAXR
+!
+#define BOXSIM
+#define BCX_PERIOD
+#define BCY_PERIOD
+#define BCZ_PERIOD
+!
+#undef COSM
+#undef MULTI_LEV
+! #undef COOL
+! #undef STAR
+#undef SF
+! #undef SF_EFD
+! #undef SF_ZFD
+! #undef METAL
+! #undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
+#endif
+
+! *** 3D Shocktube test
+#ifdef STUB3D
+!
+! #define RHOINI
+#define ADTESTSIM
+#undef DM
+!
+#define BOXSIM
+! #define FIXDVYZ
+#define BCX_FIX
+#define BCY_PERIOD
+#define BCZ_PERIOD
+!
+#endif
+
+! *** 1D Shocktube test
+#ifdef STUB1D
+! *** 1 D simulation ***
+#define SIM1D
+!
+! #define RHOINI
+#define ADTESTSIM
+#undef SGRAV
+#undef DM
+!
+#define BOXSIM
+#define BCX_FIX
+#define BCY_PERIOD
+#define BCZ_PERIOD
+#endif
+
+! *** 1D Shocktube test
+#ifdef WAVE1D
+! *** 1 D simulation ***
+#define SIM1D
+!
+! #define RHOINI
+#define ADTESTSIM
+#undef SGRAV
+#undef DM
+!
+#define BOXSIM
+#define BCX_PERIOD
+#define BCY_PERIOD
+#define BCZ_PERIOD
+#endif
+
+! *** Wind tunnel test
+#ifdef WTUN
+!
+! #define RHOINI
+#define ADTESTSIM
+#undef DM
+#undef SGRAV
+!
+#define BOXSIM
+#define BCX_PERIOD
+#define BCY_PERIOD
+#define BCZ_PERIOD
+#endif
+
+! *** Wind tunnel test 2D
+#ifdef WTUN2D
+! *** 2 D simulation ***
+#define SIM2D
+!
+! #define RHOINI
+#define ADTESTSIM
+#undef DM
+#undef SGRAV
+!
+#define BOXSIM
+#define BCX_PERIOD
+#define BCY_PERIOD
+#define BCZ_PERIOD
+#endif
+
+#ifdef ADTESTSIM
+#undef MEXT
+#undef MAXR
+#undef COSM
+#undef MULTI_LEV
+#undef COOL
+#undef STAR
+#undef SF
+#undef SF_EFD
+#undef SF_ZFD
+#undef METAL
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
+#undef RANAZ
+#endif
+
+! *** for consistency ***
+#ifndef GAS
+#undef COOL
+#undef STAR
+#undef SF
+#undef METAL
+#undef SF_EFD
+#undef SF_ZFD
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
+#endif
+!
+#ifndef METAL
+#undef SF_ZFD
+#undef METALDIFF
+#endif
+!
+#ifndef COOL
+#endif
+!
+#ifndef SGRAV
+#undef DM
+#undef FASTG
+#endif
+!
+#ifndef STAR
+#undef SF
+#undef SF_EFD
+#undef SF_ZFD
+#ifndef GAS
+#undef METAL
+#endif
+#endif
+!
+#ifdef STAR
+#define GAS
+#endif
+
+#ifndef DM
+#undef FIXEDDMP
+#endif
+
+#ifdef PINI
+#undef RHOINI
+#endif
+
+! *** for numerical library in dec*.f
+#define NUMREC
+
+#define IMSL
+#undef IMSL
