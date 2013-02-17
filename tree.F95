@@ -155,7 +155,7 @@ subroutine treebuild(np)
       endif
 ! * initialization for the case np_tr < 8 *
 
-      allocate(nd_sc(0:numtr))
+      allocate(nd_sc(0:num_tr))
 
       do i=list(level),num_tr-1
         nd_sc(i)=0

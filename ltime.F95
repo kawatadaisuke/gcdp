@@ -405,7 +405,7 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
 ! ***** for DM Particles *****
         if(nadm.gt.0) then
 
-          allocaet(dti(0:nadm))
+          allocate(dti(0:nadm))
 
           do i=0,nadm-1
             pn=list_adm(i)			 
