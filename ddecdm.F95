@@ -283,7 +283,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           idmrjs(0)=idmrjr(0)
           idmrjs(1)=idmrjr(1)
 
-          write(6,*) ' myrank,idmrjs=',myrank,idmrjs(0),idmrjs(1)
+!          write(6,*) ' myrank,idmrjs=',myrank,idmrjs(0),idmrjs(1)
 ! *** range of the key and order ***
 ! *** cannot use MPI_GET_COUNT ***
           call MPI_ISEND(idmrjs,2,MPI_INTEGER,srank(0),1 &

@@ -820,9 +820,6 @@ program gcdp
 #endif
 #ifdef GAS
       if(nagt.gt.0) then
-
-!        write(6,*) ' gtree start',myrank
-
         call gtreebuild(ng,ns)
       endif
 #endif

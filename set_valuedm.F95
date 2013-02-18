@@ -65,9 +65,8 @@ subroutine set_valuedm(ndm,nadm,flag)
 ! pn_nfp can be bigger than ng+ns in this proc, when receiving the particles
       integer pn_nfp(0:MNDM-1)
 ! for MPI
-      integer npproc(0:nprocs-1),isproc(0:nprocs-1),ieproc(0:nprocs-1) &
-       ,cproc(0:nprocs-1),idisp(0:nprocs-1),jjlen(0:nprocs-1) &
-       ,ireqs(0:nprocs-1),npjr(0:nprocs-1)
+      integer,allocatable :: npproc(:),isproc(:),ieproc(:) &
+       ,cproc(:),idisp(:),jjlen(:),ireqs(:),npjr(:)
 ! for work,allocatable
       integer,allocatable :: flagi(:)
       integer,allocatable :: pncomp(:),flagproc(:),flagcom(:)
@@ -81,6 +80,25 @@ subroutine set_valuedm(ndm,nadm,flag)
         ,tivs(:),talist(:),nalist(:),sldmtrlist(:)
       double precision,allocatable :: tx(:),ty(:),tz(:),du0(:),tdvr(:) &
         ,tdvs(:),fhx(:),fx(:),hu(:),lu(:),av(:),adv(:)
+
+!      write(fileo,'(a7,i3.3)') 'psetvdm',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        pni=list_adm(i)
+!        write(60,'(6(1pE13.5))') x_dm(pni),y_dm(pni),z_dm(pni) &
+!        ,vx_dm(pni),vy_dm(pni),vz_dm(pni)
+!      enddo
+!      close(60)
+
+! *** allocate work space for MPI ***
+      allocate(idisp(0:nprocs))
+      allocate(jjlen(0:nprocs))
+      allocate(ireqs(0:nprocs))
+      allocate(npproc(0:nprocs))
+      allocate(isproc(0:nprocs))
+      allocate(ieproc(0:nprocs))
+      allocate(cproc(0:nprocs))
+      allocate(npjr(0:nprocs))
 
 ! **** Basic Value ***
       ipi = 1.0d0/M_PI
@@ -657,6 +675,10 @@ subroutine set_valuedm(ndm,nadm,flag)
         npjs=npj
 ! *** ncompi: number of particles originally sent from iproc=0
         npj=ncompi
+
+        deallocate(tdvr)
+        allocate(tdvr(0:npj*nval))
+
         do ip=0,nprocs-1
 
           allocate(trbuf(0:npjr(ip)*snval))
@@ -675,6 +697,7 @@ subroutine set_valuedm(ndm,nadm,flag)
           deallocate(trbuf)
 
         enddo    
+
         if(irecv.ne.npj) then
           write(6,*) ' Error in set_valuedm(): irecv,npj=',irecv,npj
           write(6,*) ' when sending back the results.'
@@ -704,14 +727,16 @@ subroutine set_valuedm(ndm,nadm,flag)
         irecv=0
 ! *** ncompi: number of particles originally sent from iproc=0
         npj=ncompi
+
+        deallocate(tivr)
+        allocate(tivr(0:npj*nival))
+
         do ip=0,nprocs-1
 
-          allocate(tibuf(0:npjr(ip)*snval))
+          allocate(tibuf(0:npjr(ip)*snival))
 
           call MPI_SCATTERV(tivs,jjlen,idisp,MPI_INTEGER,tibuf &
-           ,npjr(ip)*snival,MPI_INTEGER,ip,tibuf,npjr(ip)*snival &
-           ,MPI_INTEGER,ip,tibuf,npjr(ip)*snival,MPI_INTEGER,ip &
-           ,MPI_COMM_WORLD,ierr)
+           ,npjr(ip)*snival,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
 ! *** set the data to tdvr ***
           do i=0,npjr(ip)-1
             tivr(irecv)=tibuf(snival*i)
@@ -1465,6 +1490,16 @@ subroutine set_valuedm(ndm,nadm,flag)
         endif
       enddo
 #endif
+
+! deallocate
+      deallocate(idisp)
+      deallocate(jjlen)
+      deallocate(ireqs)
+      deallocate(npproc)
+      deallocate(isproc)
+      deallocate(ieproc)
+      deallocate(cproc)
+      deallocate(npjr)
 
       deallocate(flagi)
       deallocate(fhx)
