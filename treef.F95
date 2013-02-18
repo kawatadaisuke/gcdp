@@ -108,13 +108,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         fap(pn)=dsqrt(pax_p(pn)**2+pay_p(pn)**2+paz_p(pn)**2)
       enddo
 
-      allocate(tdvr(0:nval*nags))
       allocate(flagproc(0:nags))
       allocate(flagcom(0:nags))
       allocate(pncomp(0:nags))
 
       flagtr=0
-   71 do i=0,nag-1
+
+   71 allocate(tdvr(0:nval*nags))
+
+      do i=0,nag-1
         pn=list_ap(i)
         pn_nfp(i)=pn
         tdvr(i)=x_p(pn)
@@ -619,6 +621,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i
@@ -1050,6 +1053,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i

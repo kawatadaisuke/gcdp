@@ -14,7 +14,9 @@ subroutine set_valuedm(ndm,nadm,flag)
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
+#ifdef MULTI_LEV
       use gcdp_ldmtree
+#endif
       use gcdp_system
       use gcdp_kernel
 
@@ -719,9 +721,10 @@ subroutine set_valuedm(ndm,nadm,flag)
           deallocate(tibuf)
 
         enddo          
-      endif
 
-      deallocate(tivs)
+        deallocate(tivs)
+
+      endif
 
       do i=0,npj-1
         pni = pn_nfp(i)

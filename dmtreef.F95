@@ -11,6 +11,10 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       use gcdp_const
       use gcdp_system
       use gcdp_kernel
+#if defined(GAS) || defined(STARS)
+      use gcdp_baryon
+      use gcdp_btree
+#endif
       use gcdp_dm
       use gcdp_dmtree
 #ifdef MULTI_LEV
@@ -100,7 +104,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         fap(pn)=dsqrt(pdvx_dm(pn)**2+pdvy_dm(pn)**2+pdvz_dm(pn)**2)
       enddo
 
-      allocate(tdvr(0:nval*nadm))
       allocate(flagproc(0:nadm))
       allocate(flagcom(0:nadm))
       allocate(pncomp(0:nadm))
@@ -110,7 +113,9 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 #else
       flagtr=1
 #endif
-   71 do i=0,nadm-1
+   71 allocate(tdvr(0:nval*nadm))
+
+      do i=0,nadm-1
         pn=list_adm(i)
         pn_nfp(i)=pn
         tdvr(i)=x_dm(pn)
@@ -166,6 +171,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i
@@ -179,6 +185,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -201,7 +208,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -568,7 +574,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
 
 ! * update not-finished particle list *
       tnlist = nlist
@@ -608,6 +613,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i
@@ -619,6 +625,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -640,7 +647,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -1000,7 +1006,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
  
 ! * update not-finished particle list *
       tnlist = nlist
@@ -1037,6 +1042,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
       allocate(list(0:npj))
       allocate(node(0:npj))
+      allocate(flago(0:npj))
 
       do i=0,npj-1
         list(i)=i
@@ -1048,6 +1054,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
         deallocate(list)
         deallocate(node)
+        deallocate(flago)
 
         goto 93
       endif
@@ -1069,7 +1076,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       allocate(yijp(0:nlist))
       allocate(zijp(0:nlist))
       allocate(r2p(0:nlist))
-      allocate(flago(0:nlist))
 
       ntf=0
       do i=0,nlist-1
@@ -1431,7 +1437,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       deallocate(yijp)
       deallocate(zijp)
       deallocate(r2p)
-      deallocate(flago)
   
 ! * update not-finished particle list *
       tnlist = nlist

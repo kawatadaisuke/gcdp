@@ -9,7 +9,9 @@ subroutine setsldmtr(nssl,nalist)
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
+#ifdef MULTI_LEV
       use gcdp_ldmtree
+#endif
       use gcdp_system
 
       implicit none

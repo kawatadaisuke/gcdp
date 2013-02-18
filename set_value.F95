@@ -588,10 +588,9 @@ subroutine set_value(ng,nag,ns,flag)
         allocate(tivr(0:npj*nival))
 
         do ip=0,nprocs-1
-          if(allocated(tibuf)) then
-            deallocate(tibuf)
-          endif
+
           allocate(tibuf(0:npjr(ip)*snival))
+
           call MPI_SCATTERV(tivs,jjlen,idisp,MPI_INTEGER,tibuf &
            ,npjr(ip)*snival,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
 ! *** set the data to tdvr ***
@@ -599,9 +598,13 @@ subroutine set_value(ng,nag,ns,flag)
             tivr(irecv)=tibuf(snival*i)
             irecv=irecv+1
           enddo
+
+          deallocate(tibuf)
+
         enddo          
-        deallocate(tibuf)
+
         deallocate(tivs)
+
       endif
 
       do i=0,npj-1

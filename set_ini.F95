@@ -508,7 +508,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         do i=0,ndmt-1
           if(i.ge.jsta.and.i.le.jend) then
             read(51) x_dm(ndm),y_dm(ndm),z_dm(ndm) &
-            ,vx_dm(ndm),vy_dm(ndm),vz_dm(ndm),m_dm(ndm)
+            ,vx_dm(ndm),vy_dm(ndm),vz_dm(ndm),m_dm(ndm) &
             ,rho_dm(ndm)
             id_dm(ndm)=nc
             ndm=ndm+1

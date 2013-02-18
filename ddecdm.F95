@@ -14,7 +14,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
+#ifdef MULTI_LEV
       use gcdp_ldmtree
+#endif
       use gcdp_system
 
       implicit none
@@ -34,9 +36,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** for parallel process ***
       integer ndmj,nval
       integer crank,isend,jsta,jend,npnord
-      integer srank(0:nprocs-1),rrank(0:nprocs-1)
-      integer jstap(0:nprocs-1),jendp(0:nprocs-1)
-      integer npsp(0:nprocs-1),nprp(0:nprocs-1)
       integer ireqs(0:3),ireqr(0:3)
       double precision dx(0:1)
       data dx/1.0d0,-1.0d0/
@@ -46,6 +45,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** for test ***
       character fileo*60
 ! for work
+      integer,allocatable :: srank(:),rrank(:)
+      integer,allocatable :: jstap(:),jendp(:)
+      integer,allocatable :: npsp(:),nprp(:)
       integer,allocatable :: istatus(:),istatusr(:)
       integer,allocatable :: ord(:),pnord(:,:),ord1(:),nd_nfp(:)
       integer,allocatable :: list(:),talist(:),nalist(:)
@@ -68,7 +70,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       do it=0,1
 #else
 
-      allocate(pnord(0:ndm,0))
+      allocate(pnord(0:ndm,0:0))
 
       do it=0,0
 #endif
@@ -94,7 +96,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         endif
         maxlevel = 0
 ! * initialization *
-
         allocate(phkey(idmr(0):idmr(1)+1))
         allocate(c_nfp(idmr(0):idmr(1)+1))
         allocate(snfp(idmr(0):idmr(1)+1))
@@ -207,6 +208,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         call indexxl(npnord,phkey1,ord1)
 
+        deallocate(phkey1)
+
         do i=0,npnord-1
           pnord(i,it)=ord1(i+1)+idmr(0)-1
         enddo
@@ -224,7 +227,12 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         enddo
         idmrjr(0)=idmr(0)
         idmrjr(1)=idmr(1)
+
 ! *** define rank for sending and rank for recieving ***
+
+        allocate(srank(0:0))
+        allocate(rrank(0:0))
+
         srank(0) = myrank+1
         if(srank(0).ge.nprocs) then
           srank(0) = srank(0)-nprocs
@@ -274,6 +282,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
           idmrjs(0)=idmrjr(0)
           idmrjs(1)=idmrjr(1)
+
+          write(6,*) ' myrank,idmrjs=',myrank,idmrjs(0),idmrjs(1)
 ! *** range of the key and order ***
 ! *** cannot use MPI_GET_COUNT ***
           call MPI_ISEND(idmrjs,2,MPI_INTEGER,srank(0),1 &
@@ -310,11 +320,16 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         enddo
 
         deallocate(phkey)
+        deallocate(srank)
+        deallocate(rrank)
 
       enddo
 ! *** finish ordering for both high and low reso particles ***
-
 ! *** define srank and rrank ***
+
+      allocate(srank(0:nprocs))
+      allocate(rrank(0:nprocs))
+
       do j = 0,nprocs-1
         srank(j) = myrank+j
         if(srank(j).ge.nprocs) then
@@ -333,6 +348,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** sort talist for sending proc ***
 
       allocate(talist(0:ndm))
+      allocate(jstap(0:nprocs))
+      allocate(jendp(0:nprocs))
+      allocate(npsp(0:nprocs))
+      allocate(nprp(0:nprocs))
 
       na=0
       do ip=0,nprocs-1
@@ -850,6 +869,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       deallocate(nalist)
       deallocate(tivr)
       deallocate(tdvr)
+
+      deallocate(srank)
+      deallocate(rrank)
+      deallocate(jstap)
+      deallocate(jendp)
+      deallocate(npsp)
+      deallocate(nprp)
+
 
 ! *** after care ***
 ! *** make active particle list ***
