@@ -638,6 +638,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         tivs(4)=nag
         tivs(5)=nadm
         tivs(6)=nas
+
 ! *** number of particles sending ****
         npj=tivs(1)
         if(myrank.lt.SI_nof) then
@@ -651,7 +652,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
             npjr(ip)=tivr(1)
           enddo
         else
-          call MPI_ISEND(tivs,8,MPI_INTEGER,srank,1 &
+          call MPI_ISEND(tivs,7,MPI_INTEGER,srank,1 &
            ,MPI_COMM_WORLD,ireqs(ip),ierr)
           call MPI_WAIT(ireqs(ip),istatus,ierr)
         endif
@@ -663,6 +664,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
             npjrmax=npjr(ip)
           endif
         enddo
+
         deallocate(tivs)
         deallocate(tivr)
         allocate(tivs(0:npj))
