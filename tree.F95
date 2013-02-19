@@ -22,6 +22,7 @@ subroutine treebuild(np)
 
       integer,intent(in) :: np
       integer i,pn,nd,level,npn,ierr
+! change test
 ! * for not-finished particle (nfp) *
 ! * number of not-finished particle *	  
       integer numnfp
