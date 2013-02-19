@@ -779,7 +779,7 @@ program gcdp
 #ifdef COSM
       call afromt(TM_tot,SI_a)
       if(SI_a.lt.SI_epsa) then
-        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps
+        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps0
       else
         SI_eps=SI_eps0
       endif
