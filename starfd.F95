@@ -463,10 +463,12 @@ subroutine starfd(ng,ns,nag,nas,nagravg)
         do i=1,NYEL
           SI_zsns(i-1)=SI_zsns(i-1)+tdvr(i)
         enddo
+
+        deallocate(tdvs)
+        deallocate(tdvr)
+
       endif
 
-      deallocate(tdvs)
-      deallocate(tdvr)
 
 end subroutine
 #endif
