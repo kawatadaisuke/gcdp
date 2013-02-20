@@ -1261,11 +1261,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
         do ip=0,nprocs-1
 
-          if(allocated(trbuf)) then
-            deallocate(trbuf)
-          endif
-
           allocate(trbuf(0:npjr(ip)*snval))
+
           call MPI_SCATTERV(tdvs,jjlen,idisp,MPI_DOUBLE_PRECISION &
            ,trbuf,npjr(ip)*snval,MPI_DOUBLE_PRECISION &
            ,ip,MPI_COMM_WORLD,ierr)
@@ -1283,10 +1280,12 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             tdzd(irecv+npj*10)=trbuf(snval*i+9)
             irecv=irecv+1
           enddo
+
+          deallocate(trbuf)
+
         enddo
 
         deallocate(tdvs)
-        deallocate(trbuf)
 
 #endif
 #if defined(SF_EFD) || defined(SF_ZFD)
@@ -1314,14 +1313,13 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! *** ncompi: number of particles originally sent from iproc=0
           npj=ncompi
 
-          deallocae(tivr)
-          allocae(tivr(0:npj*nival))
+          deallocate(tivr)
+          allocate(tivr(0:npj*nival))
 
           do ip=0,nprocs-1
-            if(allocated(tibuf)) then
-              deallocate(tibuf)
-            endif
+
             allocate(tibuf(0:npjr(ip)*snival))
+
             call MPI_SCATTERV(tivs,jjlen,idisp,MPI_INTEGER &
              ,tibuf,npjr(ip)*snival,MPI_INTEGER,ip &
              ,MPI_COMM_WORLD,ierr)
@@ -1330,8 +1328,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
               tivr(irecv+npj)=tibuf(snival*i)
               irecv=irecv+1
             enddo
+
+            deallocate(tibuf)
+
           enddo          
-          deallocate(tibuf)
         endif
 #endif
 
@@ -1395,9 +1395,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         if(ncomptmax.gt.0) then
 ! *** get how many particles each proc receives
 
-          if(allocated(tivr)) then
-            deallocate(tivr)
-          endif
+          deallocate(tivr)
           allocate(tivr(0:nprocs))
 
           do i=0,nprocs-1
@@ -1700,7 +1698,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         deallocate(tdvr)
         allocate(tdvr(0:npj*nval))
 #if defined(SF_EFD) || defined(SF_ZFD)
-        if(allocaed(tivr)) then
+        if(allocated(tivr)) then
           deallocate(tivr)
         endif
         allocate(tivr(0:npj*nival))

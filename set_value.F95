@@ -477,7 +477,7 @@ subroutine set_value(ng,nag,ns,flag)
 ! *** new nval to send the results
 #ifdef METALDIFF
         snval=8
-#eles
+#else
         snval=7
 #endif
         if(allocated(tivs)) then
