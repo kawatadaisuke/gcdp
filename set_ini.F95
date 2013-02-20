@@ -736,7 +736,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 !        read(51,'(a24,4I10)') ctmp,nif,idf,ngt,ng
         read(51) nif,idf,nst,ns
         if(myrank.eq.0) then
-          write(6,*) ' nif,idf,ngt,ng=',nif,idf,nst,ns
+          write(6,*) ' nif,idf,nst,ns=',nif,idf,nst,ns
         endif      
         call para_range(0,nst-1,nprocs,myrank,jsta,jend)
 ! keep the total number of formed star 
@@ -830,7 +830,8 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
       TM_dt=0.0d0
       TMsf_dt=0.0d0
-      call dtyields(ng+ns,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
+
+      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
        ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
        ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
 ! *** set tmz*_p for both star and gas ***
@@ -861,7 +862,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef SF_EFD
       TMsf_dt=DTSF
       TM_dt=TMsf_dt
-      call dtyields(ng,ns)
+      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
+       ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
+       ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
 
       allocate(mfd(0:np))
 
