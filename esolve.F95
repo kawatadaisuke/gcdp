@@ -18,7 +18,7 @@
 !
 
 #ifdef COOL
-subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
+subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
       use gcdp_const
       use gcdp_baryon
 #ifdef METAL
@@ -28,12 +28,12 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
 
       implicit none
 
-      integer,intent(inout) :: nlist
+      integer,intent(in) :: nlist0
       integer,intent(in) :: ngs,flagdu
-      integer,intent(in) :: plist(:)
+      integer,intent(in) :: plist(0:nlist0)
       double precision,intent(in) :: current_z
 
-      integer it,maxnt
+      integer it,maxnt,nlist
       double precision gkmm,dudt,dtc
       double precision tcool,tdyn     
 ! * for iteration *
@@ -43,7 +43,7 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
       character filen*60
 ! work allocatable
       integer,allocatable :: flagu(:),palist(:),flagu1(:),flagtc(:),node(:)
-      integer,allocatable :: pn_nfp(:)
+      integer,allocatable :: pn_nfp(:),clist(:)
       double precision,allocatable :: asp(:),uhlim(:),rhogam(:),gamrhogam1(:)
       double precision,allocatable :: tx(:),adv(:),av(:),ulim(:),dti(:),du0(:) &
        ,ram(:),hu(:),lu(:),fhx(:),fx(:)
@@ -52,7 +52,6 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
       maxnt=1000000000
       gkmm=(GAM-1.0d0)/((KCGS/(MP*MYU))/K_MU)
 
-      allocate(pn_nfp(0:ngs))
       allocate(ulim(0:ngs))
       allocate(uhlim(0:ngs))
       allocate(tx(0:ngs))
@@ -69,12 +68,14 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
       allocate(lu(0:ngs))
       allocate(fhx(0:ngs))
       allocate(fx(0:ngs))
-      allocate(palist(0:ngs))
       allocate(flagu(0:ngs))
       allocate(flagu1(0:ngs))
 
-      nptc=nlist
-      do i=0,nlist-1
+      allocate(pn_nfp(0:nlist0))
+      allocate(palist(0:nlist0))
+
+      nptc=nlist0
+      do i=0,nlist0-1
         pn = plist(i)
         pn_nfp(i)=pn
         ulim(pn)=(TLLIMIT/gkmm)*(MYU/myu_p(pn))
@@ -98,7 +99,7 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
       enddo
 #ifdef SF_EFD
       if(flagdu.eq.1) then
-        do i=0,nlist-1
+        do i=0,nlist0-1
           pn = plist(i)
 ! *** only flagdu.eq.1
 ! *** check cooling time-scale vs. dynamical time scale for SNe II particle
@@ -126,6 +127,9 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
         write(6,*) ' Error in esolve() myrank=',myrank
         write(6,*) ' it > maxnt, nptc=',nptc
       endif
+
+!      write(6,*) 'it,nptc=',it,nptc
+
 ! *** check cooling time vs. dt_p and set dti ***
       do i=0,nptc-1
         pn=pn_nfp(i)
@@ -225,7 +229,17 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
       enddo
 
 ! *** set ram ***
-      call cool(nlist,palist,current_z,ngs,ram)
+
+! reallocate to clist length with nlist from palist
+      allocate(clist(0:nlist))
+
+      do i=0,nlist-1 
+        clist(i)=palist(i)
+      enddo
+
+      call cool(nlist,clist,current_z,ngs,ram)
+
+      deallocate(clist)
 
       if(ie.eq.1) then
         do i=0,nlist-1
@@ -316,13 +330,21 @@ subroutine energy_solver(ngs,nlist,plist,current_z,flagdu)
 ! *** increasing as ***
 ! *** check the highest temperature limit ***
           if(asp(pn).gt.uhlim(pn)) then
-            asp(pn) = uhlim(pn)
-            flagu(pn) = 0
+
 #ifdef SF_EFD
 !                                  123456789012345678901234567890
             write(6,'(a30,5I10)') 'Thlim1 myrank,id,flagfd,ie,it=' &
              ,myrank,id_p(pn),flagfd_p(pn),ie,it
+            write(6,*) 'flagdu,Gsn,ndu,ram,asp,uhlim=' &
+             ,flagdu,Gsn_p(pn),ndu_p(pn),ram_p(pn),asp(pn),uhlim(pn)
+            write(6,*) 'flagtc,flagu,dti,dt=' &
+             ,flagtc(pn),flagu(pn),dti(pn),dt_p(pn)
+
+            stop
 #endif
+
+            asp(pn) = uhlim(pn)
+            flagu(pn) = 0
           else
             lu(pn) = hu(pn)
             hu(pn) = hu(pn)+DU_UPU

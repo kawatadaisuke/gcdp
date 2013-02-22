@@ -49,6 +49,20 @@ subroutine updateu(np,ng)
         eslist(i)=plist(i)
       enddo
       call energy_solver(np,nlist,eslist,zn,0)
+
+!#if defined(SF_EFD) || defined(SF_ZFD)
+!      write(fileo,'(a4,i3.3)')  'updu',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pn=list_ap(i)
+!        write(60,'(10(1pE13.5),I10)') x_p(pn),y_p(pn),z_p(pn) &
+!         ,u_p(pn),p_p(pn),ram_p(pn),dvx_p(pn),ax_p(pn) &
+!        ,ndu_p(pn),rho_p(pn),pn
+!      enddo
+!      close(60)
+!      stop
+!#endif
+
 ! *** update u_p ***
       do i=0,nlist-1
         pn=eslist(i)
@@ -56,6 +70,7 @@ subroutine updateu(np,ng)
       enddo
       deallocate(plist)
       deallocate(eslist)
+
 
 #else
       do i=0,ng-1
@@ -87,6 +102,7 @@ subroutine virtualp_cs(np,ng)
       integer nlist
       integer,allocatable :: palist(:),eslist(:)
       double precision zn
+      character fileo*60
 #endif
 
 #ifdef COOL
@@ -103,15 +119,43 @@ subroutine virtualp_cs(np,ng)
         endif
 #endif
       enddo
+
+!#if defined(SF_EFD) || defined(SF_ZFD)
+!      write(fileo,'(a5,i3.3)')  'pvpcs',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pn=list_ap(i)
+!        write(60,'(10(1pE13.5),I10)') x_p(pn),y_p(pn),z_p(pn) &
+!         ,u_p(pn),p_p(pn),ram_p(pn),dvx_p(pn),ax_p(pn) &
+!         ,ndu_p(pn),rho_p(pn),pn
+!      enddo
+!      close(60)
+!#endif
+
       zn = 1.0d0/SI_a-1.0d0
 ! *** update p_p ***
       allocate(eslist(0:nlist))
       do i=0,nlist-1
         eslist(i)=palist(i)
       enddo
-      call energy_solver(nlist,eslist,zn,1)
+      call energy_solver(np,nlist,eslist,zn,1)
       deallocate(palist)
       deallocate(eslist)
+
+!#if defined(SF_EFD) || defined(SF_ZFD)
+!      write(fileo,'(a4,i3.3)')  'vpcs',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pn=list_ap(i)
+!        write(60,'(10(1pE13.5),I10)') x_p(pn),y_p(pn),z_p(pn) &
+!         ,u_p(pn),p_p(pn),ram_p(pn),dvx_p(pn),ax_p(pn) &
+!         ,ndu_p(pn),rho_p(pn),pn
+!      enddo
+!      close(60)
+!      stop
+!#endif
+
+
 #else
 ! *** no cooling ***
       do i=0,ng-1

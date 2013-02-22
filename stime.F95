@@ -34,6 +34,7 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
 ! * minimum limit due to output step
       double precision dtolim
 ! *** for work
+      character fileo*60
       integer knp
       double precision dtcr1,dtcr2,adv
 #if defined(GAS) || defined(STAR)
@@ -62,6 +63,10 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
       allocate(dti(0:np))
 #endif
 #ifdef GAS
+
+!      write(fileo,'(a4,i3.3)') 'stmg',myrank
+!      open(60,file=fileo,status='unknown')
+
 ! *** for SPH Particles ***
       do i=0,ng-1
         pn = list_ap(i)
@@ -138,7 +143,19 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
           dti(pn)=INF
        endif
 #endif
+
+!       write(60,'(16(1pE13.5),2I6)') x_p(pn),y_p(pn),dtcr1,dtcr2,dti(pn) &
+!        ,dtu,u_p(pn),Gsn_p(pn) &
+!        ,h_p(pn),hvsigdt_p(pn),adv,dvx_p(pn),dvy_p(pn),dvz_p(pn) &
+!        ,ax_p(pn),ay_p(pn),id_p(pn),nnb_p(pn)
+
       enddo
+
+!      close(60)
+!      if(step.eq.1) then 
+!        stop
+!      endif
+
 #ifdef COSM
 #ifdef COOL
       if(SI_flagrad.le.-1.and.SI_flagrad.gt.-NITEOR) then

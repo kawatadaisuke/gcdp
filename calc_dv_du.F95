@@ -539,7 +539,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
 #ifdef METALDIFF
       allocate(tdzd(0:npj*nvalzd))
-      allocate(av(0:npj))
+      allocate(av(0:np))
 #endif
 
 ! ****  Set Data  ****
@@ -634,10 +634,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       endif
 ! * Initialization *
 
-      if(allocated(list)) then
-        deallocate(list)
-        deallocate(node)
-      endif
       allocate(list(0:npj))
       allocate(node(0:npj))
 
@@ -1890,9 +1886,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           enddo
 
           allocate(ram(0:np))
-          do i=0,np-1
-            ram(i)=0.0d0
-          enddo
+! this is done within cool
+!          do i=0,np-1
+!            ram(i)=0.0d0
+!          enddo
 
           call cool(nlist,list,zn,np,ram)
 ! receive ram(0:nlist-1)
@@ -1943,9 +1940,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         do i=0,nlist-1
           list(i)=listb(i)
         enddo
-        do i=0,np-1
-          ram(i)=0.0d0
-        enddo
+! this is done within cool
+!        do i=0,np-1
+!          ram(i)=0.0d0
+!        enddo
 
 ! *** set myu
         call cool(nlist,list,zn,np,ram)
@@ -2020,11 +2018,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 !      open(60,file=fileo,status='unknown')
 !      do i=0,ng-1
 !        pni=list_ap(i)
-!        write(60,'(19(1pE13.5),2I10)') x_p(pni),y_p(pni),z_p(pni) &
+!        write(60,'(21(1pE13.5),3I10)') x_p(pni),y_p(pni),z_p(pni) &
 !         ,ndu_p(pni),dvx_p(pni),dvy_p(pni),dvz_p(pni),div_v_p(pni) &
 !         ,arot_v_p(pni),d2u_p(pni),p_p(pni),u_p(pni),ax_p(pni),ay_p(pni) &
 !         ,az_p(pni),rho_p(pni),omgh_p(pni),hvsigdt_p(pni),alpv_p(pni) &
-!         ,id_p(pni),nnb_p(pni)
+!         ,ram_p(pni),myu_p(pni),id_p(pni),nnb_p(pni),flagfd_p(pni)
 !      enddo
 !      close(60)
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)

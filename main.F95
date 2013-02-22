@@ -981,6 +981,19 @@ program gcdp
       call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt,nadmt &
        ,nast,nagravgt,flagv,flagu,0)
 
+!      write(fileo,'(a6,i3.3)') 'calvu2',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pn=list_ap(i)
+!        write(60,'(21(1pE13.5),3I10)') x_p(pn),y_p(pn),z_p(pn) &
+!        ,ndu_p(pn),dvx_p(pn),dvy_p(pn),dvz_p(pn),div_v_p(pn),arot_v_p(pn) &
+!        ,d2u_p(pn),p_p(pn),u_p(pn),ax_p(pn),ay_p(pn),az_p(pn) &
+!        ,rho_p(pn),omgh_p(pn),hvsigdt_p(pn),alpv_p(pn),ram_p(pn) &
+!        ,myu_p(pn),id_p(pn),nnb_p(pn),flagfd_p(pn)
+!      enddo
+!      close(60)
+!      stop
+
 ! *************************
 !  Update Velocity V(n+1)
 ! **************************
