@@ -208,7 +208,8 @@ subroutine starfd(ng,ns,nag,nas,nagravg)
 
 ! *** set Feedback ***
 ! *** feedback from gas with flagfd_p<0 ***
-      allocate(mfd(0:ng))
+
+      allocate(mfd(0:np))
 
       ngfd=0
       do i = 0,ng-1
