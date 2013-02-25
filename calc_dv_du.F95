@@ -1168,9 +1168,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         allocate(tdvs(0:npj*snval))
 
         do i=0,npj-1
-! *** ndu 
+! *** ndu
           tdvs(snval*i)=tdvr(i+npj*14)
-! *** d2u 
+! *** d2u
           tdvs(snval*i+1)=tdvr(i+npj*15)
         enddo
         if(flagv.eq.0) then
@@ -1226,7 +1226,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         isend=0
         snval=10
 
-        allocate(tdvs(0:npj*snval))
+        allocate(tdvs(0:npjs*snval))
 
 ! *** setting the number of particles to send
         do i=0,nprocs-1
@@ -1331,7 +1331,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         endif
 #endif
 
-          deallocate(tivs)
+        deallocate(tivs)
 
       endif
 
@@ -1699,6 +1699,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         endif
         allocate(tivr(0:npj*nival))
 #endif
+#ifdef METALDIFF
+        deallocate(tdzd)
+        allocate(tdzd(0:npj*nvalzd))
+#endif
 
 ! *** sending and reveiving the data ***
         irecv=0
@@ -1744,6 +1748,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           deallocate(trbuf)
 
         enddo       
+
         deallocate(tdvs)
 
         if(irecv.ne.npj) then
@@ -1781,7 +1786,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           jjlen(i)=ireqs(i)*snival
         enddo
 ! *** setting the sending data ***
+
         allocate(tivs(0:ncompi*snival))
+
         do i = 0,ncompi-1
           pni=pn_nfp(i)
           tivs(snival*i)=flagfd_p(pni)
@@ -1790,22 +1797,28 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         irecv=0
 ! *** number of particles sent is ncomp
         do ip=0,nprocs-1
+
           if(allocated(tibuf)) then
             deallocate(tibuf)
           endif
           allocate(tibuf(0:npjr(ip)*snival))
+
           call MPI_SCATTERV(tivs,jjlen,idisp,MPI_INTEGER &
            ,tibuf,npjr(ip)*snival,MPI_INTEGER,ip &
            ,MPI_COMM_WORLD,ierr)
+
 ! *** set the data to tdvr ***
           do i=0,npjr(ip)-1
 ! *** flagfd_p
             tivr(irecv)=tibuf(snival*i)
             irecv=irecv+1
           enddo
+
           deallocate(tibuf)
-          deallocate(tivs)
         enddo
+
+        deallocate(tivs)
+
         if(flagv.eq.0) then
 ! *** set flagrfd=0 ***
           do i=0,npj-1             
