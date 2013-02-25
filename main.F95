@@ -895,6 +895,9 @@ program gcdp
 #endif
 #ifdef SGRAV
 #if defined(GAS) || defined (STAR)
+
+!      write(6,*) 'myrank,nagravgt=',myrank,nagravgt
+
       if(nagravgt.gt.0) then
         call treebuild(np)
       endif

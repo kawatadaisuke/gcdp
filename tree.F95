@@ -77,6 +77,9 @@ subroutine treebuild(np)
 ! the last 0 for node 0
 ! gmakeroot use pn_nfp
       call makeroot(np,pn_nfp,0.0d0)
+
+!      write(6,*) 'myrank,np,l=',myrank,np,l_tr(0)
+
       next_tr(0)=0
       pare_tr(0)=-1
       daughter_tr(0)=1
@@ -408,6 +411,8 @@ subroutine treebuild(np)
       deallocate(label_nfp)
       deallocate(snfp)
 
+!      write(6,*) 'myrank,level,num=',myrank,level,num_tr
+
 ! *** set next node for node numtr0=1 (always go back to node 0, then look at node 0s next ***
       next_tr(numtr0)=0
       if(num_tr.gt.1) then
@@ -518,8 +523,7 @@ subroutine treebuild(np)
         goto 93
    92   nodese_tr=list(i+1)-1
 
-!        write(6,*) ' myrank,nodess,nodese,np='
-!     &   ,myrank,nodess,nodese_tr,np
+!        write(6,*) ' myrank,nodess,nodese,np=',myrank,nodess,nodese_tr,np
 
    93   if(num_tr.eq.0) then
           numtrs=0
@@ -904,7 +908,7 @@ subroutine compute_mass(numtr0,level,list,pare_tr)
 ! *** counting number of the parent nodes ***
         npare = 0
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           allocate(pare_sc(0:num-list(j)))
           allocate(nd_sc(0:num-list(j)))    
         endif
@@ -933,7 +937,7 @@ subroutine compute_mass(numtr0,level,list,pare_tr)
           enddo
         enddo		  
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           deallocate(pare_sc)
           deallocate(nd_sc)
         endif
@@ -964,7 +968,7 @@ subroutine compute_mass(numtr0,level,list,pare_tr)
       do j=level,1,-1
         npare = 0
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           allocate(pare_sc(0:num-list(j)))
           allocate(nd_sc(0:num-list(j)))    
         endif
@@ -1003,7 +1007,7 @@ subroutine compute_mass(numtr0,level,list,pare_tr)
           enddo
         enddo
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           deallocate(pare_sc)
           deallocate(nd_sc)
         endif

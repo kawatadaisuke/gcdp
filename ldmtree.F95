@@ -819,7 +819,7 @@ subroutine ldmcompute_mass(numtr0,numdmtr,level,list,pare_tr)
       do j=level,1,-1
         npare = 0
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           allocate(pare_sc(0:num-list(j)))
           allocate(nd_sc(0:num-list(j)))    
         endif
@@ -845,7 +845,7 @@ subroutine ldmcompute_mass(numtr0,numdmtr,level,list,pare_tr)
           enddo            
         enddo
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           deallocate(pare_sc)
           deallocate(nd_sc)
         endif
@@ -877,7 +877,7 @@ subroutine ldmcompute_mass(numtr0,numdmtr,level,list,pare_tr)
       do j=level,1,-1
         npare = 0
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           allocate(pare_sc(0:num-list(j)))
           allocate(nd_sc(0:num-list(j)))    
         endif
@@ -916,7 +916,7 @@ subroutine ldmcompute_mass(numtr0,numdmtr,level,list,pare_tr)
           enddo
         enddo
 
-        if(num.gt.list(j)) then
+        if(num.ge.list(j)) then
           deallocate(pare_sc)
           deallocate(nd_sc)
         endif

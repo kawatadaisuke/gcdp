@@ -89,6 +89,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 !      else
 !        write(fileo,'(a5,i3.3,i3.3)') 'pdecb',myrank,0
 !      endif
+!       write(fileo,'(a5,i3.3)') 'pdecb',myrank
 !      open(60,file=fileo,status='unknown')
 !      write(60,*) ng,nag,np
 !      do i=0,np-1
@@ -98,7 +99,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 !      enddo
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !      close(60)
-!      write(6,*) step,' ng,nag,myrank=',ng,nag,myrank
+!      write(6,*) step,' ng,nag,ns,nas,nagravg,myrank=',ng,nag,ns,nas,nagravg,myrank
 
 ! ** Make root in tree.f **	
 ! *** since ver.33. need to list pn_nfp
@@ -1213,6 +1214,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 !      else
 !        write(fileo,'(a4,i3.3,i3.3)') 'decb',myrank,0
 !      endif
+!       write(fileo,'(a4,i3.3)') 'decb',myrank
 !      open(60,file=fileo,status='unknown')
 !      do i=0,np-1
 !        write(60,'(13(1pE13.5),2I10)') xc_p(i),yc_p(i),zc_p(i) &
@@ -1221,7 +1223,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 !      enddo
 !      close(60)
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-!      write(6,*) 'after decb ng,nag,myrank=',ng,nag,myrank
+!      write(6,*) 'after decb ng,nag,myrank=',ng,nag,ns,nas,nagravg,myrank
 !      stop
 
 
