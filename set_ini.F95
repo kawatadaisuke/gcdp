@@ -137,6 +137,22 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       ndmt = 0
       ndm = 0
 #ifdef DM
+! get ndm for each rank
+      do il=Ini_mul,0,-1
+        write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
+        open(51,file=fin,status='old',form='unformatted')
+        read(51) nif,idf,ndl,nd(il),flagrf
+! *** read the data ***
+        call para_range(0,ndl-1,nprocs,myrank,jsta,jend)
+        ndm=ndm+jend-jsta+1
+        close(51)
+      enddo
+
+      allocate(tx(0:ndm))
+      allocate(ty(0:ndm))
+      allocate(tz(0:ndm))
+
+      ndm=0
       do il=Ini_mul,0,-1
         write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
         open(51,file=fin,status='old',form='unformatted')
@@ -152,10 +168,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** read the data ***
         call para_range(0,ndl-1,nprocs,myrank,jsta,jend)
 !       call MPI_BCAST(flagrf,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-
-        allocate(tx(0:jend-jsta+1))
-        allocate(ty(0:jend-jsta+1))
-        allocate(tz(0:jend-jsta+1))
 
         ndt(il)=0
         nd(il)=0
@@ -178,6 +190,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           ndt(il)=ndt(il)+1
         enddo
         close(51)
+
       enddo
       if(ndm.gt.MNDM) then
         write(6,*) ' Error: MNDM is too small. MNDM,ndm=' &

@@ -62,6 +62,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       level_mergin = 1
 
       allocate(ord(0:ndm))
+      allocate(istatus(MPI_STATUS_SIZE))
+      allocate(istatusr(MPI_STATUS_SIZE))
 
 #ifdef MULTI_LEV
 
@@ -241,9 +243,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         if(rrank(0).lt.0) then
           rrank(0)=rrank(0)+nprocs
         endif
-
-        allocate(istatus(MPI_STATUS_SIZE))
-        allocate(istatusr(MPI_STATUS_SIZE))
 
 ! *** start ordering @ other PE *** 
         do j = 0,nprocs-1
