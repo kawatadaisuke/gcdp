@@ -108,21 +108,21 @@ end module gcdp_baryon
 
 #ifdef METAL
 module gcdp_metal
-      use gcdp_const
+
       implicit none
 ! * For Heavy Elements unit Solar Mass *
-      double precision mzHe_p(0:MNB-1),mzC_p(0:MNB-1),mzN_p(0:MNB-1) &
-       ,mzO_p(0:MNB-1),mzNe_p(0:MNB-1),mzMg_p(0:MNB-1) &
-       ,mzSi_p(0:MNB-1),mzFe_p(0:MNB-1),mzZ_p(0:MNB-1)
+      double precision,allocatable :: mzHe_p(:),mzC_p(:),mzN_p(:) &
+       ,mzO_p(:),mzNe_p(:),mzMg_p(:) &
+       ,mzSi_p(:),mzFe_p(:),mzZ_p(:)
 ! original metals
-      double precision mzHe0_p(0:MNB-1),mzC0_p(0:MNB-1),mzN0_p(0:MNB-1) &
-       ,mzO0_p(0:MNB-1),mzNe0_p(0:MNB-1),mzMg0_p(0:MNB-1) &
-       ,mzSi0_p(0:MNB-1),mzFe0_p(0:MNB-1),mzZ0_p(0:MNB-1)
+      double precision,allocatable :: mzHe0_p(:),mzC0_p(:),mzN0_p(:) &
+       ,mzO0_p(:),mzNe0_p(:),mzMg0_p(:) &
+       ,mzSi0_p(:),mzFe0_p(:),mzZ0_p(:)
 #ifdef METALDIFF
-      double precision vsig_p(0:MNB-1),zdA_p(0:MNB-1),zdHeB_p(0:MNB-1) &
-       ,zdCB_p(0:MNB-1),zdNB_p(0:MNB-1),zdOB_p(0:MNB-1) &
-       ,zdNeB_p(0:MNB-1),zdMgB_p(0:MNB-1),zdSiB_p(0:MNB-1) &
-       ,zdFeB_p(0:MNB-1),zdZB_p(0:MNB-1)
+      double precision,allocatable :: vsig_p(:),zdA_p(:),zdHeB_p(:) &
+       ,zdCB_p(:),zdNB_p(:),zdOB_p(:) &
+       ,zdNeB_p(:),zdMgB_p(:),zdSiB_p(:) &
+       ,zdFeB_p(:),zdZB_p(:)
 #endif
 end module gcdp_metal
 #endif
@@ -136,40 +136,39 @@ module gcdp_dm
       implicit none
 ! ***** For Dark Matter *****
 ! * Particle ID *
-      integer id_dm(0:MNDM-1)
+      integer,allocatable :: id_dm(:)
 ! *** number of neighbour particles ***
-      integer nnb_dm(0:MNDM-1)
+      integer,allocatable :: nnb_dm(:)
 ! * mass *      
-      double precision m_dm(0:MNDM-1)
+      double precision,allocatable :: m_dm(:)
 ! * Virtual Position *      
-      double precision x_dm(0:MNDM-1),y_dm(0:MNDM-1),z_dm(0:MNDM-1)
+      double precision,allocatable :: x_dm(:),y_dm(:),z_dm(:)
 ! * Correct Position *      
-      double precision xc_dm(0:MNDM-1),yc_dm(0:MNDM-1),zc_dm(0:MNDM-1)
+      double precision,allocatable :: xc_dm(:),yc_dm(:),zc_dm(:)
 ! * Velocity V(n+1/2) *
-      double precision vx_dm(0:MNDM-1),vy_dm(0:MNDM-1),vz_dm(0:MNDM-1)
+      double precision,allocatable :: vx_dm(:),vy_dm(:),vz_dm(:)
 ! * Virtual Velocity V(n+1/2) *      
-      double precision vnx_dm(0:MNDM-1),vny_dm(0:MNDM-1),vnz_dm(0:MNDM-1)
+      double precision,allocatable :: vnx_dm(:),vny_dm(:),vnz_dm(:)
 ! * acceleration *
-      double precision dvx_dm(0:MNDM-1),dvy_dm(0:MNDM-1),dvz_dm(0:MNDM-1)
+      double precision,allocatable :: dvx_dm(:),dvy_dm(:),dvz_dm(:)
 ! * acceleration  at previous time step *
-      double precision pdvx_dm(0:MNDM-1),pdvy_dm(0:MNDM-1) &
-       ,pdvz_dm(0:MNDM-1)
+      double precision,allocatable :: pdvx_dm(:),pdvy_dm(:),pdvz_dm(:)
 ! * for Individual time steep *
 ! * Individual time bin *      
-      double precision dt_dm(0:MNDM-1)
+      double precision,allocatable :: dt_dm(:)
 ! * time in system time step *      
-      double precision lt_dm(0:MNDM-1)
+      double precision,allocatable :: lt_dm(:)
 ! * virtual time bin *      
-      double precision vdt_dm(0:MNDM-1)
+      double precision,allocatable :: vdt_dm(:)
 ! * minimum time step of neighbours *      
-      double precision dtmnb_dm(0:MNDM-1),dtr_dm(0:MNDM-1)
+      double precision,allocatable :: dtmnb_dm(:),dtr_dm(:)
 ! *** for adaptive softening ***
-      double precision h_dm(0:MNDM-1),omgh_dm(0:MNDM-1),zetah_dm(0:MNDM-1) &
-       ,rho_dm(0:MNDM-1),div_v_dm(0:MNDM-1)
+      double precision,allocatable :: h_dm(:),omgh_dm(:),zetah_dm(:) &
+       ,rho_dm(:),div_v_dm(:)
 ! * list of active particles for DM *      
-      integer list_adm(0:MNDM-1)
+      integer,allocatable :: list_adm(:)
 ! * flag for time step changed 0: no change, otherwise changed *
-      integer flagt_dm(0:MNDM-1)
+      integer,allocatable :: flagt_dm(:)
 end module gcdp_dm
 #endif
 

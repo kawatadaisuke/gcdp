@@ -148,6 +148,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         close(51)
       enddo
 
+! allocate dm variables
+      call allocate_dm_all(ndm)      
+
       allocate(tx(0:ndm))
       allocate(ty(0:ndm))
       allocate(tz(0:ndm))
@@ -518,6 +521,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           write(6,*) ' ndmt,ndm=',ndmt,ndm
         endif
         call para_range(0,ndmt-1,nprocs,myrank,jsta,jend)
+
+! allocate DM variables
+        ndm=jend-jsta+1
+        call allocate_dm_all(ndm)
+
         nc=0
         ndm=0
 ! *** Read and  Set Position ***

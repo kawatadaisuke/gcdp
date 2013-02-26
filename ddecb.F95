@@ -530,7 +530,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       enddo
 
 ! reallocate integer values
-      call reallocate_int(np)
+      call reallocate_baryon_int(np)
 
       npj=0
       np=0
@@ -842,6 +842,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate integer values
+      call reallocate_metal(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1
@@ -911,6 +915,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate integer values
+      call reallocate_metal0(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1

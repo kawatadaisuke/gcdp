@@ -491,6 +491,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         ndm=ndm+nprp(ip)
       enddo
+
+! reallocate DM variables
+      call reallocate_dm_int(ndm)
+
       ndmj=0
       ndm=0
       do ip=0,nprocs-1
@@ -544,6 +548,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         ndm=ndm+nprp(ip)
       enddo
+
+! reallocate DM variables
+      call reallocate_dm_d1(ndm)
+
       ndmj=0
       ndm=0
       do ip=0,nprocs-1
@@ -607,6 +615,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         ndm=ndm+nprp(ip)
       enddo
+
+! reallocate DM variables
+      call reallocate_dm_d2(ndm)
+
       ndmj=0
       ndm=0
       do ip=0,nprocs-1
@@ -670,6 +682,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         ndm=ndm+nprp(ip)
       enddo
+
+! reallocate DM variables
+      call reallocate_dm_d3(ndm)
+
       ndmj=0
       ndm=0
       do ip=0,nprocs-1
