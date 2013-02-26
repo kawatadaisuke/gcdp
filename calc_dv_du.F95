@@ -1391,7 +1391,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         if(ncomptmax.gt.0) then
 ! *** get how many particles each proc receives
 
+#if defined(SF_EFD) || defined(SF_ZFD)
           deallocate(tivr)
+#endif
           allocate(tivr(0:nprocs))
 
           do i=0,nprocs-1

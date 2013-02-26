@@ -7,12 +7,12 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        atfunc.o esolve.o setcool.o \
        ddecb.o ddecdm.o indexxl.o boundary.o\
        set_valuedm.o\
-       setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o
+       setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o allocate.o
 INIOBJ = set_ini.o
 CONTOBJ = cont.o
-DEFFILE = gcdp.def
+DEFFILE = gcdp.def gcdp_const.F95 common.F95
 ###  for MPICH 
-OPTIONS=-O -mcmodel=medium
+OPTIONS=-g -mcmodel=medium
 ### kepler 
 # MPI_DIR=/cluster/mpich2_3.0
 ### mac
@@ -71,6 +71,7 @@ ${OBJS} : ${DEFFILE}
 ${INIOBJ}: ${DEFFILE}
 ${CONTOBJ} : ${DEFFILE}
 ${CONTSOBJ} : ${DEFFILE}
+%.o : %.mod
 
 clean :
 	rm *.o  ${EXEC} ${EXECC} ${EXECSC} ${EXEG} ${EXEGC} *.f90 *.mod

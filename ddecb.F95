@@ -528,6 +528,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate integer values
+      call reallocate_int(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1
@@ -599,6 +603,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate memory space
+      call reallocate_baryon_d1(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1
@@ -688,6 +696,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate memory space
+      call reallocate_baryon_d2(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1
@@ -758,6 +770,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         np=np+nprp(ip)
       enddo
+
+! reallocate memory space
+      call reallocate_starfd(np)
+
       npj=0
       np=0
       do ip=0,nprocs-1
@@ -1136,6 +1152,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! *** set total yield ***
+! reallocate memory space
+      call reallocate_tfeed(np)
 
       do i=0,np-1
 ! ** total **

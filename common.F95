@@ -7,85 +7,85 @@
 #if defined(GAS) || defined(STAR)
 ! * for baryon Particle *
 module gcdp_baryon
-      use gcdp_const
+
       implicit none
 ! * Particle ID *
-      integer id_p(0:MNB-1)
+      integer,allocatable :: id_p(:)
 ! * number neighbour *
-      integer nnb_p(0:MNB-1)
+      integer,allocatable :: nnb_p(:)
 ! * Mass *      
-      double precision m_p(0:MNB-1)
+      double precision,allocatable :: m_p(:)
 ! * Virtual Position Xn+1,Xn *      
-      double precision x_p(0:MNB-1),y_p(0:MNB-1),z_p(0:MNB-1)
+      double precision,allocatable :: x_p(:),y_p(:),z_p(:)
 ! * Correct position *      
-      double precision xc_p(0:MNB-1),yc_p(0:MNB-1),zc_p(0:MNB-1)
+      double precision,allocatable :: xc_p(:),yc_p(:),zc_p(:)
 ! * Velosity Vn-1/2,Vn+1/2 *
-      double precision vx_p(0:MNB-1),vy_p(0:MNB-1),vz_p(0:MNB-1)
+      double precision,allocatable :: vx_p(:),vy_p(:),vz_p(:)
 ! * Vn+1 *    
-      double precision vnx_p(0:MNB-1),vny_p(0:MNB-1),vnz_p(0:MNB-1)
+      double precision,allocatable :: vnx_p(:),vny_p(:),vnz_p(:)
 ! * Virtual Vn+1 *      
-      double precision vvnx_p(0:MNB-1),vvny_p(0:MNB-1),vvnz_p(0:MNB-1)
+      double precision,allocatable :: vvnx_p(:),vvny_p(:),vvnz_p(:)
 ! * Internal Energy Un+1,Un * 
-      double precision u_p(0:MNB-1)
+      double precision,allocatable :: u_p(:)
 ! * molecular weight *
-      double precision myu_p(MNB-1)
+      double precision,allocatable :: myu_p(:)
 ! * Smoothing Length hn+1,hn *      
-      double precision h_p(0:MNB-1)
+      double precision,allocatable :: h_p(:)
 ! * Density rhon+1,rhon *       
-      double precision rho_p(0:MNB-1)
+      double precision,allocatable :: rho_p(:)
 ! * Presure Pn+1,Pn *      
-      double precision p_p(0:MNB-1)
+      double precision,allocatable :: p_p(:)
 ! * Sound Velocity *      
-      double precision cs_p(0:MNB-1)
+      double precision,allocatable :: cs_p(:)
 ! * Entropic function *
-      double precision as_p(0:MNB-1)
+      double precision,allocatable :: as_p(:)
 ! * div V *
-      double precision div_v_p(0:MNB-1)
+      double precision,allocatable :: div_v_p(:)
 ! * |rot V| *      
-      double precision arot_v_p(0:MNB-1)
+      double precision,allocatable :: arot_v_p(:)
 ! *** signal velocity, max, for courant condition ***
-      double precision hvsigdt_p(0:MNB-1)
+      double precision,allocatable :: hvsigdt_p(:)
 ! *** artificial viscosity and thermal conductivity term ***
-      double precision alpv_p(0:MNB-1),alpu_p(0:MNB-1),d2u_p(0:MNB-1)
+      double precision,allocatable :: alpv_p(:),alpu_p(:),d2u_p(:)
 ! *** variable smoothing correction ***
-      double precision omgh_p(0:MNB-1),zetah_p(0:MNB-1)
+      double precision,allocatable :: omgh_p(:),zetah_p(:)
 ! * dv/dt *      
-      double precision dvx_p(0:MNB-1),dvy_p(0:MNB-1),dvz_p(0:MNB-1)
+      double precision,allocatable :: dvx_p(:),dvy_p(:),dvz_p(:)
 ! * du/dt_n,du/dt_n+1 *      
-      double precision pdu_p(0:MNB-1),ndu_p(0:MNB-1)
+      double precision,allocatable :: pdu_p(:),ndu_p(:)
 ! * Acceleration used in star.F for feedback *       
-      double precision ax_p(0:MNB-1),ay_p(0:MNB-1),az_p(0:MNB-1)
+      double precision,allocatable :: ax_p(:),ay_p(:),az_p(:)
 ! previous time step 
-      double precision pax_p(0:MNB-1),pay_p(0:MNB-1),paz_p(0:MNB-1)
+      double precision,allocatable :: pax_p(:),pay_p(:),paz_p(:)
 ! *** For Individual time step ***
 ! * Individual time bin *      
-      double precision dt_p(0:MNB-1)
+      double precision,allocatable :: dt_p(:)
 ! * system time bin *      
-      double precision lt_p(0:MNB-1)
+      double precision,allocatable :: lt_p(:)
 ! * Virtual Time bin *      
-      double precision vdt_p(0:MNB-1)
+      double precision,allocatable :: vdt_p(:)
 ! * dt, lt for gravity 
-      double precision dtg_p(0:MNB-1),ltg_p(0:MNB-1)
+      double precision,allocatable :: dtg_p(:),ltg_p(:)
 ! * minimum dt for neighbours, and previous or required time step *      
-      double precision dtmnb_p(0:MNB-1),dtr_p(0:MNB-1)
+      double precision,allocatable :: dtmnb_p(:),dtr_p(:)
 ! * flag for <=0: gas, -1 no cooling, >=1: stars *
-      integer flagc_p(0:MNB-1)
+      integer,allocatable :: flagc_p(:)
 ! ***** For Individual Time Step *****
 ! * list of active particles for gas and star *      
-      integer list_ap(0:MNB-1)
+      integer,allocatable :: list_ap(:)
 ! * flag for time step changed 0: no change, otherwise changed *
-      integer flagt_p(0:MNB-1)
+      integer,allocatable :: flagt_p(:)
 #ifdef COOL
 ! * for cooling *
-      double precision ram_p(0:MNB-1)
+      double precision,allocatable :: ram_p(:)
 #endif
 #ifdef STAR
 ! * star formtion time *
-      double precision ts_p(0:MNB-1)
+      double precision,allocatable :: ts_p(:)
 ! *** for feedback ***
 #ifdef SF_EFD
 ! * energy of supernova *      
-      double precision Gsn_p(0:MNB-1)
+      double precision,allocatable :: Gsn_p(:)
 #endif
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! flag for feedback gas
@@ -95,15 +95,16 @@ module gcdp_baryon
 !  for stars, 0: normal, 1: changing to gas in the next step.
 !  after dtyields: -1 and flagfd<0: end of the mass group
 !  set in calc_dv_du()
-      integer flagfd_p(0:MNB-1),flagrfd_p(0:MNB-1)
+      integer,allocatable :: flagfd_p(:),flagrfd_p(:)
 ! * For Total Ejected mass by SNe unit Solar Mass *
-      double precision tnsn_p(0:MNB-1),tmej_p(0:MNB-1),tmzHe_p(0:MNB-1) &
-       ,tmzC_p(0:MNB-1),tmzN_p(0:MNB-1),tmzO_p(0:MNB-1),tmzNe_p(0:MNB-1) &
-       ,tmzMg_p(0:MNB-1),tmzSi_p(0:MNB-1),tmzFe_p(0:MNB-1) &
-       ,tmzZ_p(0:MNB-1) 
+      double precision,allocatable :: tnsn_p(:),tmej_p(:),tmzHe_p(:) &
+       ,tmzC_p(:),tmzN_p(:),tmzO_p(:),tmzNe_p(:) &
+       ,tmzMg_p(:),tmzSi_p(:),tmzFe_p(:) &
+       ,tmzZ_p(:) 
 #endif
 #endif
 end module gcdp_baryon
+
 
 #ifdef METAL
 module gcdp_metal

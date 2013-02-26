@@ -217,6 +217,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       call para_range(0,npt-1,nprocs,myrank,jsta,jend)
 
       allocate(adv(0:jend-jsta+1))
+      np=jend-jsta+1
+      call allocate_baryon_all(np)
+      np=0
 
 ! *** Read and  Set Position ***
       do i=0,npt-1
@@ -546,18 +549,59 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       ns=0
       np=0
 #ifdef GAS
-! *** Read and Set Position and basic values ***
+! get ng for each rank
       if(flagfg.le.0) then
-        open(51,file='ini/gas.dat',status='old',form='unformatted')
         if(myrank.eq.0) then
           write(6,*) ' reading gas.dat. flagfg=',flagfg
         endif
+        open(51,file='ini/gas.dat',status='old',form='unformatted')
         read(51) nif,idf,ngt,ng,flagrf
-! flagrf is not 0: read flagfd_p info from gas.dat
-! since pv31.19
+        close(51) 
         if(myrank.eq.0) then
           write(6,*) ' nif,idf,ngt,ng,flagrf=',nif,idf,ngt,ng,flagrf
         endif    
+        call para_range(0,ngt-1,nprocs,myrank,jsta,jend)
+        ng=jend-jsta+1
+      endif
+#endif
+! get ns for each rank
+#ifdef STAR
+      SI_tnsf=0
+      if(flagfs.eq.0) then
+        open(51,file='ini/star.dat',status='old',form='unformatted')
+        if(myrank.eq.0) then
+          write(6,*) ' reading star.dat. flagfs=',flagfs
+        endif
+        read(51) nif,idf,nst,ns
+        close(51)
+
+        if(myrank.eq.0) then
+          write(6,*) ' nif,idf,nst,ns=',nif,idf,nst,ns
+        endif      
+        call para_range(0,nst-1,nprocs,myrank,jsta,jend)
+      endif
+#endif
+#if defined(GAS) || defined(STAR)
+      np=ng+ns
+
+! initial allocate memory space
+! all baryon
+      call allocate_baryon_all(np)
+
+      ng=0
+      ns=0
+      np=0
+#endif
+#ifdef GAS
+! *** Read and Set Position and basic values ***
+      if(flagfg.le.0) then
+        open(51,file='ini/gas.dat',status='old',form='unformatted')
+!        if(myrank.eq.0) then
+!          write(6,*) ' reading gas.dat. flagfg=',flagfg
+!        endif
+        read(51) nif,idf,ngt,ng,flagrf
+! flagrf is not 0: read flagfd_p info from gas.dat
+! since pv31.19
 #ifndef STAR
         if(myrank.eq.0.and.flagrf.ne.0) then
           write(6,*) ' set flagrf=0'
