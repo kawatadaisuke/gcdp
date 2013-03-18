@@ -1351,10 +1351,18 @@ subroutine set_valuedm(ndm,nadm,flag)
             pn=list(i)
             if(hu(pn).gt.0.0d0.and.lu(pn).gt.0.0d0) then
               flagi(pn)=0
-            else if(hu(pn).lt.0.0d0) then
-              flagi(pn)=1
             else if(lu(pn).lt.0.0d0) then
               flagi(pn)=-1
+            else if(hu(pn).lt.0.0d0) then
+              h_dm(pn)=lu(pn)
+              flagi(pn)=1
+              if(lu(pn).lt.0.0d0) then
+                write(6,*) ' Error in set_valuedm(): rank,id=',myrank,id_dm(pn)
+                write(6,*) ' no guess for initial h'
+                write(6,*) ' h,rho,flagi=',h_dm(pn),rho_dm(pn),flagi(pn)
+                write(6,*) ' lu,hu,av,adv=',lu(pn),hu(pn),av(pn),adv(pn)
+                stop
+              endif
             else
               write(6,*) ' Error in set_value(): rank,id=',myrank,id_dm(pn)
               write(6,*) ' no guess for initial h'
@@ -1377,21 +1385,29 @@ subroutine set_valuedm(ndm,nadm,flag)
             av(pn)=0.5d0*(lu(pn)+hu(pn))
           else if(flagi(pn).eq.1) then
 ! *** need to find f(hu)>0 ***
-            if(adv(pn).gt.0.0d0) then
+            if(adv(pn).gt.0.0d0.and.nnb_dm(pn).gt.0) then
               fhx(pn)=adv(pn)
               hu(pn)=h_dm(pn)
               av(pn)=0.5d0*(lu(pn)+hu(pn))
               flagi(pn)=0
+            else if(nnb_dm(pn).le.0) then
+              av(pn)=1.01d0*h_dm(pn)
             else
 ! *** believe that decreasing h would increase f(h) ***
               av(pn)=0.8d0*h_dm(pn)
             endif
           else if(flagi(pn).eq.-1) then
-! *** need to find f(hu)<0 ***
-            if(adv(pn).lt.0.0d0) then
+! **** Note: hu < lu ***
+            if(adv(pn).lt.0.0d0.and.nnb_dm(pn).gt.0) then
               lu(pn)=h_dm(pn)
-              av(pn)=0.5d0*(lu(pn)+hu(pn))
-              flagi(pn)=0
+              if(hu(pn).gt.0.0d0) then
+                av(pn)=0.5d0*(lu(pn)+hu(pn))
+                flagi(pn)=0
+              else
+                fx(pn)=adv(pn)
+! *** now turned to flagi(pn) and decreasing h to find hu
+                flagi(pn)=1
+              endif
             else
               av(pn)=1.2d0*h_dm(pn)
             endif

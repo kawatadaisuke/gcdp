@@ -11,9 +11,14 @@ term
 
 ### update log ###
 
-difference from pv34.6.2
+matching with pv34.6.7
 
-treef.F95 and dmtreef.F95
+- set_value.F and set_valuedm.F update
+
+*** difference from pv34.6.2
+
+18/03/2012
+treef.F95 and dmtreef.F95  -> pv34.6.7
  set flago=3 if the impoted node np_tr=1
  adding .and.proc_dmtr(nd).eq.myrank) then and etc.
 
