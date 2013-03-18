@@ -492,6 +492,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! ***** Set du & dv in SPH Particle *****
 #ifdef GAS
       if(flagu.ne.1) then
+
         do i=0,nag-1
           pdu_p(list_ap(i))=ndu_p(list_ap(i))
         enddo          
@@ -633,6 +634,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         goto 90
       endif
 ! * Initialization *
+
+!      write(6,*) ' calcdvdu flagv,npj,iproc,myrank=',flagv,npj,iproc,myrank
 
       allocate(list(0:npj))
       allocate(node(0:npj))

@@ -5,7 +5,7 @@
 ! ****************************************************
 
 #ifdef DM
-subroutine setsldmtr(nssl,nalist)
+subroutine setsldmtr(nssl,nalist,ndm)
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
@@ -17,7 +17,7 @@ subroutine setsldmtr(nssl,nalist)
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: nssl,nalist(0:nssl)
+      integer,intent(in) :: nssl,nalist(0:nssl),ndm
       integer i
 ! * Number of Notfinished particle, temp *      
       integer nlist,tnlist
@@ -52,7 +52,7 @@ subroutine setsldmtr(nssl,nalist)
       endif
 
       allocate(list(0:nssl))
-      allocate(node(0:nssl))
+      allocate(node(0:ndm))
 
       do i=0,nssl-1
         pni=nalist(i)

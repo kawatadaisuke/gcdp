@@ -1312,13 +1312,13 @@ subroutine set_valuedm(ndm,nadm,flag)
             sldmtrlist(i)=nalist(i)
           enddo
 
-          call setsldmtr(nssl,sldmtrlist)
+          call setsldmtr(nssl,sldmtrlist,ndm)
 
           deallocate(sldmtrlist)
 
         endif
 
-        deallocate(nalist)
+!        deallocate(nalist)
 
       else
         do i = 0,tnlist-1
@@ -1428,11 +1428,16 @@ subroutine set_valuedm(ndm,nadm,flag)
         enddo
       endif
 
-      deallocate(list)
 
       flagnb=0
       call MPI_ALLREDUCE(nlist,flagnb,1,MPI_INTEGER &
        ,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+      deallocate(list)
+      if(nit.lt.mnitb) then
+        deallocate(nalist)
+      endif
+
       if(flagnb.gt.0) then
         if(nit.gt.mnit) then
           if(myrank.eq.0) then

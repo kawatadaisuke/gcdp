@@ -1116,7 +1116,7 @@ subroutine set_value(ng,nag,ns,flag)
               slgtrlist(i)=nalist(i)
             enddo
 ! *** set h for particles whose density is zero, using local _gtr ***
-            call setslgtr(nssl,slgtrlist,0)
+            call setslgtr(nssl,slgtrlist,npb,0)
 
             deallocate(slgtrlist)
 

@@ -106,6 +106,11 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
       allocate(pn_nfp(0:np))      
 
+      if(.not.allocated(np_tr)) then
+! allocate memory for tree, need only the np size of _tr array
+        call allocate_btree(np)
+      endif
+
       do i=0,np-1
         pn_nfp(i)=i
       enddo

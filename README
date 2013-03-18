@@ -12,6 +12,11 @@ term
 ### update log ###
 
 difference from pv34.6.2
+
+treef.F95 and dmtreef.F95
+ set flago=3 if the impoted node np_tr=1
+ adding .and.proc_dmtr(nd).eq.myrank) then and etc.
+
 dmtree.F95 ldmtree.F95
  - no pn_nfp, but set pn_dmtr 0 or SI_ndm1
 forcont.F95

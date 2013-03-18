@@ -169,10 +169,11 @@ module gcdp_dm
       integer,allocatable :: list_adm(:)
 ! * flag for time step changed 0: no change, otherwise changed *
       integer,allocatable :: flagt_dm(:)
+
 end module gcdp_dm
 #endif
 
-#ifdef GAS
+#if defined(GAS) || defined(STAR)
 module gcdp_btree
       use gcdp_const
       implicit none
@@ -182,38 +183,33 @@ module gcdp_btree
 ! * max node id sent to the other proc 
       integer nodese_tr
 ! * number of contained particle *      
-       integer np_tr(0:MAXNODE-1)
+       integer,allocatable :: np_tr(:)
 ! * name of Particle *      
-      integer pn_tr(0:MAXNODE-1)
+      integer,allocatable :: pn_tr(:)
 ! * length of side *       
-      double precision l_tr(0:MAXNODE-1)
+      double precision,allocatable :: l_tr(:)
 ! * Coordinate of center *      
-      double precision cx_tr(0:MAXNODE-1),cy_tr(0:MAXNODE-1) &
-       ,cz_tr(0:MAXNODE-1)
+      double precision,allocatable :: cx_tr(:),cy_tr(:),cz_tr(:)
 ! * first child node *      
-      integer daughter_tr(0:MAXNODE-1)
+      integer,allocatable :: daughter_tr(:)
 ! * next node *      
-      integer next_tr(0:MAXNODE-1)
+      integer,allocatable :: next_tr(:)
 #ifdef SGRAV
 ! * center of mass *      
-      double precision cmx_tr(0:MAXNODE-1),cmy_tr(0:MAXNODE-1) &
-       ,cmz_tr(0:MAXNODE-1)
+      double precision,allocatable :: cmx_tr(:),cmy_tr(:),cmz_tr(:)
 ! * total of mass *      
-      double precision mass_tr(0:MAXNODE-1)
+      double precision,allocatable :: mass_tr(:)
 ! * distance between cm and center, maximum softening *      
-      double precision delta_tr(0:MAXNODE-1),hm_tr(0:MAXNODE-1)
+      double precision,allocatable :: delta_tr(:),hm_tr(:)
 #ifdef QPTREEF
 ! * for Multipole Expansion *
-      double precision mx_tr(0:MAXNODE-1),my_tr(0:MAXNODE-1) &
-       ,mz_tr(0:MAXNODE-1)
-      double precision mxx_tr(0:MAXNODE-1),myy_tr(0:MAXNODE-1) &
-       ,mzz_tr(0:MAXNODE-1)
-      double precision mxy_tr(0:MAXNODE-1),myz_tr(0:MAXNODE-1) &
-       ,mzx_tr(0:MAXNODE-1)
+      double precision,allocatable :: mx_tr(:),my_tr(:),mz_tr(:)
+      double precision,allocatable :: mxx_tr(:),myy_tr(:),mzz_tr(:)
+      double precision,allocatable :: mxy_tr(:),myz_tr(:),mzx_tr(:)
 #endif
 #endif
 ! *** proc id ***
-      integer proc_tr(0:MAXNODE-1)
+      integer,allocatable :: proc_tr(:)
 end module gcdp_btree
 #endif
 

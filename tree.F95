@@ -25,7 +25,7 @@ subroutine treebuild(np)
 ! change test
 ! * for not-finished particle (nfp) *
 ! * number of not-finished particle *	  
-      integer numnfp
+      integer numnfp,maxntr
 ! * for subcell (sc) *
 ! * start subcell in tree *	  
       integer stsc
@@ -59,11 +59,19 @@ subroutine treebuild(np)
       integer,allocatable :: tivr(:),npjr(:),nd0(:)
       double precision,allocatable :: tdvr(:)
 
+! an expected maximum number of tree
+      maxntr=np*3+nprocs*MAXNODESEND
+
+! allocate memory for tree
+      call allocate_btree(maxntr)
+!      write(6,*) ' myrank,maxntr=',myrank,maxntr
+
 ! *** Make root ***
 ! allocate list for keeping the top node id for each level
-      allocate(list(0:MAXNODE))
-      allocate(flag_pc(0:MAXNODE))
-      allocate(pare_tr(0:MAXNODE))
+      allocate(list(0:maxntr))
+      allocate(flag_pc(0:maxntr))
+      allocate(pare_tr(0:maxntr))
+
 ! allocate the arrays for _nfp
       allocate(pn_nfp(0:np))
       allocate(nd_nfp(0:np))
@@ -74,6 +82,8 @@ subroutine treebuild(np)
         pn_nfp(i)=i
       enddo
       level=0
+
+
 ! the last 0 for node 0
 ! gmakeroot use pn_nfp
       call makeroot(np,pn_nfp,0.0d0)
@@ -242,7 +252,7 @@ subroutine treebuild(np)
 
       deallocate(nd_sc)
 
-      if(num_tr.gt.MAXNODE-numnfp) then
+      if(num_tr.gt.maxntr-numnfp) then
         write(6,*) ' Error in buildtree():Node is overflow!'
         write(6,*) ' This level is ',level,'numnfp=',numnfp
         stop
@@ -392,7 +402,7 @@ subroutine treebuild(np)
       enddo
 ! *** store starting _tr id 
       stsc = num_tr
-      if(numsc.gt.MAXNODE) then
+      if(numsc.gt.maxntr) then
         write(6,*) ' Error in buildtree() : '
         write(6,*) '  Subcell is overflow	!'
         write(6,*) '  This level is ',level

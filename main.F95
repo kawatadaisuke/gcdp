@@ -825,7 +825,7 @@ program gcdp
 #endif
 #ifdef SGRAV
 #ifdef DM
-      if(nadmt.gt.0) then
+      if(nagravgt.gt.0.or.nadmt.gt.0) then
         call dmtreebuild(SI_ndm1)
 #ifdef MULTI_LEV
         call ldmtreebuild(ndm)
@@ -898,13 +898,13 @@ program gcdp
 
 !      write(6,*) 'myrank,nagravgt=',myrank,nagravgt
 
-      if(nagravgt.gt.0) then
+!      if(nagravgt.gt.0.or.nadmt.gt.0) then
         call treebuild(np)
-      endif
+!      endif
 #endif
 #ifdef DM
 #ifndef FIXEDDMEPS
-      if(nadmt.gt.0) then
+      if(nadmt.gt.0.or.nagravgt.gt.0) then
         call dmtreebuild(SI_ndm1)
 #ifdef MULTI_LEV
         call ldmtreebuild(ndm)
@@ -1079,7 +1079,7 @@ program gcdp
          write(6,*) '  t,t_end=',TM_tot,TM_t0
       endif
       call forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
-       ,step+1,totstep,lstep)
+       ,step,totstep,lstep)
  9999 ntime=MPI_WTIME()
       if(myrank.eq.0) then
         write(6,*) ' Calculation time summary'

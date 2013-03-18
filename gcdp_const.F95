@@ -8,7 +8,7 @@ module gcdp_const
       implicit none      
   double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***
-      integer,parameter ::  NDSTEPDDEC=5
+      integer,parameter ::  NDSTEPDDEC=10
 ! maximum number of cpus
       integer,parameter :: NCPU=256
 ! maximum number of node to be sent
@@ -34,7 +34,7 @@ module gcdp_const
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
 #ifdef DM
-      integer,parameter :: MNDM=600000
+      integer,parameter :: MNDM=40000
 #else
       integer,parameter :: MNDM=10
 #endif
@@ -235,11 +235,11 @@ module gcdp_const
 ! *** star formation threshold ***
 ! *** nh ***
 ! *** NSTH: only for softening length ***
-      double precision,parameter :: NSTH=10.0d0
+      double precision,parameter :: NSTH=0.01d0
 ! *** NSTHLIM: density limit
-      double precision,parameter :: NSTHLIM=1.0d3
+      double precision,parameter :: NSTHLIM=0.01d0
 ! *** Temperature threshold (1.0e4 K) ***
-      double precision,parameter :: TSTH=0.1d0
+      double precision,parameter :: TSTH=10.0d0
 ! * star formation efficiency coefficient *
       double precision,parameter :: CSEFF=1.0d0
 ! * supernova energy fraction for kinematic energy *

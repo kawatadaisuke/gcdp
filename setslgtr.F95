@@ -6,7 +6,7 @@
 ! flag: 0 for gas, otherwise for feedback
 
 #ifdef GAS
-subroutine setslgtr(nssl,nalist,flag)
+subroutine setslgtr(nssl,nalist,npb,flag)
       use gcdp_const
       use gcdp_baryon
       use gcdp_btree
@@ -16,7 +16,7 @@ subroutine setslgtr(nssl,nalist,flag)
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: nssl,nalist(0:nssl),flag
+      integer,intent(in) :: nssl,nalist(0:nssl),flag,npb
       integer i
 ! * Number of Notfinished particle, temp *      
       integer nlist,tnlist
@@ -57,18 +57,18 @@ subroutine setslgtr(nssl,nalist,flag)
       if(np_gtr(0).le.1.or.proc_gtr(0).ne.myrank) then
         do i=0,nssl-1
           pni=nalist(i)
-          if(tdvr(pni).lt.l_tr(0)) then
+!          if(tdvr(pni).lt.l_tr(0)) then
 ! *** use the box size of the node ***
-            tdvr(pni)=MGROOT*l_tr(0)
-          else
-            tdvr(pni)=2.0d0*tdvr(pni)
-          endif
+!            tdvr(pni)=MGROOT*l_tr(0)
+!          else
+          tdvr(pni)=2.0d0*tdvr(pni)
+!          endif
         enddo
         goto 999
       endif
 
       allocate(list(0:nssl))
-      allocate(node(0:nssl))
+      allocate(node(0:npb))
 
       do i=0,nssl-1
         pni=nalist(i)

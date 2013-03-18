@@ -610,6 +610,85 @@ subroutine reallocate_dm_d3(ndm)
 
 end subroutine
 
-
 ! endif for DM
 #endif
+
+#if defined(GAS) || defined(STAR)
+! reallocate btree
+subroutine allocate_btree(ntr)
+      use gcdp_btree
+
+      implicit none
+      integer,intent(in) :: ntr
+
+      if(allocated(np_tr)) then
+        deallocate(np_tr)
+        deallocate(pn_tr)
+        deallocate(l_tr)
+        deallocate(cx_tr)
+        deallocate(cy_tr)
+        deallocate(cz_tr)
+        deallocate(daughter_tr)
+        deallocate(next_tr)
+#ifdef SGRAV
+        deallocate(cmx_tr)
+        deallocate(cmy_tr)
+        deallocate(cmz_tr)
+        deallocate(mass_tr)
+        deallocate(delta_tr)
+        deallocate(hm_tr)
+#ifdef QPTREEF
+        deallocate(mx_tr)
+        deallocate(my_tr)
+        deallocate(mz_tr)
+        deallocate(mxx_tr)
+        deallocate(myy_tr)
+        deallocate(mzz_tr)
+        deallocate(mxy_tr)
+        deallocate(myz_tr)
+        deallocate(mzx_tr)
+#endif
+#endif
+        deallocate(proc_tr)
+      endif
+
+      allocate(np_tr(0:ntr))
+      allocate(pn_tr(0:ntr))
+      allocate(l_tr(0:ntr))
+      allocate(cx_tr(0:ntr))
+      allocate(cy_tr(0:ntr))
+      allocate(cz_tr(0:ntr))
+      allocate(daughter_tr(0:ntr))
+      allocate(next_tr(0:ntr))
+#ifdef SGRAV
+      allocate(cmx_tr(0:ntr))
+      allocate(cmy_tr(0:ntr))
+      allocate(cmz_tr(0:ntr))
+      allocate(mass_tr(0:ntr))
+      allocate(delta_tr(0:ntr))
+      allocate(hm_tr(0:ntr))
+#ifdef QPTREEF
+      allocate(mx_tr(0:ntr))
+      allocate(my_tr(0:ntr))
+      allocate(mz_tr(0:ntr))
+      allocate(mxx_tr(0:ntr))
+      allocate(myy_tr(0:ntr))
+      allocate(mzz_tr(0:ntr))
+      allocate(mxy_tr(0:ntr))
+      allocate(myz_tr(0:ntr))
+      allocate(mzx_tr(0:ntr))
+#endif
+#endif
+      allocate(proc_tr(0:ntr))
+
+end subroutine
+
+! end GAS || STAR
+#endif
+
+
+
+
+
+
+

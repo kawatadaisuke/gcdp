@@ -253,7 +253,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_tr(nd).eq.1) then
+          if(np_tr(nd).eq.1.and.proc_tr(nd).eq.myrank) then
             flago(pn)=2
           else
 #ifdef QPTREEF
@@ -274,7 +274,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_tr(nd).eq.1) then
+          if(np_tr(nd).eq.1.and.proc_tr(nd).eq.myrank) then
             flago(pn)=2
           else
             l_r2=(l_tr(nd)+delta_tr(nd))*(l_tr(nd)+delta_tr(nd))/r2p(i)
@@ -690,7 +690,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_dmtr(nd).eq.1) then
+          if(np_dmtr(nd).eq.1.and.proc_dmtr(nd).eq.myrank) then
             flago(pn)=2
           else
 #ifdef QPTREEF
@@ -711,7 +711,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_dmtr(nd).eq.1) then
+          if(np_dmtr(nd).eq.1.and.proc_dmtr(nd).eq.myrank) then
             flago(pn)=2
           else
             l_r2=(l_dmtr(nd)+delta_dmtr(nd))*(l_dmtr(nd)+delta_dmtr(nd))/r2p(i)
@@ -1119,7 +1119,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_ldmtr(nd).eq.1) then
+          if(np_ldmtr(nd).eq.1.and.proc_ldmtr(nd).eq.myrank) then
             flago(pn)=2
           else
 #ifdef QPTREEF
@@ -1140,7 +1140,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_ldmtr(nd).eq.1) then
+          if(np_ldmtr(nd).eq.1.and.proc_ldmtr(nd).eq.myrank) then
             flago(pn)=2
           else
             l_r2=(l_ldmtr(nd)+delta_ldmtr(nd)) &
