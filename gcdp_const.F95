@@ -237,9 +237,12 @@ module gcdp_const
 ! *** NSTH: only for softening length ***
       double precision,parameter :: NSTH=0.01d0
 ! *** NSTHLIM: density limit
-      double precision,parameter :: NSTHLIM=0.01d0
+      double precision,parameter :: NSTHLIM=NSTH
+! *** Hopkins13 self-gravity criterion for SF
+      double precision,parameter :: ALPHASF=1.0d0
+      double precision,parameter :: BETASF=0.5d0
 ! *** Temperature threshold (1.0e4 K) ***
-      double precision,parameter :: TSTH=10.0d0
+!      double precision,parameter :: TSTH=10.0d0
 ! * star formation efficiency coefficient *
       double precision,parameter :: CSEFF=1.0d0
 ! * supernova energy fraction for kinematic energy *

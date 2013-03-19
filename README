@@ -13,6 +13,10 @@ term
 
 matching with pv34.6.7
 
+- Hopkins et al. SF criteria + NSTHLIM
+- stime.F, ltime.F no check for dtmin in stime.F (in case of -10<SI_flagrad<-1
+- calc_dv_du.F  /GAM for peff
+- output.F output arot_v_p
 - set_value.F and set_valuedm.F update
 
 *** difference from pv34.6.2

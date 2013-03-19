@@ -267,8 +267,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_tr(nd).eq.1.and.proc_tr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_tr(nd).eq.1) then
+            if(proc_tr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
 #ifdef QPTREEF
             l_r2=(G*mass_tr(nd))*((l_tr(nd)**4)/(r2p(i)**3))
@@ -288,8 +292,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_tr(nd).eq.1.and.proc_tr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_tr(nd).eq.1) then
+            if(proc_tr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
             l_r2=(l_tr(nd)+delta_tr(nd))*(l_tr(nd)+delta_tr(nd))/r2p(i)
             if(l_r2.le.theta2) then
@@ -698,8 +706,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_dmtr(nd).eq.1.and.proc_dmtr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_dmtr(nd).eq.1) then
+            if(proc_dmtr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
 #ifdef QPTREEF
             l_r2=(G*mass_dmtr(nd))*((l_dmtr(nd)**4)/(r2p(i)**3))
@@ -719,8 +731,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_dmtr(nd).eq.1.and.proc_dmtr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_dmtr(nd).eq.1) then
+            if(proc_dmtr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
             l_r2=(l_dmtr(nd)+delta_dmtr(nd))*(l_dmtr(nd)+delta_dmtr(nd))/r2p(i)
             if(l_r2.le.theta2) then
@@ -1130,8 +1146,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_ldmtr(nd).eq.1.and.proc_ldmtr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_ldmtr(nd).eq.1) then
+            if(proc_ldmtr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
 #ifdef QPTREEF
             l_r2=(G*mass_ldmtr(nd))*((l_ldmtr(nd)**4)/(r2p(i)**3))
@@ -1151,8 +1171,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         do i=0,ntf-1
           pn=npltf(i)
           nd=node(pn)
-          if(np_ldmtr(nd).eq.1.and.proc_ldmtr(nd).eq.myrank) then
-            flago(pn)=2
+          if(np_ldmtr(nd).eq.1) then
+            if(proc_ldmtr(nd).eq.myrank) then
+              flago(pn)=2
+            else
+              flago(pn)=3
+            endif
           else
             l_r2=(l_ldmtr(nd)+delta_ldmtr(nd)) &
              *(l_ldmtr(nd)+delta_ldmtr(nd))/r2p(i)

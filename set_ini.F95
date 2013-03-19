@@ -1438,11 +1438,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
          ' TLLIMIT,THLIMIT,CLIMIT,EPSC,DU_UPU=' &
          ,TLLIMIT,THLIMIT,CLIMIT,EPSC,DU_UPU
         write(60,'(a22,2(1pE13.5))') &
-!          12345678901234567890123456789012345
+!         12345678901234567890123456789012345
          ' DTSF,MINTMSFD,DLDUFD=',DTSF,MINTMSFD,LDUFD 
-        write(60,'(a35,9(1pE13.5))') &
-         ' NSTH,NSTHLIM,TSTH,CSEFF,SNEU,SWEU=',NSTH,NSTHLIM,TSTH,CSEFF,SNEU,SWEU
-!          12345678901234567890123456789012345
+        write(60,'(a30,9(1pE13.5))') &
+         ' NSTH,NSTHLIM,CSEFF,SNEU,SWEU=',NSTH,NSTHLIM,CSEFF,SNEU,SWEU
+!         12345678901234567890123456789012345
 #ifdef BOXSIM
         write(60,'(a10,3(1pE13.5))') ' box size=',SI_lbox(0) &
          ,SI_lbox(1),SI_lbox(2)

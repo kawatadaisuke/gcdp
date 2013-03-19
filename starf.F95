@@ -22,6 +22,7 @@ subroutine starf(ng,ns,nag,nas,nagravg)
       integer i,j,pn,ifd,np,ierr
 ! * for criterion *
       double precision nhp,temp,tdyn,tdynp(0:MNB-1),tcp(0:MNB-1)
+      double precision alpvir
 ! * for star formation *
 ! * for making star particle *
       integer na,nna,dns,npsnia,nagrav
@@ -63,13 +64,12 @@ subroutine starf(ng,ns,nag,nas,nagravg)
 #if defined(SF_EFD) || defined(SF_ZFD)
         if(flagfd_p(pn).eq.0) then
 #endif
-! *** no metal dependence, assuming solar value ***
+! *** since pv34.6.7 to suppress accidental SF due to v field ~ 0 at low density
           nhp=XHSOL*rho_p(pn)*(DU/MP)
-! * candidate star -> star formation for ver.9 *
-!          else if(nhp.gt.NSTH.and.div_v_p(pn).lt.0.0d0) then
-          if(nhp.gt.NSTHLIM.and.div_v_p(pn).lt.0.0d0) then
-            temp=p_p(pn)*myu_p(pn)/(rho_p(pn)*TPRHO*MYU)
-            if(temp.lt.TSTH) then
+          if(nhp.gt.NSTHLIM) then
+! calculate alpha_vir using Hopkins13 
+            alpvir=BETASF*(div_v_p(pn)**2+arot_v_p(pn)**2)/(G*rho_p(pn))
+            if(alpvir.lt.ALPHASF) then
               tdyn=dsqrt(3.0d0*M_PI/(16.0d0*G*rho_p(pn)))
               p(pn)=(1.0d0-exp(-CSEFF*TM_dt/tdyn))
               if(p(pn).ne.0.0d0.and.p(pn).gt.dble(ran1(idum))) then

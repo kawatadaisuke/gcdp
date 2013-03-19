@@ -261,16 +261,6 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
         endif
       enddo
 
-      if(dtmin.le.DTLIMIT) then
-        write(6,*) ' Error in stime() : ',myrank
-        write(6,*) ' Time Interval dtmin=',dtmin
-#ifdef SF_EFD
-        write(6,*) ' particle id=',pn,' dtu,u,Gsn,myrank=',dtu &
-        ,u_p(pn),Gsn_p(pn),myrank,flagfd_p(pn),TMsf_dt
-#endif
-        stop
-      endif
-
       do i=0,ng-1
         pn=list_ap(i)           
         if(dti(pn).ne.INF) then
@@ -364,13 +354,6 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
         dtmin=MINTMSFD
       endif
 #endif
-
-! ***  Check   ***
-      if(dtmin.le.DTLIMIT.or.dtmax.lt.dtmin) then
-        write(6,*) ' Error in stime() : at rank',myrank
-        write(6,*) ' Time Interval=',dtmin,' Max=',dtmax
-        stop
-      endif
 
 ! *** define time steps ***
       TM_k=int(dlog(dtmax/dtmin)/dlog(2.0d0))
@@ -478,15 +461,6 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
         goto 90
       endif
 #endif
-
-      if(dtmin.le.DTLIMIT) then
-        if(myrank.eq.0) then
-          write(6,*) ' Error in stime() : '
-          write(6,*) ' Time Interval dtmin=',dtmin
-          write(6,*) ' OF_todt,TM_tot=',OF_todt,TM_tot
-        endif
-        stop
-      endif
 
 #ifdef GAS
 ! *** Define Individual time step ***

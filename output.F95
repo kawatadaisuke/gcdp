@@ -74,7 +74,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** number of output values ***
 #ifdef GAS
       ndbval=9
-      ndbhyd=7
+      ndbhyd=8
 #else
       ndbval=0
       ndbhyd=0
@@ -699,6 +699,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
               else if(iv.eq.6) then
                 do i=0,npj-1 
                   tdvs(i)=hvsigdt_p(i)
+                enddo
+              else if(iv.eq.7) then
+                do i=0,npj-1 
+                  tdvs(i)=arot_v_p(i)
                 enddo
               endif
               if(myrank.lt.SI_nof) then

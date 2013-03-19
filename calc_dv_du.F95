@@ -521,7 +521,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           peffp(pn)=p_p(pn)
 #ifdef UTHLIM_JM
 ! from eq. (1) of Hopkins et al. (2011)
-          plim=1.2d0*(ULJMFAC**(2.0d0/3.0d0))*G*(h_p(pn)**2)*(rho_p(pn)**2)
+          plim=1.2d0*(ULJMFAC**(2.0d0/3.0d0))*G*(h_p(pn)**2)*(rho_p(pn)**2)/GAM
           if(peffp(pn).lt.plim) then
             peffp(pn)=plim
           endif

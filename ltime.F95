@@ -591,27 +591,6 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
         do i=1,np-1
           ttmp=lt_p(i)+dt_p(i)
           if(ttmp.lt.TM_dt) then
-! for test
-            if(ttmp.le.TM_lt+DTLIMIT*2.0d0) then
-              write(6,*) ' Error in localtime() : dtmin=',dtmin
-              write(6,*) ' Error in localtime() :'
-              write(6,*) '  lt_p,dt_p,dtmnb,TM_lt',lt_p(i),dt_p(i) &
-               ,dtmnb_p(i),TM_lt
-              adv=dvx_p(i)**2+dvy_p(i)**2+dvz_p(i)**2
-              adv=dsqrt(adv)
-              if(adv.ne.0.0d0) then
-                dtcr2=CDYN*dsqrt(h_p(pn)*0.5d0/adv)
-              else
-                dtcr2=INF
-              endif 
-              write(6,*) '  dvx,h,hvsig',dvx_p(i),dvy_p(i),dvz_p(i) &
-               ,h_p(i),hvsigdt_p(i),dtcr2
-              write(6,*) '  flagt,dtr,dtmnb,flagc',flagt_p(i) &
-               ,dtr_p(i),dtmnb_p(i),flagc_p(i)
-              call MPI_ABORT(MPI_COMM_WORLD,ierr)
-              stop
-            endif
-
             TM_dt = ttmp
           endif
         enddo
