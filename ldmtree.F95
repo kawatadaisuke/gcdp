@@ -21,7 +21,7 @@ subroutine ldmtreebuild(np)
       integer i,ierr
       integer level,npn
 ! * for finished tree (dmtr) *
-      integer numdmtr
+      integer numdmtr,maxntr
 ! * for not-finished particle (nfp) *
 ! * number of not-finished particle *      
       integer numnfp
@@ -56,11 +56,17 @@ subroutine ldmtreebuild(np)
       integer,allocatable :: tivr(:),npjr(:),nd0(:)
       double precision,allocatable :: tdvr(:)
 
+! an expected maximum number of tree
+      maxntr=np*3+nprocs*MAXNODESEND
+
+! allocate memory for tree
+      call allocate_ldmtree(maxntr)
+
 ! *** Make root ***
 ! allocate list for keeping the top node id for each level
-      allocate(list(0:MAXNODELDM))
-      allocate(flag_pc(0:MAXNODELDM))
-      allocate(pare_tr(0:MAXNODELDM))
+      allocate(list(0:maxntr))
+      allocate(flag_pc(0:maxntr))
+      allocate(pare_tr(0:maxntr))
 ! allocate the arrays for _nfp
       allocate(pn_nfp(0:np))
       allocate(nd_nfp(0:np))
@@ -223,7 +229,7 @@ subroutine ldmtreebuild(np)
         s_sc(nd_nfp(i))=snfp(i)
       enddo
       
-      if(numdmtr.gt.MAXNODELDM-numnfp) then
+      if(numdmtr.gt.maxntr-numnfp) then
         write(6,*) ' Error in ldmbuildtree() : Node is overflow!'
         write(6,*) '   This level is ',level,'numnfp=',numnfp
         stop
@@ -369,7 +375,7 @@ subroutine ldmtreebuild(np)
       enddo
 ! *** store starting _ldmtr id 
       stsc = numdmtr
-      if(numsc.gt.MAXNODELDM) then
+      if(numsc.gt.maxntr) then
         write(6,*) 'Error in ldmbuildtree():Subcell is overflow!'
         write(6,*) ' This level is ',level
         stop
@@ -519,7 +525,7 @@ subroutine ldmtreebuild(np)
           call MPI_BCAST(npjr(ip),1,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
         enddo
 
-        allocate(nd0(0:MAXNODELDM))
+        allocate(nd0(0:maxntr))
 
         nvali=4
 #ifdef QPTREEF

@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! ***************************************
 !     dmtree.F95  for GCD+ ver f03.0
-!  3 Feb. 2013   written by D. Kawata
+!  22 Mar. 2013   written by D. Kawata
 !  *************************************** 
 
 #ifdef DM
@@ -22,7 +22,7 @@ subroutine dmtreebuild(np)
       integer numdmtr
 ! * for not-finished particle (nfp) *
 ! * number of not-finished particle *      
-      integer numnfp
+      integer numnfp,maxntr
 ! * for subcell (sc) *
 ! * start subcell in tree *      
       integer stsc
@@ -54,11 +54,17 @@ subroutine dmtreebuild(np)
       integer,allocatable :: tivr(:),npjr(:),nd0(:)
       double precision,allocatable :: tdvr(:)
 
+! an expected maximum number of tree
+      maxntr=np*3+nprocs*MAXNODESEND
+
+! allocate memory for tree
+      call allocate_dmtree(maxntr)
+
 ! *** Make root ***
 ! allocate list for keeping the top node id for each level
-      allocate(list(0:MAXNODEDM))
-      allocate(flag_pc(0:MAXNODEDM))
-      allocate(pare_tr(0:MAXNODEDM))
+      allocate(list(0:maxntr))
+      allocate(flag_pc(0:maxntr))
+      allocate(pare_tr(0:maxntr))
 ! allocate the arrays for _nfp
       allocate(pn_nfp(0:np))
       allocate(nd_nfp(0:np))
@@ -233,7 +239,7 @@ subroutine dmtreebuild(np)
         s_sc(nd_nfp(i))=snfp(i)
       enddo
       
-      if(numdmtr.gt.MAXNODEDM-numnfp) then
+      if(numdmtr.gt.maxntr-numnfp) then
         write(6,*) ' Error in dmbuildtree() : Node is overflow!'
         write(6,*) '   This level is ',level,'numnfp=',numnfp
         stop
@@ -382,7 +388,7 @@ subroutine dmtreebuild(np)
       enddo
 ! *** store starting _dmtr id 
       stsc = numdmtr
-      if(numsc.gt.MAXNODEDM) then
+      if(numsc.gt.maxntr) then
         write(6,*) 'Error in buildtree():Subcell is overflow!'
         write(6,*) ' This level is ',level
         stop
@@ -534,7 +540,7 @@ subroutine dmtreebuild(np)
           call MPI_BCAST(npjr(ip),1,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
         enddo
 
-        allocate(nd0(0:MAXNODEDM))
+        allocate(nd0(0:maxntr))
 
         nvali=4
 #ifdef QPTREEF

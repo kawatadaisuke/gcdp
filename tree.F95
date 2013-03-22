@@ -557,7 +557,7 @@ subroutine treebuild(np)
           call MPI_BCAST(npjr(ip),1,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
         enddo
 
-        allocate(nd0(0:MAXNODE))
+        allocate(nd0(0:maxntr))
 
         nvali=4
 #ifdef QPTREEF

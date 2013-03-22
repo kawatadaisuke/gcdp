@@ -687,8 +687,142 @@ end subroutine
 #endif
 
 
+#ifdef DM
+! reallocate btree
+subroutine allocate_dmtree(ntr)
+      use gcdp_dmtree
 
+      implicit none
+      integer,intent(in) :: ntr
 
+      if(allocated(np_dmtr)) then
+        deallocate(np_dmtr)
+        deallocate(pn_dmtr)
+        deallocate(l_dmtr)
+        deallocate(cx_dmtr)
+        deallocate(cy_dmtr)
+        deallocate(cz_dmtr)
+        deallocate(daughter_dmtr)
+        deallocate(next_dmtr)
+        deallocate(cmx_dmtr)
+        deallocate(cmy_dmtr)
+        deallocate(cmz_dmtr)
+        deallocate(mass_dmtr)
+        deallocate(delta_dmtr)
+        deallocate(hm_dmtr)
+#ifdef QPTREEF
+        deallocate(mx_dmtr)
+        deallocate(my_dmtr)
+        deallocate(mz_dmtr)
+        deallocate(mxx_dmtr)
+        deallocate(myy_dmtr)
+        deallocate(mzz_dmtr)
+        deallocate(mxy_dmtr)
+        deallocate(myz_dmtr)
+        deallocate(mzx_dmtr)
+#endif
+        deallocate(proc_dmtr)
+      endif
 
+      allocate(np_dmtr(0:ntr))
+      allocate(pn_dmtr(0:ntr))
+      allocate(l_dmtr(0:ntr))
+      allocate(cx_dmtr(0:ntr))
+      allocate(cy_dmtr(0:ntr))
+      allocate(cz_dmtr(0:ntr))
+      allocate(daughter_dmtr(0:ntr))
+      allocate(next_dmtr(0:ntr))
+      allocate(cmx_dmtr(0:ntr))
+      allocate(cmy_dmtr(0:ntr))
+      allocate(cmz_dmtr(0:ntr))
+      allocate(mass_dmtr(0:ntr))
+      allocate(delta_dmtr(0:ntr))
+      allocate(hm_dmtr(0:ntr))
+#ifdef QPTREEF
+      allocate(mx_dmtr(0:ntr))
+      allocate(my_dmtr(0:ntr))
+      allocate(mz_dmtr(0:ntr))
+      allocate(mxx_dmtr(0:ntr))
+      allocate(myy_dmtr(0:ntr))
+      allocate(mzz_dmtr(0:ntr))
+      allocate(mxy_dmtr(0:ntr))
+      allocate(myz_dmtr(0:ntr))
+      allocate(mzx_dmtr(0:ntr))
+#endif
+      allocate(proc_dmtr(0:ntr))
+
+end subroutine
+
+! end ifdef DM
+#endif
+
+#ifdef MULTI_LEV
+! reallocate btree
+subroutine allocate_ldmtree(ntr)
+      use gcdp_ldmtree
+
+      implicit none
+      integer,intent(in) :: ntr
+
+      if(allocated(np_ldmtr)) then
+        deallocate(np_ldmtr)
+        deallocate(pn_ldmtr)
+        deallocate(l_ldmtr)
+        deallocate(cx_ldmtr)
+        deallocate(cy_ldmtr)
+        deallocate(cz_ldmtr)
+        deallocate(daughter_ldmtr)
+        deallocate(next_ldmtr)
+        deallocate(cmx_ldmtr)
+        deallocate(cmy_ldmtr)
+        deallocate(cmz_ldmtr)
+        deallocate(mass_ldmtr)
+        deallocate(delta_ldmtr)
+        deallocate(hm_ldmtr)
+#ifdef QPTREEF
+        deallocate(mx_ldmtr)
+        deallocate(my_ldmtr)
+        deallocate(mz_ldmtr)
+        deallocate(mxx_ldmtr)
+        deallocate(myy_ldmtr)
+        deallocate(mzz_ldmtr)
+        deallocate(mxy_ldmtr)
+        deallocate(myz_ldmtr)
+        deallocate(mzx_ldmtr)
+#endif
+        deallocate(proc_ldmtr)
+      endif
+
+      allocate(np_ldmtr(0:ntr))
+      allocate(pn_ldmtr(0:ntr))
+      allocate(l_ldmtr(0:ntr))
+      allocate(cx_ldmtr(0:ntr))
+      allocate(cy_ldmtr(0:ntr))
+      allocate(cz_ldmtr(0:ntr))
+      allocate(daughter_ldmtr(0:ntr))
+      allocate(next_ldmtr(0:ntr))
+      allocate(cmx_ldmtr(0:ntr))
+      allocate(cmy_ldmtr(0:ntr))
+      allocate(cmz_ldmtr(0:ntr))
+      allocate(mass_ldmtr(0:ntr))
+      allocate(delta_ldmtr(0:ntr))
+      allocate(hm_ldmtr(0:ntr))
+#ifdef QPTREEF
+      allocate(mx_ldmtr(0:ntr))
+      allocate(my_ldmtr(0:ntr))
+      allocate(mz_ldmtr(0:ntr))
+      allocate(mxx_ldmtr(0:ntr))
+      allocate(myy_ldmtr(0:ntr))
+      allocate(mzz_ldmtr(0:ntr))
+      allocate(mxy_ldmtr(0:ntr))
+      allocate(myz_ldmtr(0:ntr))
+      allocate(mzx_ldmtr(0:ntr))
+#endif
+      allocate(proc_ldmtr(0:ntr))
+
+end subroutine
+
+! end ifdef MULTI_LEV
+#endif
 
 

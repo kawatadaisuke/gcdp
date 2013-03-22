@@ -77,6 +77,11 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       do it=0,0
 #endif
         if(it.eq.0) then
+
+          if(.not.allocated(np_dmtr)) then
+            call allocate_dmtree(SI_ndm1)
+          endif
+
           call dmmakeroot(SI_ndm1,0.0d0)
           idmr(0)=0
           idmr(1)=SI_ndm1-1
@@ -87,6 +92,11 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 #ifdef MULTI_LEV
         else
 ! *** for low-reso particles SI_ndm1-ndm ***
+
+          if(.not.allocated(np_ldmtr)) then
+            call allocate_ldmtree(ndm-SI_ndm1)
+          endif
+
           call ldmmakeroot(ndm)
           idmr(0)=SI_ndm1
           idmr(1)=ndm-1

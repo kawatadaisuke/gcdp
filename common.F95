@@ -223,36 +223,31 @@ module gcdp_dmtree
 ! * max node id sent to the other proc 
       integer nodese_dmtr,nodess_dmtr
 ! * number of contained particle *       
-      integer np_dmtr(0:MAXNODEDM-1)
+      integer,allocatable :: np_dmtr(:)
 ! * name of Particle *      
-      integer pn_dmtr(0:MAXNODEDM-1)
+      integer,allocatable :: pn_dmtr(:)
 ! * length of side *       
-      double precision l_dmtr(0:MAXNODEDM-1)
+      double precision,allocatable :: l_dmtr(:)
 ! * first child node *      
-      integer daughter_dmtr(0:MAXNODEDM-1)
+      integer,allocatable :: daughter_dmtr(:)
 ! * next node *      
-      integer next_dmtr(0:MAXNODEDM-1)
+      integer,allocatable :: next_dmtr(:)
 ! * Coordinate of center *      
-      double precision cx_dmtr(0:MAXNODEDM-1),cy_dmtr(0:MAXNODEDM-1) &
-       ,cz_dmtr(0:MAXNODEDM-1)
+      double precision,allocatable :: cx_dmtr(:),cy_dmtr(:),cz_dmtr(:)
 ! * center of mass *      
-      double precision cmx_dmtr(0:MAXNODEDM-1),cmy_dmtr(0:MAXNODEDM-1) &
-       ,cmz_dmtr(0:MAXNODEDM-1)
+      double precision,allocatable :: cmx_dmtr(:),cmy_dmtr(:),cmz_dmtr(:)
 ! * total of mass *
-      double precision mass_dmtr(0:MAXNODEDM-1) 
+      double precision,allocatable :: mass_dmtr(:) 
 ! * distance between cm and center *      
-      double precision delta_dmtr(0:MAXNODEDM-1),hm_dmtr(0:MAXNODEDM-1)
+      double precision,allocatable :: delta_dmtr(:),hm_dmtr(:)
 #ifdef QPTREEF
 ! * for Multipole Expansion *
-      double precision mx_dmtr(0:MAXNODEDM-1),my_dmtr(0:MAXNODEDM-1) &
-       ,mz_dmtr(0:MAXNODEDM-1)
-      double precision mxx_dmtr(0:MAXNODEDM-1),myy_dmtr(0:MAXNODEDM-1) &
-       ,mzz_dmtr(0:MAXNODEDM-1)
-      double precision mxy_dmtr(0:MAXNODEDM-1),myz_dmtr(0:MAXNODEDM-1) &
-       ,mzx_dmtr(0:MAXNODEDM-1)
+      double precision,allocatable :: mx_dmtr(:),my_dmtr(:),mz_dmtr(:)
+      double precision,allocatable :: mxx_dmtr(:),myy_dmtr(:),mzz_dmtr(:)
+      double precision,allocatable :: mxy_dmtr(:),myz_dmtr(:),mzx_dmtr(:)
 #endif
 ! *** proc id ***
-      integer proc_dmtr(0:MAXNODEDM-1)
+      integer,allocatable :: proc_dmtr(:)
 end module gcdp_dmtree
 #endif
 
@@ -266,36 +261,31 @@ module gcdp_ldmtree
 ! * max node id sent to the other proc 
       integer nodese_ldmtr,nodess_ldmtr
 ! * number of contained particle *   
-      integer np_ldmtr(0:MAXNODELDM-1)
+      integer,allocatable :: np_ldmtr(:)
 ! * name of Particle *      
-      integer pn_ldmtr(0:MAXNODELDM-1)
+      integer,allocatable :: pn_ldmtr(:)
 ! * length of side *       
-      double precision l_ldmtr(0:MAXNODELDM-1),hm_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable :: l_ldmtr(:),hm_ldmtr(:)
 ! * first child node *      
-      integer daughter_ldmtr(0:MAXNODELDM-1)
+      integer,allocatable :: daughter_ldmtr(:)
 ! * next node *      
-      integer next_ldmtr(0:MAXNODELDM-1)
+      integer,allocatable :: next_ldmtr(:)
 ! * Coordinate of center *      
-      double precision cx_ldmtr(0:MAXNODELDM-1) &
-       ,cy_ldmtr(0:MAXNODELDM-1),cz_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable :: cx_ldmtr(:),cy_ldmtr(:),cz_ldmtr(:)
 ! * center of mass *      
-      double precision cmx_ldmtr(0:MAXNODELDM-1) &
-       ,cmy_ldmtr(0:MAXNODELDM-1),cmz_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable :: cmx_ldmtr(:),cmy_ldmtr(:),cmz_ldmtr(:)
 ! * total of mass *
-      double precision mass_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable ::  mass_ldmtr(:)
 ! * distance between cm and center *      
-      double precision delta_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable ::  delta_ldmtr(:)
 #ifdef QPTREEF
 ! * for Multipole Expansion *
-      double precision mx_ldmtr(0:MAXNODELDM-1),my_ldmtr(0:MAXNODELDM-1) &
-       ,mz_ldmtr(0:MAXNODELDM-1)
-      double precision mxx_ldmtr(0:MAXNODELDM-1) &
-       ,myy_ldmtr(0:MAXNODELDM-1),mzz_ldmtr(0:MAXNODELDM-1)
-      double precision mxy_ldmtr(0:MAXNODELDM-1) &
-       ,myz_ldmtr(0:MAXNODELDM-1),mzx_ldmtr(0:MAXNODELDM-1)
+      double precision,allocatable ::  mx_ldmtr(:),my_ldmtr(:),mz_ldmtr(:)
+      double precision,allocatable ::  mxx_ldmtr(:),myy_ldmtr(:),mzz_ldmtr(:)
+      double precision,allocatable ::  mxy_ldmtr(:),myz_ldmtr(:),mzx_ldmtr(:)
 #endif
 ! *** proc id ***
-      integer proc_ldmtr(0:MAXNODELDM-1)
+      integer,allocatable :: proc_ldmtr(:)
 end module gcdp_ldmtree
 #endif
 
