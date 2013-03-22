@@ -195,11 +195,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         close(51)
 
       enddo
-      if(ndm.gt.MNDM) then
-        write(6,*) ' Error: MNDM is too small. MNDM,ndm=' &
-         ,MNDM,ndm,' myrank=',myrank
-        stop
-      endif
 #endif
   151 format(5(1pE13.5))
   152 format(6(1pE13.5))
@@ -247,10 +242,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         endif
       enddo
       close(51)
-      if(np.gt.MN) then
-        write(6,*) ' Error: MN is too small. MN,np=',MN,np,' myrank=',myrank
-        stop
-      endif
 !        write(6,*) myrank,' rank ',il,' level np = ',np
 #endif
       SI_h0 = SI_h0/100.0d0
@@ -1382,7 +1373,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         call system("rm ./output/data/*")           
         call system("rm ./output/*anim*")
         open(60,file='./output/ana/inipara.dat',status='unknown')
-        write(60,'(a12,3I10)') 'MNB,MNDM,MN=',MNB,MNDM,MN
         write(60,'(a34,8I10)') 'npt,ndmt,np,ng,ns,ndm,ndm1,ndm1t=' &
          ,npt,ndmt,np,ng,ns,ndm,SI_ndm1,SI_ndm1t
 #ifdef COSM

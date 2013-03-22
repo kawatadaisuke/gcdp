@@ -168,11 +168,6 @@ subroutine  setcool()
       allocate(tdvr(0:nval))
 
       if(myrank.eq.0) then
-        if(MNVALP.lt.nval) then
-          write(6,*) ' Error in setcool(): too big cooling array.'
-          write(6,*) ' MNVALP,nval=',MNVALP,nval
-          stop
-        endif
         nc=0
         do iz=0,nz_crtb-1
           do inh=0,nnh_crtb-1

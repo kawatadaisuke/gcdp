@@ -204,7 +204,7 @@ subroutine set_value(ng,nag,ns,flag)
       ncompt=0
 ! *** iproc=0: in proc, iproc=1: tree walk for particles in the other node ***
       iproc=0 
-      maxntw=MAXNODE
+      maxntw=ng*3+nprocs*MAXNODESEND
 
    70 if(np_gtr(0).eq.0) then
         goto 99

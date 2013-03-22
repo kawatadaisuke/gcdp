@@ -825,4 +825,41 @@ end subroutine
 ! end ifdef MULTI_LEV
 #endif
 
+#ifdef GAS
+! reallocate gtree
+subroutine allocate_gtree(ntr)
+      use gcdp_gtree
+
+      implicit none
+      integer,intent(in) :: ntr
+
+      if(allocated(np_gtr)) then
+        deallocate(np_gtr)
+        deallocate(pn_gtr)
+        deallocate(l_gtr)
+        deallocate(hm_gtr)
+        deallocate(cx_gtr)
+        deallocate(cy_gtr)
+        deallocate(cz_gtr)
+        deallocate(daughter_gtr)
+        deallocate(next_gtr)
+        deallocate(proc_gtr)
+      endif
+
+      allocate(np_gtr(0:ntr))
+      allocate(pn_gtr(0:ntr))
+      allocate(l_gtr(0:ntr))
+      allocate(hm_gtr(0:ntr))
+      allocate(cx_gtr(0:ntr))
+      allocate(cy_gtr(0:ntr))
+      allocate(cz_gtr(0:ntr))
+      allocate(daughter_gtr(0:ntr))
+      allocate(next_gtr(0:ntr))
+      allocate(proc_gtr(0:ntr))
+
+end subroutine
+
+! end ifdef GAS
+#endif
+
 

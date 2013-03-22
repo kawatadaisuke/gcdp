@@ -27,6 +27,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       integer,intent(in) :: ng,nag,ns,nas,ndm,flags   
       integer i,ip,level,is,np
       integer nval,isend,npj,srank,rrank,nags,irecv
+      integer maxntw
 ! * Number of Notfinished particle, temp *      
       integer nlist,tnlist
 ! * Node searching for each Particle *      
@@ -86,6 +87,13 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! *** initialization ***      
       nags=nag+nas
       np=ng+ns
+
+! maximum number of tree walk
+      if(np.gt.ndm) then
+        maxntw=np*3+nprocs*MAXNODESEND
+      else  
+        maxntw=ndm*3+nprocs*MAXNODESEND
+      endif
 
 !allocate work space for MPI
       allocate(idisp(0:nprocs))
@@ -204,7 +212,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODE) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in treef(): failure in walking tree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=' &
          ,myrank,iproc,idivcom,ndivcom
@@ -646,7 +654,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODEDM) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in treef(): failure in walking dmtree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=',myrank,iproc,idivcom,ndivcom
         write(fileo,'(a7,i3.3)') 'errtfdt',myrank
@@ -1086,7 +1094,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODELDM) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in treef(): failure in walking ldmtree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=',myrank,iproc,idivcom,ndivcom
         write(fileo,'(a8,i3.3)') 'errtfldt',myrank

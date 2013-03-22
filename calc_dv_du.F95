@@ -37,6 +37,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       integer nd
       integer npj,srank,rrank,ip,nval,nival,isend,irecv,isend0
       integer nsn,irecv1
+      integer maxntw
 ! number of particles in a list
       integer nlist,tnlist,nbp
 ! list for active and their neighbour paritcles

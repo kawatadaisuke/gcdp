@@ -13,9 +13,6 @@ module gcdp_const
       integer,parameter :: NCPU=256
 ! maximum number of node to be sent
       integer,parameter :: MAXNODESEND=70
-! number of extranode
-      integer,parameter :: MNEXND=NCPU*MAXNODESEND
-! Definition Max Number
 
 ! *****   for baryon particles  *****
 ! Max Number of Particle
@@ -27,35 +24,12 @@ module gcdp_const
 ! specific heat
       double precision,parameter :: GAM=5.0d0/3.0d0
 
-! *****   For Tree   *****
-! Max Number of node in tree
-      integer,parameter :: MAXNODE=MNB*3+MAXNODESEND*NCPU
-
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
 #ifdef DM
       integer,parameter :: MNDM=40000
 #else
       integer,parameter :: MNDM=10
-#endif
-
-! *** For Tree of high lesolution DM particles***
-! Max Number of node in tree
-      integer,parameter :: MAXNODEDM=MNDM*3+MAXNODESEND*NCPU
-
-! *** For Tree of low resolution DM particles ***
-! Max Number of node in tree
-#ifdef MULTI_LEV
-      integer,parameter :: MAXNODELDM=MAXNODEDM
-#endif
-
-! *** maximum particle and node data ***
-#ifdef DM
-      integer,parameter :: MN=MNDM
-      integer,parameter :: MNNODE=MAXNODEDM
-#else
-      integer,parameter :: MN=MNB
-      integer,parameter :: MNNODE=MAXNODE
 #endif
 
 ! *** maximum number of points to set up Mext(<r) ***
@@ -286,19 +260,6 @@ module gcdp_const
 !*** For Parallel ***
 ! *** Peano-Hilbert curve ***
       integer*8,parameter :: NDPH=8
-! *** maximum number of variables to store tdvr ***
-! *** maximum list entry for communication
-#ifdef GAS
-      integer,parameter :: MNVALP=22*MN
-      integer,parameter :: MNIVALP=4*MN
-#else
-#ifdef QPTREEF
-      integer,parameter :: MNVALP=18*MNDM
-#else
-      integer,parameter :: MNVALP=12*MNDM
-#endif
-      integer,parameter :: MNIVALP=4*MNDM
-#endif
 ! *** for parallel metal diffusion 
 #ifdef METALDIFF
 ! *** factor for metal diffusion coefficient Grief et al. = 2, but seems too big

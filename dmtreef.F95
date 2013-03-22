@@ -29,7 +29,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       include 'mpif.h'
 
       integer,intent(in) :: ndm,nadm,np,flags
-      integer i,level,ip,is
+      integer i,level,ip,is,maxntw
       integer nval,isend,npj,srank,rrank,irecv
 ! * Number of Notfinished particle, temp *      
       integer nlist,tnlist
@@ -86,6 +86,13 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 ! ***** Initialization *****
       theta2 = THETA*THETA
       nval=11
+
+! maximum number of tree walk
+      if(np.gt.ndm) then
+        maxntw=np*3+nprocs*MAXNODESEND
+      else  
+        maxntw=ndm*3+nprocs*MAXNODESEND
+      endif
 
 !allocate work space for MPI
       allocate(idisp(0:nprocs))
@@ -190,7 +197,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODEDM) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in dmtreef(): failure in walking tree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=' &
          ,myrank,iproc,idivcom,ndivcom
@@ -638,7 +645,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODEDM) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in dmtreef(): failure in walking dmtree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=',myrank,iproc,idivcom,ndivcom
         write(fileo,'(a8,i3.3)') 'errdtfdt',myrank
@@ -1075,7 +1082,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         goto 93
       endif
       level = level+1
-      if(level.gt.MAXNODELDM) then
+      if(level.gt.maxntw) then
         write(6,*) ' Error in dmtreef(): failure in walking ldmtree'
         write(6,*) 'myrank,iproc.idivcom,ndivcom=',myrank,iproc,idivcom,ndivcom
         write(fileo,'(a9,i3.3)') 'errdtfldt',myrank

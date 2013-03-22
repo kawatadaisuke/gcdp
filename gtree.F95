@@ -23,7 +23,7 @@ subroutine gtreebuild(ng,ns)
       integer,intent(in) :: ng,ns
       integer i,j,pn,nd,pnd,level,npn,np,ierr
 ! * for finish tree (tr) *
-      integer numgtr
+      integer numgtr,maxntr
 ! * for not-finished particle (nfp) *
 ! * number of not-finished particle *
       integer numnfp
@@ -65,10 +65,16 @@ subroutine gtreebuild(ng,ns)
 ! *** Make root ***
       np=ng+ns
 
+! an expected maximum number of tree
+      maxntr=ng*3+nprocs*MAXNODESEND
+
+! allocate memory for tree
+      call allocate_gtree(maxntr)
+
 ! allocate list for keeping the top node id for each level
-      allocate(list(0:MNNODE))
-      allocate(flag_pc(0:MNNODE))
-      allocate(pare_tr(0:MNNODE))
+      allocate(list(0:maxntr))
+      allocate(flag_pc(0:maxntr))
+      allocate(pare_tr(0:maxntr))
 
 ! allocate the arrays for _nfp
       allocate(pn_nfp(0:np))
@@ -237,7 +243,7 @@ subroutine gtreebuild(ng,ns)
         np_sc(nd_nfp(i))=np_sc(nd_nfp(i))+1
         s_sc(nd_nfp(i))=snfp(i)
       enddo
-      if(numgtr.gt.MAXNODE-numnfp) then
+      if(numgtr.gt.maxntr-numnfp) then
         write(6,*) ' Error in gbuildtree():Node is overflow!'
         write(6,*) ' This level is ',level,'numnfp=',numnfp
         write(6,*) ' rank=',myrank,' ng=',ng
@@ -577,7 +583,7 @@ subroutine gtreebuild(ng,ns)
 !        write(6,*) ' npjr in gtree=',npjr(ip),myrank
         enddo
 
-        allocate(nd0(0:MNNODE))
+        allocate(nd0(0:maxntr))
 
 ! *** get number of particles ***
         nvali=4
@@ -680,7 +686,7 @@ subroutine gtreebuild(ng,ns)
       endif
 
 ! *** set common 
-      if(numgtr.gt.MAXNODE) then
+      if(numgtr.gt.maxntr) then
         write(6,*) &
          ' Error in gbuildtree():Node is overflow after combined!'
         write(6,*) ' rank=',myrank,' ng=',ng,'numgtr=',numgtr

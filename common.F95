@@ -298,22 +298,20 @@ module gcdp_gtree
 ! * max node id sent to the other proc 
       integer nodese_gtr,nodess_gtr
 ! * number of contained particle *       
-      integer np_gtr(0:MAXNODE-1)
+      integer,allocatable :: np_gtr(:)
 ! * name of Particle *            
-      integer pn_gtr(0:MAXNODE-1)
+      integer,allocatable :: pn_gtr(:)
 ! * length of side *      
-      double precision l_gtr(0:MAXNODE-1),hm_gtr(0:MAXNODE-1)
-      double precision cx_gtr(0:MAXNODE-1),cy_gtr(0:MAXNODE-1) &
-       ,cz_gtr(0:MAXNODE-1)
+      double precision,allocatable :: l_gtr(:),hm_gtr(:)
+      double precision,allocatable :: cx_gtr(:),cy_gtr(:),cz_gtr(:)
 ! * first child node *      
-      integer daughter_gtr(0:MAXNODE-1)
+      integer,allocatable :: daughter_gtr(:)
 ! * next node *      
-      integer next_gtr(0:MAXNODE-1)
+      integer,allocatable :: next_gtr(:)
 ! *** proc id ***
-      integer proc_gtr(0:MAXNODE-1)
+      integer,allocatable :: proc_gtr(:)
 end module gcdp_gtree
 #endif
-
 
 #ifdef MEXT
 module mext

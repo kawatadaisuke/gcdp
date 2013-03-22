@@ -136,7 +136,7 @@ subroutine set_valuedm(ndm,nadm,flag)
       endif
 
 ! * Initialization *
-      maxntw=MAXNODEDM
+      maxntw=ndm*3+nprocs*MAXNODESEND
 ! *** maximum iteration to switch to bi-section ***
       mnitb = 10
 ! *** maximum iteration ***
