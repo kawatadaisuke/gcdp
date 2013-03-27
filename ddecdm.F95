@@ -127,7 +127,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         l_sc = 0.5d0*l_sc
 ! *** check for the level ***
         if(level.gt.ndmt.and.ndmt.gt.0) then
-          write(6,*) ' Error at ddecdm(): too many tree level is required'
+          write(6,*) ' Error in ddecdm(): too many tree level is required'
           write(6,*) ' myrank,ndm,it=',myrank,ndm,it
           write(6,*) ' level,ndmt=',level,ndmt
           stop
@@ -209,8 +209,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** ordering with indexxl ***
         npnord = idmr(1)-idmr(0)+1
 
-        allocate(phkey1(1:npnord))
-        allocate(ord1(1:npnord))
+        allocate(phkey1(1:npnord+1))
+        allocate(ord1(1:npnord+1))
   
         nin=0
         do i=idmr(0),idmr(1)
@@ -277,8 +277,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
             enddo
           endif
 
-          allocate(tivs(idmrjr(0):idmrjr(1)))
-          allocate(phkeys(idmrjr(0):idmrjr(1)))
+          allocate(tivs(idmrjr(0):idmrjr(1)+1))
+          allocate(phkeys(idmrjr(0):idmrjr(1)+1))
 
 ! *** Message Passing ***
           do i=idmrjr(0),idmrjr(1)
@@ -289,20 +289,20 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           deallocate(tivr)
           deallocate(phkeyr)
 
-          idmrjs(0)=idmrjr(0)
-          idmrjs(1)=idmrjr(1)
+          if(j.ne.nprocs-1) then
+
+            idmrjs(0)=idmrjr(0)
+            idmrjs(1)=idmrjr(1)
 
 !          write(6,*) ' myrank,idmrjs=',myrank,idmrjs(0),idmrjs(1)
 ! *** range of the key and order ***
 ! *** cannot use MPI_GET_COUNT ***
-          call MPI_ISEND(idmrjs,2,MPI_INTEGER,srank(0),1 &
-           ,MPI_COMM_WORLD,ireqs(0),ierr)
-          call MPI_IRECV(idmrjr,2,MPI_INTEGER,rrank(0),1 &
-           ,MPI_COMM_WORLD,ireqr(0),ierr)
-          call MPI_WAIT(ireqs(0),istatus,ierr)
-          call MPI_WAIT(ireqr(0),istatusr,ierr)
-
-          if(j.ne.nprocs-1) then
+            call MPI_ISEND(idmrjs,2,MPI_INTEGER,srank(0),1 &
+             ,MPI_COMM_WORLD,ireqs(0),ierr)
+            call MPI_IRECV(idmrjr,2,MPI_INTEGER,rrank(0),1 &
+             ,MPI_COMM_WORLD,ireqr(0),ierr)
+            call MPI_WAIT(ireqs(0),istatus,ierr)
+            call MPI_WAIT(ireqr(0),istatusr,ierr)
 
             allocate(tivr(idmrjr(0):idmrjr(1)+1))
             allocate(phkeyr(idmrjr(0):idmrjr(1)+1))
@@ -386,6 +386,27 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         nprp(ip) = 0
       enddo
 
+      if(ndm.ne.na) then
+        write(6,*) ' Error in ddecdm(): npnord not equal ndm'
+        write(6,*) '  myrank,ndm,npnord=',myrank,ndm,na
+        write(6,*) ' ndm1t,ndmt-ndm1t,ndmt=',SI_ndm1t,ndmt-SI_ndm1t,ndmt
+        write(fileo,'(a9,i6.6)') 'errddecdm',myrank
+        open(60,file=fileo,status='unknown')
+        do i=0,SI_ndm1-1
+          write(60,'(3(1pE13.5),2I10)') x_dm(i),y_dm(i),z_dm(i) &
+           ,ord(pnord(i,0)),pnord(i,0)
+        enddo
+        close(60)
+        write(fileo,'(a10,i6.6)') 'errddecdm1',myrank
+        open(60,file=fileo,status='unknown')
+        do i=SI_ndm1,ndm-1
+          write(60,'(3(1pE13.5),2I10)') x_dm(i),y_dm(i),z_dm(i) &
+           ,ord(pnord(i-SI_ndm1,1)),pnord(i-SI_ndm1,1)
+        enddo
+        close(60)        
+        stop
+      endif
+
 ! *** set pnord, jstap, jendp in order of asigned rank ***
       npnord=na 
       do i=0,ndm-1
@@ -393,13 +414,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo 
 
       deallocate(talist)
-
-      if(ndm.ne.na) then
-        write(6,*) ' Error in ddecdm(): npnord not equal ndm'
-        write(6,*) '  myrank,ndm,npnord=',myrank,ndm,na
-        write(6,*) ' ndm1t,ndmt-ndm1t,ndmt=',SI_ndm1,ndmt-SI_ndm1t,ndmt
-        stop
-      endif
 
 ! *** start data transfer ***
 ! get number of particles -> nprp and np

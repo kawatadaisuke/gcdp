@@ -221,8 +221,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
 #ifdef NUMREC
 
-      allocate(phkey1(1:np))
-      allocate(ord1(1:np))
+      allocate(phkey1(1:np+1))
+      allocate(ord1(1:np+1))
 
       do i=0,np-1
         phkey1(i+1)=phkey(i)

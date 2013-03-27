@@ -158,8 +158,8 @@
 ! #undef DM
 ! #define SIM2D
 ! *** B85 test adding Fext in calc_dv_du.F ***
-#define B85TEST
-#define ADTESTSIM
+! #define B85TEST
+! #define ADTESTSIM
 ! #undef GEPSLIM_G
 ! #undef GEPSLIM_VH
 ! #undef FIXEDDMEPS
