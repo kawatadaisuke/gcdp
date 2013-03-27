@@ -124,7 +124,8 @@
 ! #define PINI
 ! *** no UVB heating  (assume lognh=0.0)
 ! #define NOUVB
-
+!
+!
 ! *** isolated galaxy
 ! #define MAXR
 ! #define MEXT
@@ -350,3 +351,28 @@
 
 #define IMSL
 #undef IMSL
+
+! ***** MHD option *****
+! *** MHD turn on ***
+#define MHD
+!#undef MHD
+!
+#ifdef MHD
+!
+! *** Borve divB corrector ***
+#define DIVBCOR
+! #undef DIVBCOR
+!
+! *** Time Dependant Dissipation
+#define TIMEDIS
+! #undef TIMEDIS
+!
+! *** Balsara switch off
+#define BALSWCHOFF
+! #undef BALSWCHOFF
+!
+! *** Battery Generation
+! #define BBAT
+! #undef BBAT
+
+#endif
