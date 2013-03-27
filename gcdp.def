@@ -375,4 +375,11 @@
 ! #define BBAT
 ! #undef BBAT
 
+#else
+
+#undef DIVBCOR
+#undef TIMEDIS
+#undef BALSWCHOFF
+#undef BBAT
+
 #endif
