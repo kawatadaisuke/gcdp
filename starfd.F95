@@ -54,6 +54,7 @@ subroutine starfd(ng,ns,nag,nas,nagravg)
       newns=0
       newnas=0
 ! *** should not initialise flagrfd_p, because it's setted in calc_dv_du ***
+
 ! allocation for feedback values
       allocate(tmej_sn(0:np))
       allocate(tnsn_sn(0:np))
@@ -93,8 +94,6 @@ subroutine starfd(ng,ns,nag,nas,nagravg)
             flagc_p(pn)=-1
           endif
           flagrfd_p(pn)=0
-! keep flagfd_p positive, but updated in main.F
-!          flagfd_p(pn)=-flagfd_p(pn)
 ! *** for time ***
           dt_p(pn)=TM_lt+TM_dt-lt_p(pn)
           dtg_p(pn)=dt_p(pn)

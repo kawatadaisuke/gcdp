@@ -21,8 +21,9 @@ subroutine starf(ng,ns,nag,nas,nagravg)
       integer,intent(inout) :: ng,ns,nag,nas,nagravg
       integer i,j,pn,ifd,np,ierr
 ! * for criterion *
-      double precision nhp,temp,tdyn,tdynp(0:MNB-1),tcp(0:MNB-1)
-      double precision alpvir
+      double precision nhp,temp,tdyn
+      double precision peff
+!      double precision alpvir
 ! * for star formation *
 ! * for making star particle *
       integer na,nna,dns,npsnia,nagrav
@@ -42,10 +43,6 @@ subroutine starf(ng,ns,nag,nas,nagravg)
 
 ! ***   Calculate basic Value   ***
 ! *** Initialization ***
-      dns=0
-      nagrav=0
-      na=0
-      nna=0
       np=ng+ns
 
 ! *** gas->star ***
@@ -55,6 +52,8 @@ subroutine starf(ng,ns,nag,nas,nagravg)
       allocate(list(0:ng))
       allocate(talist(0:ng))
       allocate(nalist(0:ng))
+
+      nagrav=0
       dns=0
       na=0
       nna=0
@@ -67,9 +66,14 @@ subroutine starf(ng,ns,nag,nas,nagravg)
 ! *** since pv34.6.7 to suppress accidental SF due to v field ~ 0 at low density
           nhp=XHSOL*rho_p(pn)*(DU/MP)
           if(nhp.gt.NSTHLIM) then
+! since 34.6.8 
+            peff=1.2d0*(ULJMFAC**(2.0d0/3.0d0))*G*(h_p(pn)**2) &
+             *(rho_p(pn)**2)/GAM
+            if(p_p(pn).lt.peff) then
+! *** since pv34.6.7 to suppress accidental SF due to v field ~ 0 at low density
 ! calculate alpha_vir using Hopkins13 
-            alpvir=BETASF*(div_v_p(pn)**2+arot_v_p(pn)**2)/(G*rho_p(pn))
-            if(alpvir.lt.ALPHASF) then
+!            alpvir=BETASF*(div_v_p(pn)**2+arot_v_p(pn)**2)/(G*rho_p(pn))
+!            if(alpvir.lt.ALPHASF) then
               tdyn=dsqrt(3.0d0*M_PI/(16.0d0*G*rho_p(pn)))
               p(pn)=(1.0d0-exp(-CSEFF*TM_dt/tdyn))
               if(p(pn).ne.0.0d0.and.p(pn).gt.dble(ran1(idum))) then
