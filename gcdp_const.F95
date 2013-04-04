@@ -289,6 +289,10 @@ module gcdp_const
       double precision,parameter :: ALPB_MIN=0.0d0
       double precision,parameter :: ALPB_MAX=1.0d0
       double precision,parameter :: ALPHA_CONST=1.0e-3
+#ifdef BBAT
+! * Normalize Battery term (e/mp)*
+      double precision,parameter :: MCH=4.1463e21
+#endif
 #endif
 
 end module gcdp_const

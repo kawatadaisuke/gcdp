@@ -176,7 +176,7 @@ program gcdp
         call setyield()
 #endif
 #endif
-#ifdef COOL
+#if defined(COOL) || defined(BBAT)
         call setcool()
         if(1.0d0/SI_a-1.0d0.lt.SI_zeor) then
           SI_flagrad=-NITEOR
@@ -236,6 +236,18 @@ program gcdp
 #endif
 #ifdef DM
          write(6,*) '   ###  including DM  ###'
+#endif
+#ifdef MHD
+         write(6,*) '   ###  including MHD  ###'
+#endif
+#ifdef SGRAV
+         write(6,*) '   ###  include self-gravity  ###'
+#endif
+#ifdef TIMEDIS
+         write(6,*) '   ###  include time dependent resistivity  ###'
+#endif
+#ifdef BBAT
+         write(6,*) '   ###  include Biermann battery source  ###'
 #endif
 #ifdef SGRAV
          write(6,*) '   ###  include self-gravity  ###'
@@ -931,12 +943,19 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_updateu=WTM_updateu+ectime-ntime
 #endif
+
+#ifdef MHD
+! ************************
+!  Update B, predictor
+! ************************
+      call updatevb(ng)
+#endif
+
 ! ************************
 !  Calculate (du/dt)n+1 
 ! ************************
       flagv =  1
       flagu = 2
-
 
 !      write(6,*) ' calcdvdu 1 start',myrank
 !      call system('rm *calvu*')
@@ -971,6 +990,14 @@ program gcdp
           flagrfd_p(list_ap(i))=0
         enddo
 #endif
+#endif
+
+!***************************
+! update B (with corrector)
+!***************************
+#ifdef MHD
+! update B for active particles
+      call updatebn(nag)
 #endif
 
 ! ************************

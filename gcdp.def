@@ -359,6 +359,10 @@
 !
 #ifdef MHD
 !
+! *** Balsara switch off ***
+#define BALSWCHOFF
+! #undef BALSWCHOFF
+!
 ! *** Borve divB corrector ***
 #define DIVBCOR
 ! #undef DIVBCOR
@@ -372,11 +376,12 @@
 ! #undef BALSWCHOFF
 !
 ! *** Battery Generation
-! #define BBAT
+#define BBAT
 ! #undef BBAT
 
 #else
 
+#undef BALSWCHOFF
 #undef DIVBCOR
 #undef TIMEDIS
 #undef BALSWCHOFF
