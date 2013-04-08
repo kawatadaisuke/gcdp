@@ -496,7 +496,7 @@ end subroutine
 subroutine updatealpvu(ng)
       use gcdp_const
       use gcdp_baryon
-#ifdef MHD
+#if defined(MHD) && defined(TIMEDIS)
       use gcdp_mhd
 #endif
       implicit none
@@ -504,7 +504,7 @@ subroutine updatealpvu(ng)
       integer,intent(in) :: ng
       double precision tau,sav,dalpv_tau,dalpu_tau,sau
       integer i,pn
-#ifdef MHD
+#if defined(MHD) && defined(TIMEDIS)
       double precision dalpb_tau,sab
 #endif
 
