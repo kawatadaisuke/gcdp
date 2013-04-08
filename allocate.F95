@@ -161,7 +161,7 @@ subroutine reallocate_baryon_int(np)
       allocate(flagrfd_p(0:np))
 #endif
 
-end subroutine
+end subroutine reallocate_baryon_int
 
 
 ! reallocate first set of double precision baryon variables
@@ -862,4 +862,74 @@ end subroutine
 ! end ifdef GAS
 #endif
 
+#ifdef MHD
+subroutine allocate_mhd(np)
+      use gcdp_mhd
+      implicit none
+      integer,intent(in) :: np
+
+      if(allocated(bx_p)) then
+        deallocate(bx_p)
+        deallocate(by_p)
+        deallocate(bz_p)
+        deallocate(pbx_p)
+        deallocate(pby_p)
+        deallocate(pbz_p)
+        deallocate(dbx_p)
+        deallocate(dby_p)
+        deallocate(dbz_p)
+        deallocate(pdbx_p)
+        deallocate(pdby_p)
+        deallocate(pdbz_p)
+        deallocate(divb_p)
+        deallocate(arotb_p)
+        deallocate(rotbx_p)
+        deallocate(rotby_p)
+        deallocate(rotbz_p)
+        deallocate(alpb_p)
+        deallocate(dbdiss_p)
+        deallocate(dudissb_p)
+        deallocate(valfi_p)
+        deallocate(pb_p)
+        deallocate(divberr_p)
+#ifdef BBAT
+        deallocate(chi_p)
+        deallocate(lognh_p)
+        deallocate(logne_p)
+#endif
+      endif
+
+      allocate(bx_p(0:np))
+      allocate(by_p(0:np))
+      allocate(bz_p(0:np))
+      allocate(pbx_p(0:np))
+      allocate(pby_p(0:np))
+      allocate(pbz_p(0:np))
+      allocate(dbx_p(0:np))
+      allocate(dby_p(0:np))
+      allocate(dbz_p(0:np))
+      allocate(pdbx_p(0:np))
+      allocate(pdby_p(0:np))
+      allocate(pdbz_p(0:np))
+      allocate(divb_p(0:np))
+      allocate(arotb_p(0:np))
+      allocate(rotbx_p(0:np))
+      allocate(rotby_p(0:np))
+      allocate(rotbz_p(0:np))
+      allocate(alpb_p(0:np))
+      allocate(dbdiss_p(0:np))
+      allocate(dudissb_p(0:np))
+      allocate(valfi_p(0:np))
+      allocate(pb_p(0:np))
+      allocate(divberr_p(0:np))
+#ifdef BBAT
+      allocate(chi_p(0:np))
+      allocate(lognh_p(0:np))
+      allocate(logne_p(0:np))
+#endif
+
+end subroutine
+
+
+#endif
 

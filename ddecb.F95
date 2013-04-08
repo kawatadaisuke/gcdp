@@ -1000,7 +1000,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       enddo
 
 ! reallocate metal0 values
-      call reallocate_mhd(np)
+      call allocate_mhd(np)
 
       npj=0
       np=0

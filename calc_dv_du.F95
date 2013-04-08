@@ -2448,7 +2448,14 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         deallocate(rotbzp)
 
 #ifdef BBAT
-        call setchi(ng,listb,zn)
+
+! set listab
+        do i=0,nag-1
+          listb=list_ap(i)
+        enddo
+
+! only for active gas
+        call setchi(nag,listb,zn)
 
         do i=0,nag-1
            pni=list_ap(i)
@@ -2497,6 +2504,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           enddo
 
           zn = 1.0d0/SI_a-1.0d0
+
 ! reallocate to nlist length list from nblist(0:nag-1)
           allocate(list(0:nlist))
           do i=0,nlist-1
@@ -2519,6 +2527,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           deallocate(ram)
         endif
 #endif
+
       endif
 ! *** set u,p,cs,as for new feedback particles ***
 #if defined(SF_EFD) || defined(SF_ZFD)
