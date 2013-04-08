@@ -4,7 +4,7 @@
 !  03 Feb. 2013   written by D. Kawata
 ! *********************************************
 
-#ifdef COOL
+#if defined(COOL) || defined(BBAT)
 subroutine  setcool()
       use gcdp_const
       use gcdp_cool
@@ -26,7 +26,7 @@ subroutine  setcool()
       allocate(tivr(0:3))
 
       if(myrank.eq.0) then
-        open(50,file='./cool/setcool.dat',status='old')
+        open(50,file='./cool12feb/setcool.dat',status='old')
         read(50,'(I6)') nz_crtb
         read(50,150) nnh_crtb,lnh10,dnh10
         read(50,150) nmet_crtb,lmet10,dmet10
@@ -35,7 +35,7 @@ subroutine  setcool()
   150   format(3I6)
         close(50)
 
-        open(51,file='./cool/setcoolzred.dat',status='old')
+        open(51,file='./cool12feb/setcoolzred.dat',status='old')
         do iz=0,nz_crtb-1
           read(51,*) z100
           z_crtb(iz)=dble(z100)/100.0d0
@@ -58,15 +58,16 @@ subroutine  setcool()
               endif
 ! *** set filename ***
               write(filen,'(a13,a5,a5,a5,a4)') &
-               './cool/chrate',czred,cmet,cnh,'.dat'
+               './cool12feb/chrate',czred,cmet,cnh,'.dat'
               open(50,file=filen,status='old')
               do i=1,4
                 read(50,*)
               enddo
               do i=0,nt_crtb-1
                 read(50,151) t_crtb(i),cr_crtb(i,imet,inh,iz) &
-                 ,hr_crtb(i,imet,inh,iz),myu_crtb(i,imet,inh,iz)
-  151           format(f5.3,f8.3,f8.3,f6.3) 
+                 ,hr_crtb(i,imet,inh,iz),myu_crtb(i,imet,inh,iz) &
+                 ,ne_crtb(i,imet,inh,iz)
+  151           format(f5.3,f8.3,f8.3,f6.3,f8.3) 
               enddo
               close(50)
             enddo
@@ -244,6 +245,35 @@ subroutine  setcool()
             do imet=0,nmet_crtb-1
               do i=0,nt_crtb-1
                 myu_crtb(i,imet,inh,iz)=tdvr(nc)
+                nc=nc+1
+              enddo
+            enddo
+          enddo
+        enddo
+      endif
+
+! *** send ne ***
+      if(myrank.eq.0) then
+        nc=0
+        do iz=0,nz_crtb-1
+          do inh=0,nnh_crtb-1
+            do imet=0,nmet_crtb-1
+              do i=0,nt_crtb-1
+                tdvr(nc)=ne_crtb(i,imet,inh,iz)
+                nc=nc+1
+              enddo
+            enddo
+          enddo
+        enddo
+      endif
+      call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      if(myrank.ne.0) then
+        nc=0
+        do iz=0,nz_crtb-1
+          do inh=0,nnh_crtb-1
+            do imet=0,nmet_crtb-1
+              do i=0,nt_crtb-1
+                ne_crtb(i,imet,inh,iz)=tdvr(nc)
                 nc=nc+1
               enddo
             enddo
