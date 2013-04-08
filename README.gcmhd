@@ -1,0 +1,13 @@
+
+
+setcool.F
+ read cool12feb/ to read ne_crtb
+
+stime.F 
+ no need to change from hydro version for BBAT
+
+calc_dv_du.F
+
+#eifdef BALSWCHOFF
+->
+#elifdef BALSWCHOFF
