@@ -410,6 +410,10 @@ module gcdp_system
 #ifdef BCX_FIX
       integer BCX_ndx
       double precision BCX_rhox(0:1),BCX_px(0:1),BCX_vx(0:1)
+#ifdef MHD
+      double precision BCX_bx(0:1),BCX_by(0:1),BCX_bz(0:1)
+      double precision BCX_vy(0:1),BCX_vz(0:1)
+#endif
 #endif
 
 ! *** for counting walltime ***
