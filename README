@@ -11,6 +11,9 @@ term
 
 ### update log ###
 
+matching with pv34.6.10
+- use NSTHLIM and p<peffp for star formation criteria
+
 matching with pv34.6.7
 
 - Hopkins et al. SF criteria + NSTHLIM

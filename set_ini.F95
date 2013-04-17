@@ -19,6 +19,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DM
       use gcdp_dm
 #endif
+#ifdef MHD
+      use gcdp_mhd
+#endif
       use gcdp_system
      
       implicit none
@@ -211,12 +214,23 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** dx (Mpc, Comoving), zstart,omegam,lambda ***
       read(51) dxi(il),SI_a,SI_omg0,SI_lam0,SI_h0
       dxi(il) = dxi(il)*10.0d0
+
+#ifdef MHD
+      open(57,file='ini/gas-mhd.dat',status='old',form='unformatted')
+      if(myrank.eq.0) then
+         write(6,*) 'reading ini/gas-mhd.dat'
+      endif
+#endif
+
 ! *** read the data ***
       call para_range(0,npt-1,nprocs,myrank,jsta,jend)
 
       allocate(adv(0:jend-jsta+1))
       np=jend-jsta+1
       call allocate_baryon_all(np)
+#ifdef MHD
+      call allocate_mhd(np)
+#endif
       np=0
 
 ! *** Read and  Set Position ***
@@ -235,13 +249,36 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           flagrfd_p(np)=0
           ts_p(np)=0.0d0
 #endif
+
+#ifdef MHD
+          read(57) bx_p(np),by_p(np),bz_p(np)
+          pbx_p(np)=bx_p(np)
+          pby_p(np)=by_p(np)
+          pbz_p(np)=bz_p(np)
+          dbx_p(np)=0.0d0
+          dby_p(np)=0.0d0
+          dbz_p(np)=0.0d0
+          pdbx_p(np)=0.0d0
+          pdby_p(np)=0.0d0
+          pdbz_p(np)=0.0d0
+          divb_p(np)=0.0d0
+          arotb_p(np)=0.0d0
+          alpb_p(np)=ALPB_MIN
+#endif
+
           id_p(np)=i
           np = np+1
         else
           read(51)
+#ifdef MHD
+          read(57)
+#endif
         endif
       enddo
       close(51)
+#ifdef MHD   
+      close(57)
+#endif
 !        write(6,*) myrank,' rank ',il,' level np = ',np
 #endif
       SI_h0 = SI_h0/100.0d0
@@ -680,8 +717,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         endif
 #ifdef BCX_FIX
         read(51) BCX_ndx
+#ifdef MHD
+        read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0),BCX_vy(0),BCX_vz(0)
+        read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1),BCX_vy(1),BCX_vz(1)
+        read(51) BCX_bx(0),BCX_by(0),BCX_bz(0)
+        read(51) BCX_bx(1),BCX_by(1),BCX_bz(1)
+!        BCX_ndx=5
+#else
         read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0)
         read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1)
+#endif
         if(myrank.eq.0) then
           write(6,*) ' boundary is fixed from the edge+-dx=',BCX_ndx
         endif
@@ -749,6 +794,45 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         enddo
       endif
 #endif
+
+#ifdef MHD
+
+      call allocate_mhd(np)
+
+! *** reading B data ***
+      open(51,file='ini/gas-mhd.dat',status='old',form='unformatted')
+      if(myrank.eq.0) then
+         write(6,*) 'reading ini/gas-mhd.dat'
+      endif
+      ngi=0
+      do i=0,ngt-1
+         if(i.ge.jsta.and.i.le.jend) then
+            read(51) bx_p(ngi),by_p(ngi),bz_p(ngi)
+            pbx_p(ngi)=bx_p(ngi)
+            pby_p(ngi)=by_p(ngi)
+            pbz_p(ngi)=bz_p(ngi)
+            dbx_p(ngi)=0.0d0
+            dby_p(ngi)=0.0d0
+            dbz_p(ngi)=0.0d0
+            pdbx_p(ngi)=0.0d0
+            pdby_p(ngi)=0.0d0
+            pdbz_p(ngi)=0.0d0
+            divb_p(ngi)=0.0d0
+            arotb_p(ngi)=0.0d0
+            alpb_p(ngi)=ALPB_MIN
+            ngi=ngi+1
+         else
+            read(51)
+         endif
+      enddo
+      close(51)
+      if(ngi.ne.ng) then
+         write(6,*) 'Error in reading gad-mhd.dat at rank',myrank
+         write(6,*) 'ng in gat.dat gas-mhd.dat=',ng,ngi
+         stop
+      endif
+#endif
+
 ! ***** end of reading files *****
 ! *** the other properties **
       do i=0,ng-1
@@ -1439,10 +1523,21 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #ifdef BCX_FIX
         write(60,'(a9,I10)') ' BCX_ndx=',BCX_ndx
+#ifdef MHD
+        write(60,'(a25,5(1pE13.5))') 'Left BCX_rho,p,vx,vy,vz=' &
+          ,BCX_rhox(0),BCX_px(0),BCX_vx(0),BCX_vy(0),BCX_vz(0)
+        write(60,'(a13,3(1pE13.5))')'BCX_bx,by,bz=' &
+          ,BCX_bx(0),BCX_by(0),BCX_bz(0)
+        write(60,'(a26,5(1pE13.5))') 'Right BCX_rho,p,vx,vy,vz=' &
+            ,BCX_rhox(1),BCX_px(1),BCX_vx(1),BCX_vy(1),BCX_vz(1)
+        write(60,'(a13,3(1pE13.5))')'BCX_bx,by,bz=' &
+          ,BCX_bx(1),BCX_by(1),BCX_bz(1)
+#else
         write(60,'(a18,3(1pE13.5))') 'Left BCX_rho,p,vx=',BCX_rhox(0) &
          ,BCX_px(0),BCX_vx(0)
         write(60,'(a19,3(1pE13.5))') 'Right BCX_rho,p,vx=' &
          ,BCX_rhox(1),BCX_px(1),BCX_vx(1)
+#endif
 #endif
 #ifdef MAXR
         write(60,'(a9,1pE13.5)') ' MAXRLIM=',MAXRLIM

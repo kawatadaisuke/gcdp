@@ -1,5 +1,15 @@
 
-calc_dv_du.F
+set_ini.F
+ - for reading cosmological simulatoin initial condition, needed to do
+        else
+          read(51)
+#ifdef MHD
+          read(57)
+#endif
+        endif
+      enddo
+ - comment out
+!        BCX_ndx=5
 
 setcool.F
  read cool12feb/ to read ne_crtb
