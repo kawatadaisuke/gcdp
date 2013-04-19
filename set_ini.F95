@@ -722,7 +722,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1),BCX_vy(1),BCX_vz(1)
         read(51) BCX_bx(0),BCX_by(0),BCX_bz(0)
         read(51) BCX_bx(1),BCX_by(1),BCX_bz(1)
-!        BCX_ndx=5
+        BCX_ndx=5
 #else
         read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0)
         read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1)

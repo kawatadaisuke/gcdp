@@ -10,7 +10,7 @@ SUBROUTINE boundary_xfix(np,npt)
       use gcdp_baryon
       use gcdp_system
 #ifdef MHD
-      uese gcdp_mhd
+      use gcdp_mhd
 #endif
 
       integer np,i,nfix,npt

@@ -1083,7 +1083,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! *** artificial viscosity parameter ***
 #ifdef NOAVSWITCH
           alpij=V_ALPHAINI
-#elifdef BALSWCHOFF
+#elif defined(BALSWCHOFF)
           alpij=(tdvr(listb(i)+npj*12)+alpv_p(nblistb(i)))*0.5d0
 #else
           alpij=(tdvr(listb(i)+npj*12)+alpv_p(nblistb(i)))*0.25d0 &
@@ -1180,7 +1180,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         enddo
       endif
 
-      deallocate(rhoij)
       deallocate(dudissv)
       deallocate(dudissu)
 
@@ -1293,6 +1292,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
 #endif
 
+      deallocate(rhoij)
+
 ! * Sum dv/dt for active particle (pressure gradient) *
       if(flagv.eq.0) then
 
@@ -1403,13 +1404,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
         enddo
 
-#ifdef MHD
-        deallocate(mdwip)
-        deallocate(mdwjp)
-        deallocate(b2ip)
-        deallocate(b2jp)
-#endif
-
         do i=0,nbp-1
 ! calculate hvsigdt for time step constraints
 ! Price thesis
@@ -1432,6 +1426,12 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
       endif
 
+#ifdef MHD
+      deallocate(mdwip)
+      deallocate(mdwjp)
+      deallocate(b2ip)
+      deallocate(b2jp)
+#endif
       deallocate(mdwic)
       deallocate(mdwjc)
       deallocate(dvdiss)
@@ -1716,7 +1716,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         npj=ncompi
 
         deallocate(tdmhd)
-        allocate(tdmhd(0:npj*nvalzd))
+        allocate(tdmhd(0:npj*nvalmhd))
 
         do ip=0,nprocs-1
 
