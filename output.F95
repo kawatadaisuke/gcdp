@@ -365,8 +365,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
               write(68,168) xc_p(pn),yc_p(pn),zc_p(pn) &
                ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn),u_p(pn) &
                ,p_p(pn),bx_p(pn),by_p(pn),bz_p(pn),divb_p(pn),arotb_p(pn) &
-               ,alpb_p(pn),valfip,pbp,divberr_p(pn)
-  168         format(19(1pE13.5))
+               ,alpb_p(pn),valfip,pbp,divberr_p(pn) &
+               ,dvx_p(pn),dvy_p(pn),dvz_p(pn),dbx_p(pn),dby_p(pn),dbz_p(pn) &
+               ,pdbx_p(pn),pdby_p(pn),pdbz_p(pn)
+  168          format(28(1pE13.5))
             enddo
             close(68)
 

@@ -993,17 +993,17 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           mdwjc(i)=0.0d0
         endif
         vxij=tdvr(pni+npj*3)-vvnx_p(pn)
-#ifdef SIM1D
-        vyij=0.0d0
-        vzij=0.0d0
-#else
+!#ifdef SIM1D
+!        vyij=0.0d0
+!        vzij=0.0d0
+!#else
         vyij=tdvr(pni+npj*4)-vvny_p(pn)
-#ifdef SIM2D
-        vzij=0.0d0
-#else
+!#ifdef SIM2D
+!        vzij=0.0d0
+!#else
         vzij=tdvr(pni+npj*5)-vvnz_p(pn)
-#endif
-#endif
+!#endif
+!#endif
 ! *** store the data only for particles who have neighbour
 ! *** v*xij/rij
         v_x_r(i)=(xijp(i)*vxij+yijp(i)*vyij+zijp(i)*vzij)/rijp(i)
@@ -2397,13 +2397,13 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             dvz_p(pn)=0.0d0
           endif
 #endif
-#if defined(FIXDVYZ) || defined(SIM1D)
-          dvy_p(pn)=0.0d0
-          dvz_p(pn)=0.0d0
-#endif
-#ifdef SIM2D
-          dvz_p(pn)=0.0d0
-#endif
+!#if defined(FIXDVYZ) || defined(SIM1D)
+!          dvy_p(pn)=0.0d0
+!          dvz_p(pn)=0.0d0
+!#endif
+!#ifdef SIM2D
+!          dvz_p(pn)=0.0d0
+!#endif
         enddo
       endif
 ! *** factor 2 for d2u_p ***

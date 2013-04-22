@@ -57,7 +57,8 @@ subroutine  setcool()
                 write(cmet,'(a2,i3.3)') 'Zm',-met10
               endif
 ! *** set filename ***
-              write(filen,'(a13,a5,a5,a5,a4)') &
+              write(filen,'(a18,a5,a5,a5,a4)') &
+!               12345678901234567890
                './cool12feb/chrate',czred,cmet,cnh,'.dat'
               open(50,file=filen,status='old')
               do i=1,4
