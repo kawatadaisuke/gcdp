@@ -354,7 +354,7 @@
 
 ! ***** MHD option *****
 ! *** MHD turn on ***
-#define MHD
+! #define MHD
 !#undef MHD
 !
 #ifdef MHD

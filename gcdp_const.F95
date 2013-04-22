@@ -24,6 +24,7 @@ module gcdp_const
 #endif
 ! specific heat
       double precision,parameter :: GAM=5.0d0/3.0d0
+!      double precision,parameter :: GAM=2.0d0
 
 ! *** for DM particles ***
 ! Max Number of Total DM Particle

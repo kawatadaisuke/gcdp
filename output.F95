@@ -66,9 +66,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 #ifdef OUT_TEST
 ! *** binary output
-      flagascii = 1
+!      flagascii = 1
 ! *** ascii output
-!      flagascii = 0
+      flagascii = 0
 #else
 ! *** binary output: no other choice ***
       flagascii = 1

@@ -2485,6 +2485,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         deallocate(bbdrhozp)
 
 #endif
+#endif
 
 #ifdef COOL
         if(flagu.eq.0) then
@@ -2658,7 +2659,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 !      close(60)
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !      stop
-#endif
 
 end subroutine
 
