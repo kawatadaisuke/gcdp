@@ -6,7 +6,8 @@
 
 module gcdp_const
       implicit none      
-  double precision,parameter :: M_PI=3.141592653589793238d0
+
+      double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***
       integer,parameter ::  NDSTEPDDEC=10
 ! maximum number of cpus
@@ -23,6 +24,7 @@ module gcdp_const
 #endif
 ! specific heat
       double precision,parameter :: GAM=5.0d0/3.0d0
+!      double precision,parameter :: GAM=2.0d0
 
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
@@ -281,6 +283,17 @@ module gcdp_const
 ! *** time at the end of maximum force and adding force
       double precision,parameter :: TMC_AF=3.0d0/TMUGYR+TG_AF
       double precision,parameter :: TME_AF=TD_AF+TMC_AF
+#endif
+
+#ifdef MHD 
+! *** constsnts for MHD ***
+      double precision,parameter :: ALPB_MIN=0.0d0
+      double precision,parameter :: ALPB_MAX=1.0d0
+      double precision,parameter :: ALPHA_CONST=1.0e-3
+#ifdef BBAT
+! * Normalize Battery term (e/mp)*
+      double precision,parameter :: MCH=4.1463e21
+#endif
 #endif
 
 end module gcdp_const

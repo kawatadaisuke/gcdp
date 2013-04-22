@@ -16,6 +16,9 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #ifdef DM
       use gcdp_dm
 #endif
+#ifdef MHD
+      use gcdp_mhd
+#endif
       use gcdp_system
 
       implicit none
@@ -27,6 +30,9 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       integer ipsta,ipend,ipd
       integer npj
       integer ndbval,ndbhyd,ndbsf,ndbmet,ndbcon,nddmcon,nibcon,nidmcon
+#ifdef MHD
+      integer ndbmhd
+#endif
       integer srank
       character fileo*60
 ! *** for work ***
@@ -307,6 +313,74 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         if(myrank.lt.SI_nof) then
           close(63)
         endif
+
+#ifdef MHD
+! *** file for MHD values ***
+      ndbmhd=9
+
+      if(myrank.lt.SI_nof) then
+        write(fileo,'(a17,i4.4,a4)') 'output/data/pbmhd',myrank,'.dat'
+        open(68,file=fileo,status='unknown',form='unformatted')
+        write(68) npt,ndmt,SI_ndm1t,SI_a,TM_tot
+        write(68) nprocs,SI_nof,ndbmhd
+      endif
+      do iv=0,ndbmhd-1
+        if (iv.eq.0)  then
+          do i=0,npj-1
+            tdvs(i)=bx_p(i)
+          enddo
+        else if (iv.eq.1) then
+          do i=0,npj-1
+            tdvs(i)=by_p(i)
+          enddo
+        else if (iv.eq.2) then
+          do i=0,npj-1
+            tdvs(i)=bz_p(i)
+          enddo
+        else if (iv.eq.3) then
+          do i=0,npj-1
+            tdvs(i)=divb_p(i)
+          enddo
+        else if (iv.eq.4) then
+          do i=0,npj-1
+            tdvs(i)=arotb_p(i)
+          enddo
+        else if (iv.eq.5) then
+          do i=0,npj-1
+            tdvs(i)=alpb_p(i)
+          enddo
+        else if (iv.eq.6) then
+          do i=0,npj-1
+            tdvs(i)=valfi_p(i)
+          enddo
+        else if (iv.eq.7) then
+          do i=0,npj-1
+            tdvs(i)=pb_p(i)
+          enddo
+        else if (iv.eq.8) then
+          do i=0,npj-1
+            tdvs(i)=divberr_p(i)
+          enddo
+        endif
+        if(myrank.lt.SI_nof) then
+          write(68) (tdvs(i),i=0,npj-1)
+          do ip=ipsta,ipend,ipd
+            call MPI_IRECV(tdvr,npjr(ip),MPI_DOUBLE_PRECISION &
+              ,ip,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+            write(68) (tdvr(i),i=0,npjr(ip)-1)
+          enddo
+        else
+          call MPI_ISEND(tdvs,npj,MPI_DOUBLE_PRECISION &
+           ,srank,iv,MPI_COMM_WORLD,ireqs(ip),ierr)
+          call MPI_WAIT(ireqs(ip),istatus,ierr)
+        endif
+      enddo
+      if(myrank.lt.SI_nof) then
+        close(68)
+      endif
+#endif
+
 ! *** file for baryon H,He cooling values ***
 #ifdef STAR
         if(myrank.lt.SI_nof) then

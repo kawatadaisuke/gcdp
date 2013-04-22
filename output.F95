@@ -16,6 +16,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #ifdef DM
       use gcdp_dm
 #endif
+#ifdef MHD  
+      use gcdp_mhd
+#endif
       use gcdp_system
     
       implicit none
@@ -42,6 +45,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       double precision gkmm
       double precision iax,z
       double precision rhobm,dtu,dtdv
+#ifdef MHD
+      integer ndbbat,ndbmhd
+      double precision valfip,pbp
+#endif
 #ifdef OUT_TEST
       integer nval
       double precision ene(0:1),etot(0:1),momt(0:2)
@@ -59,9 +66,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 #ifdef OUT_TEST
 ! *** binary output
-      flagascii = 1
+!      flagascii = 1
 ! *** ascii output
-!      flagascii = 0
+      flagascii = 0
 #else
 ! *** binary output: no other choice ***
       flagascii = 1
@@ -346,6 +353,36 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #endif
 #ifdef GAS
           if(ng.gt.0.or.ns.gt.0) then
+
+#ifdef MHD
+            write(filename,'(a17,i6.6,a1,i4.4)') &
+           './output/data/mhd',step,'n',myrank
+            open(68,file=filename,status='unknown')
+            do i=0,ng-1
+              pn=list_ap(i)
+              valfip=(bx_p(pn)+by_p(pn)+bz_p(pn))/dsqrt(rho_p(pn))
+              pbp=0.5d0*(bx_p(pn)**2+by_p(pn)**2+bz_p(pn)**2)
+              write(68,168) xc_p(pn),yc_p(pn),zc_p(pn) &
+               ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn),u_p(pn) &
+               ,p_p(pn),bx_p(pn),by_p(pn),bz_p(pn),divb_p(pn),arotb_p(pn) &
+               ,alpb_p(pn),valfip,pbp,divberr_p(pn)
+  168         format(19(1pE13.5))
+            enddo
+            close(68)
+
+#ifdef BBAT
+            write(filename,'(a18,i6.6,a1,i4.4)') &
+             './output/data/bbat',step,'n',myrank
+            open(71,file=filename,status='unknown')
+            do i=0,ng-1
+              pn=list_ap(i)
+              write(71,171) chi_p(pn),lognh_p(pn),logne_p(pn)
+  171         format(3(1pE13.5))
+            enddo
+            close(71)
+#endif
+#endif
+
             write(filename,'(a16,i6.6,a1,i4.4)') &
              './output/data/gs',step,'n',myrank
             open(61,file=filename,status='unknown')
@@ -898,10 +935,123 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
             deallocate(tivs)
             deallocate(tivr)
+
+#ifdef MHD
+            ndbmhd=9
+            if (myrank.lt.SI_nof) then
+              write(filename, '(a20,i6.6,a1,i4.4)') &
+                './output/data/bbmhds',step,'n',myrank
+              open(67,file=filename,status='unknown',form='unformatted')
+              write(67) npt,ndmt,SI_ndm1t,SI_a,TM_tot
+              write(67) nprocs,SI_nof,ndbmhd
+            endif
+            do iv=0,ndbmhd-1
+              if (iv.eq.0)  then
+                  do i=0,npj-1
+                     tdvs(i)=bx_p(i)
+                  enddo
+              else if (iv.eq.1) then
+                  do i=0,npj-1
+                     tdvs(i)=by_p(i)
+                  enddo
+              else if (iv.eq.2) then
+                  do i=0,npj-1
+                     tdvs(i)=bz_p(i)
+                  enddo
+              else if (iv.eq.3) then
+                  do i=0,npj-1
+                     tdvs(i)=divb_p(i)
+                  enddo
+              else if (iv.eq.4) then
+                  do i=0,npj-1
+                     tdvs(i)=arotb_p(i)
+                  enddo
+              else if (iv.eq.5) then
+                  do i=0,npj-1
+                     tdvs(i)=alpb_p(i)
+                  enddo
+              else if (iv.eq.6) then
+                  do i=0,npj-1
+                    valfip=(bx_p(pn)+by_p(pn)+bz_p(pn))/dsqrt(rho_p(pn))
+                    tdvs(i)=valfip
+                  enddo
+              else if (iv.eq.7) then
+                  do i=0,npj-1
+                    pbp=0.5d0*(bx_p(pn)**2+by_p(pn)**2+bz_p(pn)**2)
+                    tdvs(i)=pbp
+                  enddo
+              else if (iv.eq.8) then
+                  do i=0,npj-1
+                     tdvs(i)=divberr_p(i)
+                  enddo
+              endif
+              if (myrank.lt.SI_nof) then
+                write(67) (tdvs(i),i=0,npj-1)
+                do ip=ipsta,ipend,ipd
+                  call MPI_IRECV(tdvr,npjr(ip),MPI_DOUBLE_PRECISION &
+                    ,ip,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
+                  call MPI_WAIT(ireqr(ip),istatus,ierr)
+                  write(67) (tdvr(i),i=0,npjr(ip)-1)
+                enddo
+              else
+                call MPI_ISEND(tdvs,npj,MPI_DOUBLE_PRECISION &
+                  ,srank,iv,MPI_COMM_WORLD,ireqs(ip),ierr)
+                call MPI_WAIT(ireqs(ip),istatus,ierr)
+              endif
+            enddo
+            if(myrank.lt.SI_nof) then
+              close(67)
+            endif
+#ifdef BBAT
+            ndbbat=3
+            if (myrank.lt.SI_nof) then
+              write(filename, '(a20,i6.6,a1,i4.4)') &
+               './output/data/bbbats',step,'n',myrank
+              open(72,file=filename,status='unknown',form='unformatted')
+              write(72) npt,ndmt,SI_ndm1t,SI_a,TM_tot
+              write(72) nprocs,SI_nof,ndbmhd
+            endif
+            do iv=0,ndbbat-1
+              if (iv.eq.0)  then
+                  do i=0,npj-1
+                     tdvs(i)=bx_p(i)
+                  enddo
+              else if (iv.eq.1) then
+                  do i=0,npj-1
+                     tdvs(i)=by_p(i)
+                  enddo
+              else if (iv.eq.2) then
+                  do i=0,npj-1
+                     tdvs(i)=bz_p(i)
+                  enddo
+              endif
+              if (myrank.lt.SI_nof) then
+                write(72) (tdvs(i),i=0,npj-1)
+                do ip=ipsta,ipend,ipd
+                   call MPI_IRECV(tdvr,npjr(ip),MPI_DOUBLE_PRECISION &
+                    ,ip,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
+                   call MPI_WAIT(ireqr(ip),istatus,ierr)
+                   write(72) (tdvr(i),i=0,npjr(ip)-1)
+                enddo
+              else
+                call MPI_ISEND(tdvs,npj,MPI_DOUBLE_PRECISION &
+                 ,srank,iv,MPI_COMM_WORLD,ireqs(ip),ierr)
+                 call MPI_WAIT(ireqs(ip),istatus,ierr)
+              endif
+            enddo
+            if(myrank.lt.SI_nof) then
+               close(72)
+            endif
+#endif
+#endif
+
             deallocate(tdvs)
             deallocate(tdvr)
 
+! endif for if(npt.gt.0)
           endif
+
+
 
 ! end for GAS
 #endif

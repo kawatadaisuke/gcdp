@@ -103,6 +103,7 @@ module gcdp_baryon
        ,tmzZ_p(:) 
 #endif
 #endif
+!
 end module gcdp_baryon
 
 
@@ -409,6 +410,10 @@ module gcdp_system
 #ifdef BCX_FIX
       integer BCX_ndx
       double precision BCX_rhox(0:1),BCX_px(0:1),BCX_vx(0:1)
+#ifdef MHD
+      double precision BCX_bx(0:1),BCX_by(0:1),BCX_bz(0:1)
+      double precision BCX_vy(0:1),BCX_vz(0:1)
+#endif
 #endif
 
 ! *** for counting walltime ***
@@ -458,7 +463,7 @@ module gcdp_yields
 end module gcdp_yields
 #endif
 
-#ifdef COOL
+#if defined(COOL) || defined(BBAT)
 module gcdp_cool
       use gcdp_const
       implicit none
@@ -468,7 +473,26 @@ module gcdp_cool
       ,met_crtb(0:MNMET_CRTB),t_crtb(0:MNT_CRTB)
       double precision cr_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB) &
        ,hr_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB) &
-       ,myu_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB)
+       ,myu_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB) &
+       ,ne_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB)
 end module gcdp_cool
 #endif
 
+! ***** MHD modules ***
+
+#ifdef MHD
+module gcdp_mhd
+      implicit none
+      double precision,allocatable :: bx_p(:),by_p(:),bz_p(:)
+      double precision,allocatable :: pbx_p(:),pby_p(:),pbz_p(:)
+      double precision,allocatable :: dbx_p(:),dby_p(:),dbz_p(:) &
+       ,pdbx_p(:),pdby_p(:),pdbz_p(:)
+      double precision,allocatable :: divb_p(:),arotb_p(:)
+      double precision,allocatable :: rotbx_p(:),rotby_p(:),rotbz_p(:)
+      double precision,allocatable :: alpb_p(:),dbdiss_p(:),dudissb_p(:)
+      double precision,allocatable :: valfi_p(:),pb_p(:),divberr_p(:)
+#ifdef BBAT
+      double precision,allocatable :: chi_p(:),lognh_p(:),logne_p(:)
+#endif
+end module gcdp_mhd
+#endif

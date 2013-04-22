@@ -496,11 +496,17 @@ end subroutine
 subroutine updatealpvu(ng)
       use gcdp_const
       use gcdp_baryon
+#if defined(MHD) && defined(TIMEDIS)
+      use gcdp_mhd
+#endif
       implicit none
 
       integer,intent(in) :: ng
       double precision tau,sav,dalpv_tau,dalpu_tau,sau
       integer i,pn
+#if defined(MHD) && defined(TIMEDIS)
+      double precision dalpb_tau,sab
+#endif
 
       do i=0,ng-1
         pn=list_ap(i)
@@ -542,6 +548,22 @@ subroutine updatealpvu(ng)
         if(alpu_p(pn).lt.0.0d0) then
           alpu_p(pn)=0.0d0
         endif
+
+#if defined(MHD) && defined(TIMEDIS)
+        dalpb_tau=-(alpb_p(pn)-ALPB_MIN)/tau
+        sab=arotb_p(pn)/dsqrt(rho_p(pn))
+        if(dabs(divb_p(pn))/dsqrt(rho_p(pn)).gt.sav) then
+           sab=dabs(divb_p(pn))/dsqrt(rho_p(pn))
+        endif
+        alpb_p(pn)=alpb_p(pn)+dt_p(pn)*(dalpb_tau+sab)
+! Check allowed min/max diss
+        if(alpb_p(pn).lt.ALPB_MIN) then
+           alpb_p(pn)=ALPB_MIN
+        else if(alpb_p(pn).gt.ALPB_MAX) then
+           alpb_p(pn)=ALPB_MAX
+        endif
+#endif
+
 #if defined(SF_EFD) || defined(SF_ZFD)
         endif
 #endif
@@ -550,6 +572,49 @@ subroutine updatealpvu(ng)
       return
 end subroutine
 ! endif for GAS
+#endif
+
+#ifdef MHD
+! *** B predictor ***
+subroutine updatevb(ng)
+      use gcdp_baryon
+      use gcdp_mhd
+
+      implicit none
+
+      integer ng,i,pn
+
+      do i=0,ng-1
+         pn=list_ap(i)
+         bx_p(pn)=pbx_p(pn)+dbx_p(pn)*vdt_p(pn)
+         by_p(pn)=pby_p(pn)+dby_p(pn)*vdt_p(pn)
+         bz_p(pn)=pbz_p(pn)+dbz_p(pn)*vdt_p(pn)
+      enddo
+
+      return
+end subroutine
+
+! *** B corrector only for active particles ***
+subroutine updatebn(nag)
+      use gcdp_baryon
+      use gcdp_mhd
+
+      implicit none
+
+      integer nag, i, pn
+
+      do i=0,nag-1
+         pn=list_ap(i)
+         bx_p(pn)=pbx_p(pn)+0.5d0*(dbx_p(pn)+pdbx_p(pn))*dt_p(pn)
+         by_p(pn)=pby_p(pn)+0.5d0*(dby_p(pn)+pdby_p(pn))*dt_p(pn)
+         bz_p(pn)=pbz_p(pn)+0.5d0*(dbz_p(pn)+pdbz_p(pn))*dt_p(pn)
+         pbx_p(pn)=bx_p(pn)
+         pby_p(pn)=by_p(pn)
+         pbz_p(pn)=bz_p(pn)
+      enddo
+
+      return
+end subroutine
 #endif
 
 #ifdef GAS

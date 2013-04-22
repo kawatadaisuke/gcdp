@@ -6,7 +6,7 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        forcont.o para.o dtyields.o setyield.o\
        atfunc.o esolve.o setcool.o \
        ddecb.o ddecdm.o indexxl.o boundary.o\
-       set_valuedm.o\
+       set_valuedm.o set_chi.o\
        setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o allocate.o
 INIOBJ = set_ini.o
 CONTOBJ = cont.o

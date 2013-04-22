@@ -1,0 +1,30 @@
+
+set_ini.F
+ - for reading cosmological simulatoin initial condition, needed to do
+        else
+          read(51)
+#ifdef MHD
+          read(57)
+#endif
+        endif
+      enddo
+ - comment out
+!        BCX_ndx=5
+
+setcool.F
+ read cool12feb/ to read ne_crtb
+
+stime.F 
+ no need to change from hydro version for BBAT
+
+calc_dv_du.F
+
+        call setchi(ng,listb,zn)
+->
+! only for active gas
+        call setchi(nag,listb,zn)
+
+
+#eifdef BALSWCHOFF
+->
+#elifdef BALSWCHOFF
