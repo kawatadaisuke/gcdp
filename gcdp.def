@@ -168,11 +168,11 @@
 ! #define STUB3D
 ! #undef SGRAV
 ! *** 1D Shocktube test
-#define STUB1D
+! #define STUB1D
 ! *** Wind tunnel KHI test and Sedov test
 ! #define WTUN
 ! *** Wind tunnel KHI test 2D
-! #define WTUN2D
+#define WTUN2D
 ! #define FIXEDP
 ! *** 1D Wave test
 ! #define WAVE1D

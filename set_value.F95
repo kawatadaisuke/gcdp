@@ -379,17 +379,17 @@ subroutine set_value(ng,nag,ns,flag)
               tivr(pni)=tivr(pni)+1
 ! *** velocity difference ***
               vxij=tdvr(pni+npj*3)-vvnx_p(pn)
-#ifdef SIM1D
-              vyij=0.0d0
-              vzij=0.0d0
-#else
+!#ifdef SIM1D
+!              vyij=0.0d0
+!              vzij=0.0d0
+!#else
               vyij=tdvr(pni+npj*4)-vvny_p(pn)
-#ifdef SIM2D
-              vzij=0.0d0
-#else
+!#ifdef SIM2D
+!              vzij=0.0d0
+!#else
               vzij=tdvr(pni+npj*5)-vvnz_p(pn)
-#endif
-#endif
+!#endif
+!#endif
 #ifdef METALDIFF
 ! *** velocity dispersion ***
               tdvr(pni+npj*14)=tdvr(pni+npj*14)+(vxij**2+vyij**2+vzij**2)

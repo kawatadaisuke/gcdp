@@ -11,6 +11,9 @@ term
 
 ### update log ###
 
+22/04/2013
+MHD stub1D test requires comment out vyij=vzij=0 and dvy=dvz=0
+
 matching with pv34.6.10
 - use NSTHLIM and p<peffp for star formation criteria
 

@@ -623,6 +623,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! initial allocate memory space
 ! all baryon
       call allocate_baryon_all(np)
+#ifdef MHD
+      call allocate_mhd(np)
+#endif
 
       ng=0
       ns=0
@@ -796,8 +799,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
 #ifdef MHD
-
-      call allocate_mhd(np)
 
 ! *** reading B data ***
       open(51,file='ini/gas-mhd.dat',status='old',form='unformatted')

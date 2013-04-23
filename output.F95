@@ -66,9 +66,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 #ifdef OUT_TEST
 ! *** binary output
-!      flagascii = 1
+      flagascii = 1
 ! *** ascii output
-      flagascii = 0
+!      flagascii = 0
 #else
 ! *** binary output: no other choice ***
       flagascii = 1
@@ -974,12 +974,12 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
                   enddo
               else if (iv.eq.6) then
                   do i=0,npj-1
-                    valfip=(bx_p(pn)+by_p(pn)+bz_p(pn))/dsqrt(rho_p(pn))
+                    valfip=(bx_p(i)+by_p(i)+bz_p(i))/dsqrt(rho_p(i))
                     tdvs(i)=valfip
                   enddo
               else if (iv.eq.7) then
                   do i=0,npj-1
-                    pbp=0.5d0*(bx_p(pn)**2+by_p(pn)**2+bz_p(pn)**2)
+                    pbp=0.5d0*(bx_p(i)**2+by_p(i)**2+bz_p(i)**2)
                     tdvs(i)=pbp
                   enddo
               else if (iv.eq.8) then
