@@ -240,9 +240,6 @@ program gcdp
 #ifdef MHD
          write(6,*) '   ###  including MHD  ###'
 #endif
-#ifdef SGRAV
-         write(6,*) '   ###  include self-gravity  ###'
-#endif
 #ifdef TIMEDIS
          write(6,*) '   ###  include time dependent resistivity  ###'
 #endif

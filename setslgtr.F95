@@ -40,7 +40,7 @@ subroutine setslgtr(nssl,nalist,npb,flag)
 
       if(flag.eq.0) then
 
-        allocate(tdvr(0:nssl))
+        allocate(tdvr(0:npb))
 
         etasl=ETAH
         do i=0,nssl-1
