@@ -18,7 +18,7 @@ module gcdp_const
 ! *****   for baryon particles  *****
 ! Max Number of Particle
 #ifdef GAS
-      integer,parameter :: MNB=50000
+      integer,parameter :: MNB=1000000
 #else
       integer,parameter :: MNB=10
 #endif
@@ -29,7 +29,7 @@ module gcdp_const
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
 #ifdef DM
-      integer,parameter :: MNDM=40000
+      integer,parameter :: MNDM=1000000
 #else
       integer,parameter :: MNDM=10
 #endif

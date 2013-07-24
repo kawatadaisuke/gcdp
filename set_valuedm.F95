@@ -1065,9 +1065,9 @@ subroutine set_valuedm(ndm,nadm,flag)
 
               if(cproc(ip).ne.npproc(ip)) then
                 write(6,*) ' Error in set_valuedm():npproc,cproc,' &
-                 ,'myrank,ip,ndp,nit,idiv,ndivcom,ncomp=' &
+                 ,'myrank,ip,ndp,nit,idiv,ndivcom,ncomp,flagtr=' &
                  ,npproc(ip),cproc(ip),myrank,ip,ndp,nit,idivcom,ndivcom,ncomp 
-                write(fileo,'(a10,i3.3)') 'setvdmerrp',myrank
+                write(fileo,'(a10,i3.3)') 'setvdmerrp',myrank,flagtr
                 open(60,file=fileo,status='unknown')
                 do i=0,ncomp-1
                   pn=pncomp(i)
