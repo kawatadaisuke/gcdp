@@ -131,6 +131,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       double precision,allocatable :: b2ip(:),b2jp(:)
       double precision,allocatable :: vmhdi(:),vmhdj(:),alpb(:)
       double precision,allocatable :: rotbxp(:),rotbyp(:),rotbzp(:)
+      double precision,allocatable :: dbdiss(:)
 #ifdef DIVBCOR
       double precision beta
 #endif
@@ -1031,6 +1032,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       allocate(dvdiss(0:nbp))
       allocate(dudissv(0:nbp))
       allocate(dudissu(0:nbp))
+
       do i=0,nbp-1
 ! *  u=p/((gam-1)*rho), p=cs_p^2*rhop/gam -> u=cs^2/(gam*(gam-1))
         tz(i)=(tdvr(listb(i)+npj*7)**2)/(GAM*(GAM-1.0d0))
@@ -1184,21 +1186,22 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       deallocate(dudissu)
 
 #ifdef MHD
+
+! allocate memory 
+      allocate(dbdiss(0:nbp))
+
 ! Magnetic Dissipation Dolag
       do i=0,nbp-1
-        dbdiss_p(listb(i))=(tdvr(listb(i)+npj*8)*tdvr(listb(i) &
+        dbdiss(i)=(tdvr(listb(i)+npj*8)*tdvr(listb(i) &
          +npj*11))*((tdvr(listb(i)+npj*8)*alpb(i)))*(rijp(i) &
          *mdwij(i))*vsigav(i)/(rhoij(i)**2)
-         
-        dudissb_p(nblistb(i))= -(0.25d0*alpb(i))*(rijp(i)*mdwij(i) &
-          *vsigav(i)*((tdmhd(listb(i))-bx_p(nblistb(i)))**2 &
-          +(tdmhd(listb(i)+npj)-by_p(nblistb(i)))**2 &
-          +(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))**2))/(rhoij(i)**2)
+
+! not used         
+!        dudissb(i)= -(0.25d0*alpb(i))*(rijp(i)*mdwij(i) &
+!          *vsigav(i)*((tdmhd(listb(i))-bx_p(nblistb(i)))**2 &
+!          +(tdmhd(listb(i)+npj)-by_p(nblistb(i)))**2 &
+!          +(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))**2))/(rhoij(i)**2)
       enddo
-! Magnetic Dissipation Alfven signal velocity
-!     dbdiss_p(listb(i))=(tdvr(listb(i)+npj*8)*tdvr(listb(i)+npj*14)) &
-!      *((tdvr(listb(i)+npj*8)*alpb(i)))*(rijp(i)*mdwij(i)) &
-!      *vsigalf(i)/(rhoij(i)**2)
 
       deallocate(alpb)
 
@@ -1210,11 +1213,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
          -mdwip(i)*(vxijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
          *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))-tdmhd(listb(i)) &
          *(xijp(i)*vxijp(i)+yijp(i)*vyijp(i)+zijp(i)*vzijp(i))) &
-         +dbdiss_p(listb(i))*(tdmhd(listb(i))-bx_p(nblistb(i))) 
+         +dbdiss(i)*(tdmhd(listb(i))-bx_p(nblistb(i))) 
 ! Rosswog version
 !        -mdwip(i)*(vxijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
 !        *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))) &
-!        +dbdiss_p(listb(i))*(tdmhd(listb(i))-bx_p(nblistb(i)))
+!        +dbdiss(i)*(tdmhd(listb(i))-bx_p(nblistb(i)))
 
 ! d(By)/dt
          tdmhd(listb(i)+npj*4)=tdmhd(listb(i)+npj*4) &
@@ -1222,12 +1225,12 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           -mdwip(i)*(vyijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
           *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
           -tdmhd(listb(i)+npj)*(xijp(i)*vxijp(i)+yijp(i)*vyijp(i) &
-          +zijp(i)*vzijp(i)))+dbdiss_p(listb(i)) &
+          +zijp(i)*vzijp(i)))+dbdiss(i) &
           *(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
 ! Rosswog version
 !         -mdwip(i)*(vyijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj)
 !         *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)))
-!         +dbdiss_p(listb(i))*(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
+!         +dbdiss(i)*(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
            
 ! d(Bz)/dt
          tdmhd(listb(i)+npj*5)=tdmhd(listb(i)+npj*5) &
@@ -1235,17 +1238,18 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           -mdwip(i)*(vzijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
           *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
           -tdmhd(listb(i)+npj*2)*(xijp(i)*vxijp(i)+yijp(i) &
-          *vyijp(i)+zijp(i)*vzijp(i)))+dbdiss_p(listb(i)) &
+          *vyijp(i)+zijp(i)*vzijp(i)))+dbdiss(i) &
           *(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
 ! Rosswog version
 !          -mdwip(i)*(vzijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
 !          *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))) &
-!          +dbdiss_p(listb(i))*(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
+!          +dbdiss(i)*(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
       enddo
 
       deallocate(vxijp)
       deallocate(vyijp)
       deallocate(vzijp)
+      deallocate(dbdiss)
 
       allocate(b2ip(0:nbp))
       allocate(b2jp(0:nbp))
@@ -2440,7 +2444,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! *** Calculate Divergence error
            divberr_p(pn)=dabs(divb_p(pn)*h_p(pn))/dsqrt(bx_p(pn)**2 &
             +by_p(pn)**2+bz_p(pn)**2)
-           divberr_p(pn)=dlog10(divberr_p(pn))
+           if(divberr_p(pn).gt.0.0d0) then
+             divberr_p(pn)=dlog10(divberr_p(pn))
+           else
+             divberr_p(pn)=-INF
+           endif
         enddo
 
         deallocate(rotbxp)

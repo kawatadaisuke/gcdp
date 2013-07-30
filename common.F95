@@ -489,8 +489,10 @@ module gcdp_mhd
        ,pdbx_p(:),pdby_p(:),pdbz_p(:)
       double precision,allocatable :: divb_p(:),arotb_p(:)
       double precision,allocatable :: rotbx_p(:),rotby_p(:),rotbz_p(:)
-      double precision,allocatable :: alpb_p(:),dbdiss_p(:),dudissb_p(:)
-      double precision,allocatable :: valfi_p(:),pb_p(:),divberr_p(:)
+      double precision,allocatable :: alpb_p(:),divberr_p(:)
+! not used
+      double precision,allocatable :: valfi_p(:),pb_p(:)
+! not used
 #ifdef BBAT
       double precision,allocatable :: chi_p(:),lognh_p(:),logne_p(:)
 #endif
