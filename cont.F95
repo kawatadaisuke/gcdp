@@ -118,7 +118,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 
 ! *** reading the data from inipara ***
         open(50,file='./output/ana/inipara.dat',status='old')
-        read(50,*)
         read(50,'(a34,8I10)') tchar,npt,ndmt,np,ng,ns,ndm,SI_ndm1,SI_ndm1t
 #ifdef COSM
         read(50,'(a19,4(1pE13.5))') tchar,SI_h0,SI_omg0,SI_lam0,Ini_OMGg
@@ -180,7 +179,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 #endif
 #ifdef STAR
            ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
-            ,tivr(0),tivr(1)
+            ,tivr(0)
 #endif
           close(51)
 
@@ -189,6 +188,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         else
 
           allocate(tivr(0:2))
+          allocate(tdvr(0:1))
 
           open(50,file='./output/ana/system.dat',status='old')
           do i=0,step
@@ -212,6 +212,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 #endif    
 
           deallocate(tivr)
+          deallocate(tdvr)
 
         endif
 
@@ -1661,7 +1662,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       dtmp(2)=TM_tot
       TMsf_dt = 0.0d0
       TM_dt=0.0d0
-      call dtyields(ng,ns)
+      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
+       ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
+       ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
 ! for both gas and stars 
       do i = 0,ng+ns-1
         pn=i
@@ -1691,7 +1694,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       TM_tot=TM_tot-TMsf_dt
 ! *** dtyield at T-DTSF, to keep previous time step t*_p
 ! *** for new feedback particles
-      call dtyields(ng,ns)
+      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
+       ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
+       ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
 
       allocate(mfd(0:np))
 
