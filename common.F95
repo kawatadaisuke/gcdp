@@ -505,8 +505,12 @@ module gcdp_pm
       implicit none
 ! number of mesh
       integer nx_m,ny_m,nz_m
-! grid spaces
+! mesh spaces
       double precision dx_m,dy_m,dz_m
+! mesh 0 points
+      double precision x0_m,y0_m,z0_m
+! mesh 1D coordinates
+      double precision,allocatable :: x_m1d(:),y_m1d(:),z_m1d(:)
 ! mesh point coordinates
       double precision,allocatable :: x_m(:,:,:),y_m(:,:,:),z_m(:,:,:)
 ! density

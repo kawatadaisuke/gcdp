@@ -935,6 +935,9 @@ subroutine allocate_pm()
       use gcdp_pm
       implicit none
 
+      allocate(x_m1d(0:nx_m-1))
+      allocate(y_m1d(0:ny_m-1))
+      allocate(z_m1d(0:nz_m-1))
       allocate(x_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
       allocate(y_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
       allocate(z_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
