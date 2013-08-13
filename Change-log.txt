@@ -11,6 +11,9 @@ term
 
 ### update log ###
 
+13/08/2013
+### TreePM branch
+
 22/04/2013
 MHD stub1D test requires comment out vyij=vzij=0 and dvy=dvz=0
 

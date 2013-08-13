@@ -125,6 +125,8 @@
 ! *** no UVB heating  (assume lognh=0.0)
 ! #define NOUVB
 !
+! *** TreePM
+#define TREEPM
 !
 ! *** isolated galaxy
 ! #define MAXR
@@ -172,7 +174,7 @@
 ! *** Wind tunnel KHI test and Sedov test
 ! #define WTUN
 ! *** Wind tunnel KHI test 2D
-#define WTUN2D
+! #define WTUN2D
 ! #define FIXEDP
 ! *** 1D Wave test
 ! #define WAVE1D
@@ -299,53 +301,6 @@
 #undef RANAZ
 #endif
 
-! *** for consistency ***
-#ifndef GAS
-#undef COOL
-#undef STAR
-#undef SF
-#undef METAL
-#undef SF_EFD
-#undef SF_ZFD
-#undef METALDIFF
-#undef UTHLIM_JM
-#undef UTHLIM_POLY
-#endif
-!
-#ifndef METAL
-#undef SF_ZFD
-#undef METALDIFF
-#endif
-!
-#ifndef COOL
-#endif
-!
-#ifndef SGRAV
-#undef DM
-#undef FASTG
-#endif
-!
-#ifndef STAR
-#undef SF
-#undef SF_EFD
-#undef SF_ZFD
-#ifndef GAS
-#undef METAL
-#endif
-#endif
-!
-#ifdef STAR
-#define GAS
-#endif
-
-#ifndef DM
-#undef FIXEDDMP
-#endif
-
-#ifdef PINI
-#undef RHOINI
-#endif
-
 ! *** for numerical library in dec*.f
 #define NUMREC
 
@@ -388,3 +343,59 @@
 #undef BBAT
 
 #endif
+
+! *** for consistency ***
+#ifndef GAS
+#undef COOL
+#undef STAR
+#undef SF
+#undef METAL
+#undef SF_EFD
+#undef SF_ZFD
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
+#endif
+!
+#ifndef METAL
+#undef SF_ZFD
+#undef METALDIFF
+#endif
+!
+#ifndef COOL
+#endif
+!
+#ifndef SGRAV
+#undef DM
+#undef FASTG
+#undef TREEPM
+#endif
+!
+#ifndef STAR
+#undef SF
+#undef SF_EFD
+#undef SF_ZFD
+#ifndef GAS
+#undef METAL
+#endif
+#endif
+!
+#ifdef STAR
+#define GAS
+#endif
+
+#ifndef DM
+#undef FIXEDDMP
+#endif
+
+#ifdef PINI
+#undef RHOINI
+#endif
+
+#ifdef TREEPM
+#define BOXSIM
+#define BCX_PERIOD
+#define BCY_PERIOD
+#define BCZ_PERIOD
+#endif
+

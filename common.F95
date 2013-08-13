@@ -498,3 +498,21 @@ module gcdp_mhd
 #endif
 end module gcdp_mhd
 #endif
+
+! ***** PM modules *****
+#ifdef TREEPM
+module gcdp_pm
+      implicit none
+! number of mesh
+      integer nx_m,ny_m,nz_m
+! grid spaces
+      double precision dx_m,dy_m,dz_m
+! mesh point coordinates
+      double precision,allocatable :: x_m(:,:,:),y_m(:,:,:),z_m(:,:,:)
+! density
+      double precision,allocatable :: rho_m(:,:,:)
+end module gcdp_pm
+#endif
+
+
+

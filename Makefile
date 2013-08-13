@@ -7,7 +7,8 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        atfunc.o esolve.o setcool.o \
        ddecb.o ddecdm.o indexxl.o boundary.o\
        set_valuedm.o set_chi.o\
-       setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o allocate.o
+       setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o allocate.o\
+       mesh_gen.o
 INIOBJ = set_ini.o
 CONTOBJ = cont.o
 DEFFILE = gcdp.def gcdp_const.F95 common.F95
