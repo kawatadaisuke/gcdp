@@ -23,6 +23,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       use gcdp_mhd
 #endif
       use gcdp_system
+#ifdef TREEPM
+      use gcdp_pm
+#endif
      
       implicit none
       include 'mpif.h'
@@ -102,6 +105,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       read(50,*) flagfg,flagfdm,flagfs
       Ini_ze=Ini_zi
 #endif
+#ifdef TREEPM
+      read(50,*) nx_m,ny_m,nz_m
+#endif
+
       close(50)
 ! *** initialization for number of particles ***   
       npt=0
@@ -577,6 +584,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         if(myrank.eq.0) then
           write(6,*) ' mdm(0)=',m_dm(0)
         endif
+#ifdef DM
+      else if(myrank.eq.0) then
+        write '##### Warning in set_ini()#####'
+        write ' DM data not read, but DM is on in gcdp.def.'
+        write ' This likely causes a problem.'
+#endif
       endif
 #endif
 ! *** for Gas particles
@@ -1521,6 +1534,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef BOXSIM
         write(60,'(a10,3(1pE13.5))') ' box size=',SI_lbox(0) &
          ,SI_lbox(1),SI_lbox(2)
+#endif
+#ifdef TREEPM
+        write(60,'(a15,3I10)') ' Mesh nx,ny,nz=',nx_m,ny_m,nz_m
 #endif
 #ifdef BCX_FIX
         write(60,'(a9,I10)') ' BCX_ndx=',BCX_ndx

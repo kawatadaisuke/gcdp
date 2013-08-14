@@ -26,6 +26,8 @@ subroutine  mesh_setrho(np,ndm)
       integer i,j,k,ip0,jp0,kp0,ip1,jp1,kp1,w1,w2
       double precision df,vm
       double precision wx0,wx1,wy0,wy1,wz0,wz1
+! *** for test file *** 
+      character fileo*60
 
 ! initialisation
       do k=0,nz_m-1
@@ -40,23 +42,24 @@ subroutine  mesh_setrho(np,ndm)
 #if defined(GAS) || defined(STAR)
       do i=0,np-1
 ! x
-        ip0=int((x_p(i)-x0_m)/dx_m)
-        ip1=ip0+1
-        if(ip0.lt.0) then
-          ip0=nx_m
+        if(x_p(i).le.x0_m) then
+          ip0=nx_m-1
           ip1=0
           df=(x_m1d(0)-x_p(i))/dx_m
-          wx0=1.0d0-df
-          wx1=df
-        else if(ip1.ge.nx_m) then
+          wx0=df
+          wx1=1.0d0-df
+        else if(x_p(i).ge.x_m1d(nx_m-1)) then
+          ip0=nx_m-1
           ip1=0
           df=(x_p(i)-x_m1d(ip0))/dx_m
-          wx0=df
-          wx1=1.0-df
+          wx0=1.0d0-df
+          wx1=df
         else
+          ip0=int((x_p(i)-x0_m)/dx_m)
+          ip1=ip0+1
           df=(x_p(i)-x_m1d(ip0))/dx_m
-          wx0=df
-          wx1=1.0-df
+          wx0=1.0d0-df
+          wx1=df
         endif
 ! for check
         if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
@@ -66,23 +69,24 @@ subroutine  mesh_setrho(np,ndm)
           stop
         endif
 ! y
-        jp0=int((y_p(i)-y0_m)/dy_m)
-        jp1=jp0+1
-        if(jp0.lt.0) then
-          jp0=ny_m
+        if(y_p(i).le.y0_m) then
+          jp0=ny_m-1
           jp1=0
           df=(y_m1d(0)-y_p(i))/dy_m
-          wy0=1.0d0-df
-          wy1=df
-        else if(jp1.ge.ny_m) then
+          wy0=df
+          wy1=1.0d0-df
+        else if(y_p(i).ge.y_m1d(ny_m-1)) then
+          jp0=ny_m-1
           jp1=0
           df=(y_p(i)-y_m1d(jp0))/dy_m
-          wy0=df
-          wy1=1.0-df
+          wy0=1.0d0-df
+          wy1=df
         else
-          df=(y_p(i)-y_m1d(ip0))/dy_m
-          wy0=df
-          wy1=1.0-df
+          jp0=int((y_p(i)-y0_m)/dy_m)
+          jp1=jp0+1
+          df=(y_p(i)-y_m1d(jp0))/dy_m
+          wy0=1.0d0-df
+          wy1=df
         endif
 ! for check
         if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
@@ -92,23 +96,24 @@ subroutine  mesh_setrho(np,ndm)
           stop
         endif
 ! z
-        kp0=int((z_p(i)-z0_m)/dz_m)
-        kp1=kp0+1
-        if(kp0.lt.0) then
-          kp0=nz_m
+        if(z_p(i).le.z0_m) then
+          kp0=nz_m-1
           kp1=0
           df=(z_m1d(0)-z_p(i))/dz_m
-          wz0=1.0d0-df
-          wz1=df
-        else if(kp1.ge.nz_m) then
+          wz0=df
+          wz1=1.0d0-df
+        else if(z_p(i).ge.z_m1d(nz_m-1)) then
+          kp0=nz_m-1
           kp1=0
           df=(z_p(i)-z_m1d(kp0))/dz_m
-          wz0=df
-          wz1=1.0-df
+          wz0=1.0d0-df
+          wz1=df
         else
+          kp0=int((z_p(i)-z0_m)/dz_m)
+          kp1=kp0+1
           df=(z_p(i)-z_m1d(kp0))/dz_m
-          wz0=df
-          wz1=1.0-df
+          wz0=1.0d0-df
+          wz1=df
         endif
 ! for check
         if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
@@ -144,82 +149,86 @@ subroutine  mesh_setrho(np,ndm)
 ! assign DM mass
 #ifdef DM
       do i=0,ndm-1
+
 ! x
-        ip0=int((x_dm(i)-x0_m)/dx_m)
-        ip1=ip0+1
-        if(ip0.lt.0) then
-          ip0=nx_m
+        if(x_dm(i).le.x0_m) then
+          ip0=nx_m-1
           ip1=0
           df=(x_m1d(0)-x_dm(i))/dx_m
-          wx0=1.0d0-df
-          wx1=df
-        else if(ip1.ge.nx_m) then
+          wx0=df
+          wx1=1.0d0-df
+        else if(x_dm(i).ge.x_m1d(nx_m-1)) then
+          ip0=nx_m-1
           ip1=0
           df=(x_dm(i)-x_m1d(ip0))/dx_m
-          wx0=df
-          wx1=1.0-df
+          wx0=1.0d0-df
+          wx1=df
         else
+          ip0=int((x_dm(i)-x0_m)/dx_m)
+          ip1=ip0+1
           df=(x_dm(i)-x_m1d(ip0))/dx_m
-          wx0=df
-          wx1=1.0-df
+          wx0=1.0d0-df
+          wx1=df
         endif
 ! for check
         if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
           .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
           write(6,*) ' Error in mesh_setrho() for DM: wx0,wx1=',wx0,wx1
-          write(6,*) ' x_dm,ip0,ip1=',x_dm(i),ip0,ip1
+          write(6,*) ' x,ip0,ip1=',x_dm(i),ip0,ip1
           stop
         endif
 ! y
-        jp0=int((y_dm(i)-y0_m)/dy_m)
-        jp1=jp0+1
-        if(jp0.lt.0) then
-          jp0=ny_m
+        if(y_dm(i).le.y0_m) then
+          jp0=ny_m-1
           jp1=0
           df=(y_m1d(0)-y_dm(i))/dy_m
-          wy0=1.0d0-df
-          wy1=df
-        else if(jp1.ge.ny_m) then
+          wy0=df
+          wy1=1.0d0-df
+        else if(y_dm(i).ge.y_m1d(ny_m-1)) then
+          jp0=ny_m-1
           jp1=0
           df=(y_dm(i)-y_m1d(jp0))/dy_m
-          wy0=df
-          wy1=1.0-df
+          wy0=1.0d0-df
+          wy1=df
         else
-          df=(y_dm(i)-y_m1d(ip0))/dy_m
-          wy0=df
-          wy1=1.0-df
+          jp0=int((y_dm(i)-y0_m)/dy_m)
+          jp1=jp0+1
+          df=(y_dm(i)-y_m1d(jp0))/dy_m
+          wy0=1.0d0-df
+          wy1=df
         endif
 ! for check
         if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
           .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
           write(6,*) ' Error in mesh_setrho() for DM: wy0,wy1=',wy0,wy1
-          write(6,*) ' y_dm,jp0,jp1=',y_dm(i),jp0,jp1
+          write(6,*) ' y,jp0,jp1=',y_dm(i),jp0,jp1
           stop
         endif
 ! z
-        kp0=int((z_dm(i)-z0_m)/dz_m)
-        kp1=kp0+1
-        if(kp0.lt.0) then
-          kp0=nz_m
+        if(z_dm(i).le.z0_m) then
+          kp0=nz_m-1
           kp1=0
           df=(z_m1d(0)-z_dm(i))/dz_m
-          wz0=1.0d0-df
-          wz1=df
-        else if(kp1.ge.nz_m) then
+          wz0=df
+          wz1=1.0d0-df
+        else if(z_dm(i).ge.z_m1d(nz_m-1)) then
+          kp0=nz_m-1
           kp1=0
           df=(z_dm(i)-z_m1d(kp0))/dz_m
-          wz0=df
-          wz1=1.0-df
+          wz0=1.0d0-df
+          wz1=df
         else
+          kp0=int((z_dm(i)-z0_m)/dz_m)
+          kp1=kp0+1
           df=(z_dm(i)-z_m1d(kp0))/dz_m
-          wz0=df
-          wz1=1.0-df
+          wz0=1.0d0-df
+          wz1=df
         endif
 ! for check
         if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
           .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
           write(6,*) ' Error in mesh_setrho() for DM: wz0,wz1=',wz0,wz1
-          write(6,*) ' z_dm,kp0,kp1=',z_dm(i),kp0,kp1
+          write(6,*) ' z,kp0,kp1=',z_dm(i),kp0,kp1
           stop
         endif
 
@@ -256,6 +265,20 @@ subroutine  mesh_setrho(np,ndm)
           enddo
         enddo
       enddo
+
+! test output
+      write(fileo,'(a6,i3.3)') 'meshrho',myrank
+      open(60,file=fileo,status='unknown')
+      do k=0,nz_m-1
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+            write(60,'(4(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
+              ,rho_m(i,j,k)
+          enddo
+        enddo
+      enddo
+      close(60)
+      stop
 
 end subroutine
 #endif

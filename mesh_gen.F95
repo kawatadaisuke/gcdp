@@ -27,13 +27,15 @@ subroutine  mesh_gen()
       dy_m=SI_lbox(1)/dble(ny_m)
       dz_m=SI_lbox(2)/dble(nz_m)
 ! first grid points
-      x0_m=0.5d0*SI_lbox(0)+0.5d0*dx_m
-      y0_m=0.5d0*SI_lbox(1)+0.5d0*dy_m
-      z0_m=0.5d0*SI_lbox(2)+0.5d0*dz_m
+      x0_m=-0.5d0*SI_lbox(0)+0.5d0*dx_m
+      y0_m=-0.5d0*SI_lbox(1)+0.5d0*dy_m
+      z0_m=-0.5d0*SI_lbox(2)+0.5d0*dz_m
 
       if(myrank.eq.0) then
-        write(6,*) ' Mesh dx,dy,dz=',dx_m,dy_m,dz_m
-        write(6,*) '      x0,y0,z0=',x0_m,y0_m,z0_m
+        write(6,*) ' Mesh info'
+        write(6,*) '   nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
+        write(6,*) '   dx,dy,dz=',dx_m,dy_m,dz_m
+        write(6,*) '   x0,y0,z0=',x0_m,y0_m,z0_m
       endif
 
 ! mesh points 1d

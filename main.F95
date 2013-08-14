@@ -140,12 +140,22 @@ program gcdp
 ! *** use pax_p read in set_ini ***
         flagdtg=1
       endif
+
+! initial set up
+! setting kernel for SPH and softening
       call setkernel()
+#ifdef TREEPM
+! initial set up for TreePM
+      call mesh_gen()
+      call mesh_setrho(np,ndm)
+#endif
 #ifdef MEXT
+! set up the external potential
       call setmext()
 #endif
 
 #ifdef GAS
+! estimate of dynamical time in the softening limit
       if(myrank.eq.0) then
         pn=0
 #ifdef METAL
@@ -269,27 +279,12 @@ program gcdp
 #endif
 #ifdef BCX_PERIOD
         write(6,*) ' Periodic boundary on X-axis'
-#ifdef SGRAV
-        write(6,*) ' Error: not capable of Self-gravity'
-        call MPI_FINALIZE()
-        stop
-#endif
 #endif
 #ifdef BCY_PERIOD
         write(6,*) ' Periodic boundary on Y-axis'
-#ifdef SGRAV
-        write(6,*) ' Error: not capable of self-gravity'
-        call MPI_FINALIZE()
-        stop
-#endif
 #endif
 #ifdef BCZ_PERIOD
         write(6,*) ' Periodic boundary on Z-axis'
-#ifdef SGRAV
-        write(6,*) ' Error: not capable of self-gravity'
-        call MPI_FINALIZE()
-        stop
-#endif
 #endif
 #ifdef SIM1D
         write(6,*) ' 1 D simulation'
