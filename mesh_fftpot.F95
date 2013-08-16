@@ -7,7 +7,7 @@
 ! generating mesh points
 
 #ifdef TREEPM
-subroutine  mesh_setfftpot()
+subroutine  mesh_fftpot()
       use gcdp_const
       use gcdp_system
       use gcdp_pm
@@ -49,12 +49,28 @@ subroutine  mesh_setfftpot()
       do k=1,nz_m
         do j=1,ny_m
           do i=1,nx_m/2+1
-            write(60,'(3I10,2(1pE13.5))') i,j,k,rsd_fftw(i,j,k)
+            write(60,'(3I10,2(1pE13.5))') i,j,k,ksd_fftw(i,j,k)*dv_m
+          enddo
+        enddo
+      enddo
+      close(60)
+
+! backward FFT
+      call fftw_execute_dft_c2r(planb_fftw,ksd_fftw,rsd_fftw)
+
+! test output
+      write(fileo,'(a3,i3.3)') 'rsd',myrank
+      open(60,file=fileo,status='unknown')
+      do k=1,nz_m
+        do j=1,ny_m
+          do i=1,nx_m
+            write(60,'(3I10,(1pE13.5))') i,j,k,rsd_fftw(i,j,k)/dble(nt_m)
           enddo
         enddo
       enddo
       close(60)
       stop
+
 
 end subroutine
 #endif

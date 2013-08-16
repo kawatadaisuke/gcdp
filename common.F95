@@ -504,7 +504,9 @@ end module gcdp_mhd
 module gcdp_pm
       implicit none
 ! number of mesh
-      integer nx_m,ny_m,nz_m
+      integer nx_m,ny_m,nz_m,nt_m
+! size of mesh and box
+      double precision dv_m,vt_m
 ! mesh spaces
       double precision dx_m,dy_m,dz_m
 ! mesh 0 points

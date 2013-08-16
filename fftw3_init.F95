@@ -28,15 +28,20 @@ subroutine  fftw3_init()
       call c_f_pointer(poid_fftw,rsd_fftw,[2*(nx_m/2+1),ny_m,nz_m])
       call c_f_pointer(poid_fftw,ksd_fftw,[nx_m/2+1,ny_m,nz_m])
 ! plan for real -> k space (forward FT)
-#ifdef FFTW3_ESTIMATE
+
 ! note: nz,ny,nx order, because column ->. row measure 
       planf_fftw=fftw_plan_dft_r2c_3d(nz_m,ny_m,nx_m,rsd_fftw,ksd_fftw &
+#ifdef FFTW3_ESTIMATE
        ,FFTW_ESTIMATE)
 #else
-      planf_fftw=fftw_plan_dft_r2c_3d(nz_m,ny_m,nx_m,rsd_fftw,ksd_fftw &
        ,FFTW_MEASURE)
 #endif
-      
+      planb_fftw=fftw_plan_dft_c2r_3d(nz_m,ny_m,nx_m,ksd_fftw,rsd_fftw &
+#ifdef FFTW3_ESTIMATE
+       ,FFTW_ESTIMATE)
+#else
+       ,FFTW_MEASURE)
+#endif
 
 end subroutine
 #endif FFTW3

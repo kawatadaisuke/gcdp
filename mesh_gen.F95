@@ -38,6 +38,13 @@ subroutine  mesh_gen()
         write(6,*) '   x0,y0,z0=',x0_m,y0_m,z0_m
       endif
 
+! total number of mesh 
+      nt_m=nx_m*ny_m*nz_m
+! total box size
+      vt_m=SI_lbox(0)*SI_lbox(1)*SI_lbox(2)
+! mesh size
+      dv_m=dx_m*dy_m*dz_m
+
 ! mesh points 1d
       do i=0,nx_m-1
         x_m1d(i)=x0_m+dx_m*dble(i)

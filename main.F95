@@ -147,7 +147,14 @@ program gcdp
 #ifdef TREEPM
 ! initial set up for TreePM
       call mesh_gen()
+#ifdef FFTW3
+      call fftw3_init()
+#endif
+
+! assign density
       call mesh_setrho(np,ndm)
+! calculate potential
+      call mesh_fftpot()
 #endif
 #ifdef MEXT
 ! set up the external potential

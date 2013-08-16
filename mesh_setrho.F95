@@ -278,7 +278,7 @@ subroutine  mesh_setrho(np,ndm)
         enddo
       enddo
       close(60)
-      stop
+
 
 end subroutine
 #endif
