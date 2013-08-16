@@ -8,7 +8,7 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        ddecb.o ddecdm.o indexxl.o boundary.o\
        set_valuedm.o set_chi.o\
        setslgtr.o setsldmtr.o kernel.o setmext.o phcurve.o allocate.o\
-       mesh_gen.o mesh_setrho.o
+       mesh_gen.o mesh_setrho.o fftw3_init.o mesh_fftpot.o
 INIOBJ = set_ini.o
 CONTOBJ = cont.o
 DEFFILE = gcdp.def gcdp_const.F95 common.F95
@@ -18,6 +18,7 @@ OPTIONS=-g -mcmodel=medium
 # MPI_DIR=/cluster/mpich2_3.0
 ### mac
 MPI_DIR = /Users/dkawata/share/mpi
+FFTW_INC=/usr/local/include
 ### legion@UCL
 # MPI_DIR=/usr/mpi/qlogic
 # OPTIONS=-O3 -xSSSE3
@@ -29,8 +30,8 @@ CPP = cpp
 FORT = ${MPI_DIR}/bin/mpif90
 MPI_INC = ${MPI_DIR}/include
 MPI_LIB = ${MPI_DIR}/lib 
-FFLAGS = ${OPTIONS} -I${MPI_INC}
-LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} 
+FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -lfftw3
 ### for XT4
 # FORT=ftn
 # CPP=cpp

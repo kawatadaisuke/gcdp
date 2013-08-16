@@ -107,6 +107,14 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #ifdef TREEPM
       read(50,*) nx_m,ny_m,nz_m
+      if((mod(nx_m,2).ne.0)) then
+        if(myrank.eq.0) then
+          write(6,*) ' Error in set_ini(): nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
+          write(6,*) ' nx_m should be able to be devided by 2.'
+        endif
+        call MPI_FINALIZE(ierr)
+        stop
+      endif
 #endif
 
       close(50)

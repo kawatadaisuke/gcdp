@@ -518,5 +518,21 @@ module gcdp_pm
 end module gcdp_pm
 #endif
 
+#ifdef FFTW3
+module fftw3
+      use,intrinsic :: iso_c_binding
+      implicit none
+      include 'fftw3.f03'
+
+! forward and backward FFT plan
+      type(C_PTR) :: planf_fftw,planb_fftw
+! data space
+      real(C_DOUBLE),pointer :: rsd_fftw(:,:,:)
+      complex(C_DOUBLE_COMPLEX),pointer :: ksd_fftw(:,:,:)
+      type(C_PTR) :: poid_fftw
+
+end module fftw3
+#endif
+
 
 
