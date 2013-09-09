@@ -26,10 +26,18 @@ subroutine  mesh_gen()
       dx_m=SI_lbox(0)/dble(nx_m)
       dy_m=SI_lbox(1)/dble(ny_m)
       dz_m=SI_lbox(2)/dble(nz_m)
+! calculate grid space in k space
+      dkx_m=2.0d0*M_PI*1.0d0/(SI_lbox(0))
+      dky_m=2.0d0*M_PI*1.0d0/(SI_lbox(1))
+      dkz_m=2.0d0*M_PI*1.0d0/(SI_lbox(2))
 ! first grid points
       x0_m=-0.5d0*SI_lbox(0)+0.5d0*dx_m
       y0_m=-0.5d0*SI_lbox(1)+0.5d0*dy_m
       z0_m=-0.5d0*SI_lbox(2)+0.5d0*dz_m
+! half nx,ny,nz
+      nx2_m=nx_m/2
+      ny2_m=ny_m/2
+      nz2_m=nz_m/2
 
       if(myrank.eq.0) then
         write(6,*) ' Mesh info'

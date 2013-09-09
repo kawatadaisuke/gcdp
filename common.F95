@@ -505,10 +505,14 @@ module gcdp_pm
       implicit none
 ! number of mesh
       integer nx_m,ny_m,nz_m,nt_m
+! number/2 of mesh
+      integer nx2_m,ny2_m,nz2_m
 ! size of mesh and box
       double precision dv_m,vt_m
-! mesh spaces
+! mesh spaces in real space
       double precision dx_m,dy_m,dz_m
+! mesh spaces in k space
+      double precision dkx_m,dky_m,dkz_m
 ! mesh 0 points
       double precision x0_m,y0_m,z0_m
 ! mesh 1D coordinates
@@ -517,6 +521,8 @@ module gcdp_pm
       double precision,allocatable :: x_m(:,:,:),y_m(:,:,:),z_m(:,:,:)
 ! density
       double precision,allocatable :: rho_m(:,:,:)
+! potential
+      double precision,allocatable :: pot_m(:,:,:)
 end module gcdp_pm
 #endif
 
