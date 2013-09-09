@@ -154,7 +154,7 @@ program gcdp
 ! assign density
       call mesh_setrho(np,ndm)
 ! calculate potential
-      call mesh_fftpot()
+      call mesh_fftf()
 #endif
 #ifdef MEXT
 ! set up the external potential

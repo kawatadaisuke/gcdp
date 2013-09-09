@@ -1,13 +1,13 @@
 #include "gcdp.def"
 ! *********************************************
-!  mesh_fftpot.F95 for GCD+
-!  16 Aug. 2013   written by D. Kawata
+!  mesh_fftf.F95 for GCD+
+!  9 Sep. 2013   written by D. Kawata
 ! *********************************************
 
-! generating mesh points
+! getting force at the mesh position
 
 #ifdef TREEPM
-subroutine  mesh_fftpot()
+subroutine  mesh_fftf()
       use gcdp_const
       use gcdp_system
       use gcdp_pm
@@ -19,6 +19,9 @@ subroutine  mesh_fftpot()
       include 'mpif.h'
 
       integer i,j,k,i1
+      integer ip2,ip1,im1,im2
+      integer jp2,jp1,jm1,jm2
+      integer kp2,kp1,km1,km2
       double precision kx,ky,kz,kabs2
 ! *** for test file *** 
       character fileo*60
@@ -118,10 +121,95 @@ subroutine  mesh_fftpot()
       do k=1,nz_m
         do j=1,ny_m
           do i=1,nx_m
-            pot_m(i-1,j-1,k-1)=rsd_fftw(i,j,k)
+! normalised (has to be done)
+            pot_m(i-1,j-1,k-1)=rsd_fftw(i,j,k)/dble(nt_m)
           enddo
         enddo
       enddo
+
+! set force
+      do k=0,nz_m-1
+        kp2=k+2
+        if(kp2.gt.nz_m-1) then
+          kp2=kp2-nz_m
+        endif
+        kp1=k+1
+        if(kp1.gt.nz_m-1) then
+          kp1=kp1-nz_m
+        endif
+        km2=k-2
+        if(km2.lt.0) then
+          km2=km2+nz_m
+        endif
+        km1=k-1
+        if(km1.lt.0) then
+          km1=km1+nz_m
+        endif
+        do j=0,ny_m-1
+          jp2=j+2
+          if(jp2.gt.ny_m-1) then
+            jp2=jp2-ny_m
+          endif
+          jp1=j+1
+          if(jp1.gt.ny_m-1) then
+            jp1=jp1-ny_m
+          endif
+          jm2=j-2
+          if(jm2.lt.0) then
+            jm2=jm2+ny_m
+          endif
+          jm1=j-1
+          if(jm1.lt.0) then
+            jm1=jm1+ny_m
+          endif
+          do i=0,nx_m-1
+            ip2=i+2
+            if(ip2.gt.nx_m-1) then
+              ip2=ip2-nx_m
+            endif
+            ip1=i+1
+            if(ip1.gt.nx_m-1) then
+              ip1=ip1-nx_m
+            endif
+            im2=i-2
+            if(im2.lt.0) then
+              im2=im2+nx_m
+            endif
+            im1=i-1
+            if(im1.lt.0) then
+              im1=im1+nx_m
+            endif
+
+            fx_m(i,j,k)=(1.0d0/dx_m) &
+             *((2.0d0/3.0d0)*(pot_m(ip1,j,k)-pot_m(im1,j,k)) &
+             -((1.0d0/12.0d0)*(pot_m(ip2,j,k)-pot_m(im2,j,k))))
+            fy_m(i,j,k)=(1.0d0/dy_m) &
+             *((2.0d0/3.0d0)*(pot_m(i,jp1,k)-pot_m(i,jm1,k)) &
+             -((1.0d0/12.0d0)*(pot_m(i,jp2,k)-pot_m(i,jm2,k))))
+            fz_m(i,j,k)=(1.0d0/dz_m) &
+             *((2.0d0/3.0d0)*(pot_m(i,j,kp1)-pot_m(i,j,km1)) &
+             -((1.0d0/12.0d0)*(pot_m(i,j,kp2)-pot_m(i,j,km2))))
+     
+          enddo
+        enddo
+      enddo
+
+     write(fileo,'(a4,i3.3)') 'fpot',myrank
+      open(60,file=fileo,status='unknown')
+      do k=0,nz_m-1
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+            write(60,'(8(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
+             ,pot_m(i,j,k)/dble(nt_m) &
+!             ,pot_m(i,j,k) &
+             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k) &
+             ,dsqrt(x_m(i,j,k)**2+y_m(i,j,k)**2+z_m(i,j,k)**2)
+          enddo
+        enddo
+      enddo
+      close(60)
+      stop
+
 
 end subroutine
 #endif

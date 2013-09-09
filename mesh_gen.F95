@@ -26,10 +26,11 @@ subroutine  mesh_gen()
       dx_m=SI_lbox(0)/dble(nx_m)
       dy_m=SI_lbox(1)/dble(ny_m)
       dz_m=SI_lbox(2)/dble(nz_m)
-! calculate grid space in k space
-      dkx_m=2.0d0*M_PI*1.0d0/(SI_lbox(0))
-      dky_m=2.0d0*M_PI*1.0d0/(SI_lbox(1))
-      dkz_m=2.0d0*M_PI*1.0d0/(SI_lbox(2))
+! calculate grid space in k space, 2 pi/L seems better than 1/L
+      dkx_m=2.0d0*M_PI/(SI_lbox(0))
+      dky_m=2.0d0*M_PI/(SI_lbox(1))
+      dkz_m=2.0d0*M_PI/(SI_lbox(2))
+
 ! first grid points
       x0_m=-0.5d0*SI_lbox(0)+0.5d0*dx_m
       y0_m=-0.5d0*SI_lbox(1)+0.5d0*dy_m

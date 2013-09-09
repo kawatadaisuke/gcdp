@@ -943,6 +943,9 @@ subroutine allocate_pm()
       allocate(z_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
       allocate(rho_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
       allocate(pot_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
+      allocate(fx_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
+      allocate(fy_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
+      allocate(fz_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
 
 end subroutine
 #endif

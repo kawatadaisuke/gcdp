@@ -523,6 +523,8 @@ module gcdp_pm
       double precision,allocatable :: rho_m(:,:,:)
 ! potential
       double precision,allocatable :: pot_m(:,:,:)
+! force
+      double precision,allocatable :: fx_m(:,:,:),fy_m(:,:,:),fz_m(:,:,:)
 end module gcdp_pm
 #endif
 
