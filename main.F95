@@ -155,6 +155,15 @@ program gcdp
       call mesh_setrho(np,ndm)
 ! calculate potential
       call mesh_fftf()
+! assign force to particles
+      do i=0,nag-1
+        pn=list_ap(i)
+        dvx_p(pn)=0.0d0
+        dvy_p(pn)=0.0d0
+        dvz_p(pn)=0.0d0
+      enddo
+      call mesh_setfp(nag,nas,nadm)
+
 #endif
 #ifdef MEXT
 ! set up the external potential

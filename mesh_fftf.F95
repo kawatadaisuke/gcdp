@@ -208,7 +208,6 @@ subroutine  mesh_fftf()
         enddo
       enddo
       close(60)
-      stop
 
 
 end subroutine
