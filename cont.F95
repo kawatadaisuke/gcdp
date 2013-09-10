@@ -727,13 +727,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           open(53,file=fileo,status='unknown',form='unformatted')
           read(53) inpt,indmt,indm1t,dtmp(0),dtmp(1)
           read(53) inprocs,inof,invald
-! ndbhyd=7 in output.F, and set 7 here
           if(ndbhyd.ne.invald.and.Ini_flagcop.eq.0) then
             write(6,*) myrank,' Error: ndbhyd is inconsistent'
             write(6,*) ' in file, cont.F=',invald,ndbhyd
             stop
-          else
-            ndbhyd=invald
           endif
         endif
 ! *** read hydro values ***
