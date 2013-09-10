@@ -38,7 +38,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! * for test far away *            
       double precision theta2
       double precision l_r2
-      double precision xij,yij,zij
+      double precision xij,yij,zij,tij
       double precision dphiir,dphijr,si,sj,hsi,hsj
 #ifdef QPTREEF
       double precision dp_ij,d2phii,d2phij,d3phii,d3phij,d2p_ij,d3p_ij
@@ -239,8 +239,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         if(np_tr(nd).gt.1) then
 ! *** check for particles within a node ***
           xij=tdvr(pn)-cx_tr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_tr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_tr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_tr(nd)) then
           if(dabs(yij).lt.0.6d0*l_tr(nd)) then
           if(dabs(zij).lt.0.6d0*l_tr(nd)) then
@@ -252,8 +282,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_tr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_tr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_tr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance check ***
@@ -2075,6 +2135,26 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(flagproc)
       deallocate(flagcom)
       deallocate(pncomp)
+
+! test output
+      write(fileo,'(a3,i3.3)') 'fpt',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nag-1
+        if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
+        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i)) &
+         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) 
+        else
+        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i))
+        endif
+      enddo
+      close(60)
+      stop
 
 end subroutine
 #endif

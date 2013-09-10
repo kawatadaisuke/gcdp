@@ -588,15 +588,21 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         if(myrank.eq.0) then
           write(6,*) mname
         endif
+#ifdef BOXSIM
+        read(51) SI_lbox(0),SI_lbox(1),SI_lbox(2)
+        if(myrank.eq.0) then
+          write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
+        endif
+#endif
         close(51)
         if(myrank.eq.0) then
           write(6,*) ' mdm(0)=',m_dm(0)
         endif
 #ifdef DM
       else if(myrank.eq.0) then
-        write '##### Warning in set_ini()#####'
-        write ' DM data not read, but DM is on in gcdp.def.'
-        write ' This likely causes a problem.'
+        write(6,*) '##### Warning in set_ini()#####'
+        write(6,*) ' DM data not read, but DM is on in gcdp.def.'
+        write(6,*) ' This likely causes a problem.'
 #endif
       endif
 #endif

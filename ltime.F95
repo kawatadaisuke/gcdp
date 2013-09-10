@@ -46,9 +46,7 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
       double precision av
 #endif
       integer,allocatable :: list(:),nalist(:),talist(:)
-#if defined(GAS) || defined(STAR)
       double precision,allocatable :: dti(:)
-#endif
 
       dtu=INF
       dtc=INF

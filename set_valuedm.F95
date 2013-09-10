@@ -1458,7 +1458,7 @@ subroutine set_valuedm(ndm,nadm,flag)
         if(nit.gt.mnit) then
           if(myrank.eq.0) then
             write(6,*) myrank &
-             ,' Warning: iteration does not work in set_value',nlist,flagnb,flag
+             ,' Warning: iteration does not work in set_valuedm',nlist,flagnb,flag
           endif
           write(fileo,'(a5,i3.3)') 'error',myrank
           open(60,file=fileo,status='unknown')

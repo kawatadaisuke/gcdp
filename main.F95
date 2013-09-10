@@ -151,19 +151,6 @@ program gcdp
       call fftw3_init()
 #endif
 
-! assign density
-      call mesh_setrho(np,ndm)
-! calculate potential
-      call mesh_fftf()
-! assign force to particles
-      do i=0,nag-1
-        pn=list_ap(i)
-        dvx_p(pn)=0.0d0
-        dvy_p(pn)=0.0d0
-        dvz_p(pn)=0.0d0
-      enddo
-      call mesh_setfp(nag,nas,nadm)
-
 #endif
 #ifdef MEXT
 ! set up the external potential
@@ -524,6 +511,15 @@ program gcdp
 #endif
 #endif
 
+#ifdef TREEPM
+! assign density
+        call mesh_setrho(np,ndm)
+! calculate potential
+        call mesh_fftf()
+! assign force to particles
+        call mesh_setfp(nag,nas,nadm)
+#endif
+
 ! *************************************
 !  Calculate dv/dt & du/dt ( Initial )
 ! *************************************
@@ -531,6 +527,7 @@ program gcdp
         flagu = 0
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
          ,nagt,nadmt,nast,nagravgt,flagv,flagu,1)
+
 
       endif
 ! *****   >>>  Start Iteration   <<<   *****
