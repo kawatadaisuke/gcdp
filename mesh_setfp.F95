@@ -155,8 +155,18 @@ subroutine  mesh_setfp(nag,nas,nadm)
       write(fileo,'(a2,i3.3)') 'fp',myrank
       open(60,file=fileo,status='unknown')
       do i=0,nag-1
-        write(60,'(6(1pE13.5))') x_p(i),y_p(i),z_p(i) &
-         ,dvx_p(i),dvy_p(i),dvz_p(i)
+        if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
+        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i)) &
+         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) 
+        else
+        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i))
+        endif
       enddo
       close(60)
       stop

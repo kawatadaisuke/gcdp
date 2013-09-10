@@ -23,9 +23,9 @@ subroutine  mesh_fftf()
       integer jp2,jp1,jm1,jm2
       integer kp2,kp1,km1,km2
       double precision kx,ky,kz,kabs2
+      double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz
 ! *** for test file *** 
       character fileo*60
-
 
 ! initialisation
       do k=1,nz_m
@@ -35,6 +35,11 @@ subroutine  mesh_fftf()
           enddo
         enddo
       enddo
+! for CIC deconvolution
+      l2nx=0.5d0*dx_m
+      l2ny=0.5d0*dy_m
+      l2nz=0.5d0*dy_m
+
 ! set real space data 
       do k=1,nz_m
         do j=1,ny_m
@@ -82,6 +87,16 @@ subroutine  mesh_fftf()
             kabs2=kx**2+ky**2+kz**2
 ! x Green function
             ksd_fftw(i,j,k)=4.0d0*M_PI*ksd_fftw(i,j,k)/kabs2            
+! deconvolution for CIC
+            if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
+              kxl2nx=kx*l2nx
+              kyl2ny=ky*l2ny
+              kzl2nz=kz*l2nz
+              ksd_fftw(i,j,k)=ksd_fftw(i,j,k) &
+               /(((dsin(kxl2nx)/(kxl2nx))**4) &
+                *((dsin(kyl2ny)/(kyl2ny))**4) &
+                *((dsin(kzl2nz)/(kzl2nz))**4)) 
+            endif
           enddo
 
           do i=i1,nx_m/2+1
