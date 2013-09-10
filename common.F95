@@ -416,6 +416,10 @@ module gcdp_system
 #endif
 #endif
 
+#ifdef TREEPM
+      double precision SI_2rstpm,SI_rsp2tpm,SI_rshtpm
+#endif
+
 ! *** for counting walltime ***
       double precision WTM_ini,WTM_out,WTM_ddecb,WTM_ddecdm &
       ,WTM_cont,WTM_setval,WTM_calcvu,WTM_tree,WTM_starf &

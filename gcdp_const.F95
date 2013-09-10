@@ -52,6 +52,14 @@ module gcdp_const
       double precision,parameter :: ALPHAT=0.0025d0
 #endif
 
+#ifdef TREEPM
+! *** for TreePM ***
+! factor for scale length w.r.t. grid size
+      double precision,parameter :: FRSTPM=1.25d0
+! factor for neighbour search for short range force
+      double precision,parameter :: FRSHTPM=4.5d0
+#endif
+
 ! *** for at Table ***
       integer,parameter :: NATTABLE=50000
 ! *** for kernel tables ***

@@ -87,6 +87,9 @@ subroutine  mesh_fftf()
             kabs2=kx**2+ky**2+kz**2
 ! x Green function
             ksd_fftw(i,j,k)=4.0d0*M_PI*ksd_fftw(i,j,k)/kabs2            
+! PMTree long range force trunction
+            ksd_fftw(i,j,k)=ksd_fftw(i,j,k) &
+             *dexp(-kabs2*SI_rsp2tpm)
 ! deconvolution for CIC
             if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
               kxl2nx=kx*l2nx
