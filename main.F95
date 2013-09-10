@@ -511,14 +511,6 @@ program gcdp
 #endif
 #endif
 
-#ifdef TREEPM
-! assign density
-        call mesh_setrho(np,ndm)
-! calculate potential
-        call mesh_fftf()
-! assign force to particles
-        call mesh_setfp(nag,nas,nadm)
-#endif
 
 ! *************************************
 !  Calculate dv/dt & du/dt ( Initial )
@@ -528,6 +520,15 @@ program gcdp
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
          ,nagt,nadmt,nast,nagravgt,flagv,flagu,1)
 
+! TreePM long-range force
+#ifdef TREEPM
+! assign density
+        call mesh_setrho(np,ndm)
+! calculate potential
+        call mesh_fftf()
+! assign force to particles
+        call mesh_setfp(nag,nas,nadm)
+#endif
 
       endif
 ! *****   >>>  Start Iteration   <<<   *****

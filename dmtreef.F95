@@ -41,7 +41,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 ! * for test far away *
       double precision theta2
       double precision l_r2
-      double precision xij,yij,zij
+      double precision xij,yij,zij,tij
       double precision dphiir,dphijr,si,sj,hsi,hsj
 #ifdef QPTREEF
       double precision dp_ij,d2phii,d2phij,d3phii,d3phij,d2p_ij,d3p_ij
@@ -224,8 +224,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         if(np_tr(nd).gt.1) then
 ! *** check for particles within a node ***
           xij=tdvr(pn)-cx_tr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_tr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_tr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_tr(nd)) then
           if(dabs(yij).lt.0.6d0*l_tr(nd)) then
           if(dabs(zij).lt.0.6d0*l_tr(nd)) then
@@ -237,8 +267,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_tr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_tr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_tr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance check ***
@@ -670,8 +730,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         flago(pn)=0
         if(np_dmtr(nd).gt.1) then
           xij=tdvr(pn)-cx_dmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_dmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_dmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_dmtr(nd)) then
           if(dabs(yij).lt.0.6d0*l_dmtr(nd)) then
           if(dabs(zij).lt.0.6d0*l_dmtr(nd)) then
@@ -682,8 +772,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_dmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_dmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_dmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance calculation ***
@@ -1107,8 +1227,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         flago(pn)=0
         if(np_ldmtr(nd).gt.1) then
           xij=tdvr(pn)-cx_ldmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_ldmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_ldmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_ldmtr(nd)) then
           if(dabs(yij).lt.0.6d0*l_ldmtr(nd)) then
           if(dabs(zij).lt.0.6d0*l_ldmtr(nd)) then
@@ -1119,8 +1269,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_ldmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_ldmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_ldmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance calculation ***
@@ -1856,8 +2036,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 ! *** check for particles within a node ***
                 if(nppnd(nd).gt.1) then
                   xij=x_dm(pn)-cxpnd(nd)
+#ifdef BCX_PERIOD   
+                  tij=xij-SI_lbox(0)
+                  if(dabs(tij).lt.dabs(xij)) then
+                    xij=tij
+                  endif
+                  tij=xij+SI_lbox(0)
+                  if(dabs(tij).lt.dabs(xij)) then
+                    xij=tij
+                  endif
+#endif
                   yij=y_dm(pn)-cypnd(nd)
+#ifdef BCY_PERIOD   
+                  tij=yij-SI_lbox(1)
+                  if(dabs(tij).lt.dabs(yij)) then
+                    yij=tij
+                  endif
+                  tij=yij+SI_lbox(1)
+                  if(dabs(tij).lt.dabs(yij)) then
+                    yij=tij
+                  endif
+#endif
                   zij=z_dm(pn)-czpnd(nd)
+#ifdef BCZ_PERIOD   
+                  tij=zij-SI_lbox(2)
+                  if(dabs(tij).lt.dabs(zij)) then
+                    zij=tij
+                  endif
+                  tij=zij+SI_lbox(2)
+                  if(dabs(tij).lt.dabs(zij)) then
+                    zij=tij
+                  endif
+#endif
                   if(dabs(xij).lt.0.6d0*lpnd(nd)) then
                   if(dabs(yij).lt.0.6d0*lpnd(nd)) then
                   if(dabs(zij).lt.0.6d0*lpnd(nd)) then
@@ -1868,8 +2078,38 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
                   endif
                   if(flagp.eq.0) then
                     xij=x_dm(pn)-xpnd(nd)
+#ifdef BCX_PERIOD   
+                    tij=xij-SI_lbox(0)
+                    if(dabs(tij).lt.dabs(xij)) then
+                      xij=tij
+                    endif
+                    tij=xij+SI_lbox(0)
+                    if(dabs(tij).lt.dabs(xij)) then
+                      xij=tij
+                    endif
+#endif
                     yij=y_dm(pn)-ypnd(nd)
+#ifdef BCY_PERIOD   
+                    tij=yij-SI_lbox(1)
+                    if(dabs(tij).lt.dabs(yij)) then
+                      yij=tij
+                    endif
+                    tij=yij+SI_lbox(1)
+                    if(dabs(tij).lt.dabs(yij)) then
+                      yij=tij
+                    endif
+#endif
                     zij=z_dm(pn)-zpnd(nd)
+#ifdef BCZ_PERIOD   
+                    tij=zij-SI_lbox(2)
+                    if(dabs(tij).lt.dabs(zij)) then
+                      zij=tij
+                    endif
+                    tij=zij+SI_lbox(2)
+                    if(dabs(tij).lt.dabs(zij)) then
+                      zij=tij
+                    endif
+#endif
                     r2=xij*xij+yij*yij+zij*zij
                     if(flags.eq.0) then
                       if(r2.gt.0.0d0) then
@@ -2058,6 +2298,29 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       deallocate(flagproc)
       deallocate(flagcom)
       deallocate(pncomp)
+
+! test output
+      write(fileo,'(a5,i3.3)') 'fdmtf',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nadm-1
+        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) & 
+         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,m_dm(i)
+        else
+        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         ,m_dm(i)
+        endif
+      enddo
+      close(60)
+      stop
+
 
 end subroutine
 #endif      

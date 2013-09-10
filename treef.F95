@@ -739,8 +739,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         flago(pn)=0
         if(np_dmtr(nd).gt.1) then
           xij=tdvr(pn)-cx_dmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_dmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_dmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_dmtr(nd)) then
           if(dabs(yij).lt.0.6d0*l_dmtr(nd)) then
           if(dabs(zij).lt.0.6d0*l_dmtr(nd)) then
@@ -751,8 +781,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_dmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_dmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_dmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance calculation ***
@@ -1179,8 +1239,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         flago(pn)=0
         if(np_ldmtr(nd).gt.1) then
           xij=tdvr(pn)-cx_ldmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cy_ldmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cz_ldmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           if(dabs(xij).lt.0.6d0*l_ldmtr(nd)) then
           if(dabs(yij).lt.0.6d0*l_ldmtr(nd)) then
           if(dabs(zij).lt.0.6d0*l_ldmtr(nd)) then
@@ -1191,8 +1281,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_ldmtr(nd)
+#ifdef BCX_PERIOD   
+          tij=xij-SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+          tij=xij+SI_lbox(0)
+          if(dabs(tij).lt.dabs(xij)) then
+            xij=tij
+          endif
+#endif
           yij=tdvr(pn+npj)-cmy_ldmtr(nd)		
+#ifdef BCY_PERIOD   
+          tij=yij-SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+          tij=yij+SI_lbox(1)
+          if(dabs(tij).lt.dabs(yij)) then
+            yij=tij
+          endif
+#endif
           zij=tdvr(pn+npj*2)-cmz_ldmtr(nd)
+#ifdef BCZ_PERIOD   
+          tij=zij-SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+          tij=zij+SI_lbox(2)
+          if(dabs(tij).lt.dabs(zij)) then
+            zij=tij
+          endif
+#endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
 ! *** register the particles need distance calculation ***
@@ -1934,8 +2054,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! *** check for particles within a node ***
                 if(nppnd(nd).gt.1) then
                   xij=x_p(pn)-cxpnd(nd)
+#ifdef BCX_PERIOD   
+                  tij=xij-SI_lbox(0)
+                  if(dabs(tij).lt.dabs(xij)) then
+                    xij=tij
+                  endif
+                  tij=xij+SI_lbox(0)
+                  if(dabs(tij).lt.dabs(xij)) then
+                    xij=tij
+                  endif
+#endif
                   yij=y_p(pn)-cypnd(nd)
+#ifdef BCY_PERIOD   
+                  tij=yij-SI_lbox(1)
+                  if(dabs(tij).lt.dabs(yij)) then
+                    yij=tij
+                  endif
+                  tij=yij+SI_lbox(1)
+                  if(dabs(tij).lt.dabs(yij)) then
+                    yij=tij
+                  endif
+#endif
                   zij=z_p(pn)-czpnd(nd)
+#ifdef BCZ_PERIOD   
+                  tij=zij-SI_lbox(2)
+                  if(dabs(tij).lt.dabs(zij)) then
+                    zij=tij
+                  endif
+                  tij=zij+SI_lbox(2)
+                  if(dabs(tij).lt.dabs(zij)) then
+                    zij=tij
+                  endif
+#endif
                   if(dabs(xij).lt.0.6d0*lpnd(nd)) then
                   if(dabs(yij).lt.0.6d0*lpnd(nd)) then
                   if(dabs(zij).lt.0.6d0*lpnd(nd)) then
@@ -1946,8 +2096,38 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
                   endif
                   if(flagp.eq.0) then
                     xij=x_p(pn)-xpnd(nd)
+#ifdef BCX_PERIOD   
+                    tij=xij-SI_lbox(0)
+                    if(dabs(tij).lt.dabs(xij)) then
+                      xij=tij
+                    endif
+                    tij=xij+SI_lbox(0)
+                    if(dabs(tij).lt.dabs(xij)) then
+                      xij=tij
+                    endif
+#endif
                     yij=y_p(pn)-ypnd(nd)
+#ifdef BCY_PERIOD   
+                    tij=yij-SI_lbox(1)
+                    if(dabs(tij).lt.dabs(yij)) then
+                      yij=tij
+                    endif
+                    tij=yij+SI_lbox(1)
+                    if(dabs(tij).lt.dabs(yij)) then
+                      yij=tij
+                    endif
+#endif
                     zij=z_p(pn)-zpnd(nd)
+#ifdef BCZ_PERIOD   
+                    tij=zij-SI_lbox(2)
+                    if(dabs(tij).lt.dabs(zij)) then
+                      zij=tij
+                    endif
+                    tij=zij+SI_lbox(2)
+                    if(dabs(tij).lt.dabs(zij)) then
+                      zij=tij
+                    endif
+#endif
                     r2=xij*xij+yij*yij+zij*zij
                     if(flags.eq.0) then
                       if(r2.gt.0.0d0) then
@@ -2136,25 +2316,26 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(flagcom)
       deallocate(pncomp)
 
-! test output
-      write(fileo,'(a3,i3.3)') 'fpt',myrank
+      write(fileo,'(a4,i3.3)') 'fptf',myrank
       open(60,file=fileo,status='unknown')
       do i=0,nag-1
         if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
-        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
-         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+         ,ax_p(i),ay_p(i),az_p(i) &
          ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
-         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i)) &
-         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) 
+         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
+         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2)  &
+         ,h_p(i)
         else
-        write(60,'(8(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
          ,dvx_p(i),dvy_p(i),dvz_p(i) &
          ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
-         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i))
+         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
+         ,h_p(i)
         endif
       enddo
       close(60)
-      stop
+
 
 end subroutine
 #endif

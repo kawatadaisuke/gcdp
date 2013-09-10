@@ -75,7 +75,7 @@
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
 #define QPTREEF
-! #undef QPTREEF
+#undef QPTREEF
 !
 ! *** turn on FAST (Saitoh & Makino 2010)
 #define FASTG
@@ -132,8 +132,8 @@
 #define FFTW3_ESTIMATE
 !
 #define ADTESTSIM
-! #undef DM
-#undef GAS
+#undef DM
+! #undef GAS
 !
 ! *** isolated galaxy
 ! #define MAXR
