@@ -311,7 +311,7 @@ subroutine  mesh_setfp(nag,nas,nadm)
         endif
       enddo
       close(60)
-!      stop
+      stop
 
 #endif
 

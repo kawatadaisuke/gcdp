@@ -2637,6 +2637,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       deallocate(cproc)
       deallocate(npjr)
 
+#ifdef GAS
       deallocate(tdvr)
       deallocate(flagproc)
       deallocate(flagcom)
@@ -2652,6 +2653,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 #ifdef MHD
       deallocate(tdmhd)
+#endif
 #endif
 
 !      write(fileo,'(a5,i3.3)') 'calvu',myrank

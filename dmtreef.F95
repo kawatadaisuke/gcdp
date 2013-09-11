@@ -82,6 +82,14 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
        ,lpnd(:),deltapnd(:),mpnd(:),cxpnd(:),cypnd(:),czpnd(:) &
        ,trbuf(:)
       double precision,allocatable :: tdvs(:),tdvr(:)
+#ifdef TREEPM 
+      double precision crit
+      double precision erfcc
+      external erfcc
+
+! the distance from the corner of square to the centre, assuming 3D
+      crit=dsqrt(3.0d0)*0.5d0
+#endif
 
 ! ***** Initialization *****
       theta2 = THETA*THETA
@@ -769,6 +777,19 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
           endif
           endif
           endif
+#ifdef TREEPM
+          if(flago(pn).eq.0) then
+! distance from particle tothe closest possible particle within the node
+            rij=dsqrt(xij*xij+yij*yij+zij*zij)-crit*l_dmtr(nd)
+            if(rij.gt.SI_rshtpm) then
+! no force calculation, goto next node
+              node(pn)=next_dmtr(nd)		              
+! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
+! 1, 2, 3 are used for the case of going down to a daughter
+              flago(pn)=-1
+            endif
+          endif
+#endif
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_dmtr(nd)
@@ -806,6 +827,18 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 #endif
           r2=xij*xij+yij*yij+zij*zij
           if(r2.gt.0.0d0) then
+#ifdef TREEPM
+! check if the particle is outside FRSHTPM x rs
+            if(np_dmtr(nd).eq.1) then
+              if(r2.gt.SI_rshtpm**2) then
+! goto next node
+                node(pn)=next_dmtr(nd)
+                flago(pn)=-1
+              endif
+            endif
+            if(flago(pn).eq.0) then            
+#endif
+
 ! *** register the particles need distance calculation ***
             npltf(ntf)=pn
 ! *** store distance from the center of the mass ***
@@ -814,6 +847,9 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             zijp(ntf)=zij
             r2p(ntf)=r2
             ntf=ntf+1
+#ifdef TREEPM
+            endif
+#endif
           else if(np_dmtr(nd).eq.1) then
             node(pn)=next_dmtr(nd)		
           else
@@ -929,7 +965,14 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             endif
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
+#ifdef TREEPM
+            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr)
+#endif
+
             dhc=m_dm(pnj)*0.5d0*G*((tdvr(pn+npj*5)/tdvr(pn+npj*4))*dwi &
              +(zetah_dm(pnj)/omgh_dm(pnj))*dwj)
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-xijp(i)*(pot+dhc)
@@ -1105,8 +1148,15 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
              +myz_dmtr(nd)*((-yij*ir3+3.0d0*z2ij*yij*ir5)*dp_ij &
              +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij)
 #else
+#ifdef TREEPM
+            pot=mass_dmtr(nd)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=mass_dmtr(nd)*0.5d0*G*(dphiir+dphijr) 
+#endif
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xijp(i)*pot)
+          
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yijp(i)*pot)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zijp(i)*pot)
 #endif
@@ -2319,8 +2369,6 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
         endif
       enddo
       close(60)
-      stop
-
 
 end subroutine
 #endif      

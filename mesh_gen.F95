@@ -55,17 +55,15 @@ subroutine  mesh_gen()
       dv_m=dx_m*dy_m*dz_m
 ! set TreePM scale length
 ! rs
-      SI_2rstpm=dv_m**THIRD
+      SI_rstpm=FRSTPM*(dv_m**THIRD)
 ! rs^2
-      SI_rsp2tpm=FRSTPM*(SI_2rstpm**2)
+      SI_rsp2tpm=(SI_rstpm**2)
 ! radius for short range force
-      SI_rshtpm=FRSHTPM*SI_2rstpm
+      SI_rshtpm=FRSHTPM*SI_rstpm
 
       if(myrank.eq.0) then
-        write(6,*) ' rs for TreePM=',SI_2rstpm
+        write(6,*) ' rs for TreePM=',SI_rstpm
       endif
-
-      SI_2rstpm=2.0d0*SI_2rstpm
 
 ! mesh points 1d
       do i=0,nx_m-1

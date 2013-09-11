@@ -417,7 +417,7 @@ module gcdp_system
 #endif
 
 #ifdef TREEPM
-      double precision SI_2rstpm,SI_rsp2tpm,SI_rshtpm
+      double precision SI_rstpm,SI_rsp2tpm,SI_rshtpm
 #endif
 
 ! *** for counting walltime ***
