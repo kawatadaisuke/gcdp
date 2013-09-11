@@ -2350,25 +2350,25 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
       deallocate(pncomp)
 
 ! test output
-      write(fileo,'(a5,i3.3)') 'fdmtf',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,nadm-1
-        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) & 
-         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,m_dm(i)
-        else
-        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         ,m_dm(i)
-        endif
-      enddo
-      close(60)
+!      write(fileo,'(a5,i3.3)') 'fdmtf',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,nadm-1
+!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+!        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) & 
+!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,m_dm(i)
+!        else
+!        write(60,'(9(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         ,m_dm(i)
+!        endif
+!      enddo
+!      close(60)
 
 end subroutine
 #endif      

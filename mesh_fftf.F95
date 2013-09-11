@@ -55,8 +55,8 @@ subroutine  mesh_fftf()
 ! For normalisation see eq. A-9 and A-10 of Hockney & Eastwood
 
 ! test output
-      write(fileo,'(a3,i3.3)') 'ksd',myrank
-      open(60,file=fileo,status='unknown')
+!      write(fileo,'(a3,i3.3)') 'ksd',myrank
+!      open(60,file=fileo,status='unknown')
 
       do k=1,nz_m
         if(k.le.nz2_m+1) then
@@ -102,38 +102,36 @@ subroutine  mesh_fftf()
             endif
           enddo
 
-          do i=i1,nx_m/2+1
-            kx=dkx_m*dble(i-1)
-            kabs2=kx**2+ky**2+kz**2
-
-            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,j,k)*dv_m &
-            ,kx,ky,kz,kabs2
-          enddo
+!          do i=i1,nx_m/2+1
+!            kx=dkx_m*dble(i-1)
+!            kabs2=kx**2+ky**2+kz**2
+!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,j,k)*dv_m &
+!            ,kx,ky,kz,kabs2
+!          enddo
 
         enddo
       enddo
 
-      close(60)
+!      close(60)
 
 ! backward FFT
       call fftw_execute_dft_c2r(planb_fftw,ksd_fftw,rsd_fftw)
 
 ! test output
-      write(fileo,'(a3,i3.3)') 'rsd',myrank
-      open(60,file=fileo,status='unknown')
-      do k=1,nz_m
-        do j=1,ny_m
-          do i=1,nx_m
-            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1),y_m(i-1,j-1,k-1) &
-             ,z_m(i-1,j-1,k-1) &
-             ,rsd_fftw(i,j,k)/dble(nt_m) &
-             ,dsqrt(x_m(i-1,j-1,k-1)**2+y_m(i-1,j-1,k-1)**2 &
-              +z_m(i-1,j-1,k-1)**2)
-          enddo
-        enddo
-      enddo
-      close(60)
-!      stop
+!      write(fileo,'(a3,i3.3)') 'rsd',myrank
+!      open(60,file=fileo,status='unknown')
+!      do k=1,nz_m
+!        do j=1,ny_m
+!          do i=1,nx_m
+!            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1),y_m(i-1,j-1,k-1) &
+!             ,z_m(i-1,j-1,k-1) &
+!             ,rsd_fftw(i,j,k)/dble(nt_m) &
+!             ,dsqrt(x_m(i-1,j-1,k-1)**2+y_m(i-1,j-1,k-1)**2 &
+!              +z_m(i-1,j-1,k-1)**2)
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
 
 ! set real space potential data 
       do k=1,nz_m
@@ -212,21 +210,20 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
-     write(fileo,'(a4,i3.3)') 'fpot',myrank
-      open(60,file=fileo,status='unknown')
-      do k=0,nz_m-1
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-            write(60,'(8(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
-             ,pot_m(i,j,k)/dble(nt_m) &
-!             ,pot_m(i,j,k) &
-             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k) &
-             ,dsqrt(x_m(i,j,k)**2+y_m(i,j,k)**2+z_m(i,j,k)**2)
-          enddo
-        enddo
-      enddo
-      close(60)
-
+!     write(fileo,'(a4,i3.3)') 'fpot',myrank
+!      open(60,file=fileo,status='unknown')
+!      do k=0,nz_m-1
+!        do j=0,ny_m-1
+!          do i=0,nx_m-1
+!            write(60,'(8(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
+!             ,pot_m(i,j,k)/dble(nt_m) &
+!!             ,pot_m(i,j,k) &
+!             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k) &
+!             ,dsqrt(x_m(i,j,k)**2+y_m(i,j,k)**2+z_m(i,j,k)**2)
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
 
 end subroutine
 #endif

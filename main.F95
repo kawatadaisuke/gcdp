@@ -14,6 +14,10 @@ program gcdp
       use gcdp_metal
 #endif
 #endif
+#ifdef DM
+      use gcdp_dm
+#endif
+
       implicit none
       include 'mpif.h'
 ! * Total Number of Particles, Active *   
@@ -316,8 +320,8 @@ program gcdp
 ! **********************
 !   Domain Decomposition
 !  **********************
-!      if(nprocs.gt.1.and.flagcont.eq.0) then
-      if(flagcont.eq.0) then
+      if(nprocs.gt.1.and.flagcont.eq.0) then
+!      if(flagcont.eq.0) then
 ! *** for baryon ***
         if(step.eq.0.and.flagcont.eq.0) then
 #ifdef RHOINI
@@ -517,17 +521,57 @@ program gcdp
 ! *************************************
         flagv = 0
         flagu = 0
+
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ectime=MPI_WTIME()
+        if(myrank.eq.0) then
+          write(6,*) ' begin tree force',ectime-ntime
+        endif
+
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
          ,nagt,nadmt,nast,nagravgt,flagv,flagu,1)
 
-! TreePM long-range force
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ectime=MPI_WTIME()
+        if(myrank.eq.0) then
+          write(6,*) ' finish tree force',ectime-ntime
+        endif
+
 #ifdef TREEPM
+! TreePM long-range force
+! ***** adding PM force *****
 ! assign density
         call mesh_setrho(np,ndm)
 ! calculate potential
         call mesh_fftf()
 ! assign force to particles
         call mesh_setfp(nag,nas,nadm)
+
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      if(myrank.eq.0) then
+        write(6,*) ' mesh force end',ectime-ntime
+      endif
+
+! test output
+!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,nadm-1
+!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+!        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) 
+!        else
+!        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i))
+!        endif
+!      enddo
+!      close(60)
+!      stop
 #endif
 
       endif
@@ -1029,6 +1073,16 @@ program gcdp
 !      enddo
 !      close(60)
 !      stop
+
+#ifdef TREEPM
+! ***** adding PM force *****
+! assign density
+        call mesh_setrho(np,ndm)
+! calculate potential
+        call mesh_fftf()
+! assign force to particles
+        call mesh_setfp(nag,nas,nadm)
+#endif
 
 ! *************************
 !  Update Velocity V(n+1)

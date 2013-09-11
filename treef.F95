@@ -2316,26 +2316,25 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       deallocate(flagcom)
       deallocate(pncomp)
 
-      write(fileo,'(a4,i3.3)') 'fptf',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,nag-1
-        if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
-        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
-         ,ax_p(i),ay_p(i),az_p(i) &
-         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
-         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
-         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2)  &
-         ,h_p(i)
-        else
-        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
-         ,dvx_p(i),dvy_p(i),dvz_p(i) &
-         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
-         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
-         ,h_p(i)
-        endif
-      enddo
-      close(60)
-
+!      write(fileo,'(a4,i3.3)') 'fptf',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,nag-1
+!        if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
+!        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+!         ,ax_p(i),ay_p(i),az_p(i) &
+!         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+!         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
+!         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2)  &
+!         ,h_p(i)
+!        else
+!        write(60,'(9(1pE13.5))') x_p(i),y_p(i),z_p(i) &
+!         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+!         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+!         ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
+!         ,h_p(i)
+!        endif
+!      enddo
+!      close(60)
 
 end subroutine
 #endif

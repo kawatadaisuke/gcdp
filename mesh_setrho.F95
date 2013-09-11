@@ -23,9 +23,11 @@ subroutine  mesh_setrho(np,ndm)
 
       integer,intent(in) :: np,ndm
 
-      integer i,j,k,ip0,jp0,kp0,ip1,jp1,kp1,w1,w2
+      integer i,j,k,ip0,jp0,kp0,ip1,jp1,kp1,w1,w2,npmp
       double precision df,vm
       double precision wx0,wx1,wy0,wy1,wz0,wz1
+      integer ierr
+      double precision,allocatable :: tdvs(:),tdvr(:)
 ! *** for test file *** 
       character fileo*60
 
@@ -62,12 +64,12 @@ subroutine  mesh_setrho(np,ndm)
           wx1=df
         endif
 ! for check
-        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
-          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for baryon: wx0,wx1=',wx0,wx1
-          write(6,*) ' x,ip0,ip1=',x_p(i),ip0,ip1
-          stop
-        endif
+!        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
+!          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for baryon: wx0,wx1=',wx0,wx1
+!          write(6,*) ' x,ip0,ip1=',x_p(i),ip0,ip1
+!          stop
+!        endif
 ! y
         if(y_p(i).le.y0_m) then
           jp0=ny_m-1
@@ -89,12 +91,12 @@ subroutine  mesh_setrho(np,ndm)
           wy1=df
         endif
 ! for check
-        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
-          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for baryon: wy0,wy1=',wy0,wy1
-          write(6,*) ' y,jp0,jp1=',y_p(i),jp0,jp1
-          stop
-        endif
+!        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
+!          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for baryon: wy0,wy1=',wy0,wy1
+!          write(6,*) ' y,jp0,jp1=',y_p(i),jp0,jp1
+!          stop
+!        endif
 ! z
         if(z_p(i).le.z0_m) then
           kp0=nz_m-1
@@ -116,12 +118,12 @@ subroutine  mesh_setrho(np,ndm)
           wz1=df
         endif
 ! for check
-        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
-          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for baryon: wz0,wz1=',wz0,wz1
-          write(6,*) ' z,kp0,kp1=',z_p(i),kp0,kp1
-          stop
-        endif
+!        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
+!          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for baryon: wz0,wz1=',wz0,wz1
+!          write(6,*) ' z,kp0,kp1=',z_p(i),kp0,kp1
+!          stop
+!        endif
 
 ! assign the mass
 ! kp0
@@ -171,12 +173,12 @@ subroutine  mesh_setrho(np,ndm)
           wx1=df
         endif
 ! for check
-        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
-          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for DM: wx0,wx1=',wx0,wx1
-          write(6,*) ' x,ip0,ip1=',x_dm(i),ip0,ip1
-          stop
-        endif
+!        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
+!          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for DM: wx0,wx1=',wx0,wx1
+!          write(6,*) ' x,ip0,ip1=',x_dm(i),ip0,ip1
+!          stop
+!        endif
 ! y
         if(y_dm(i).le.y0_m) then
           jp0=ny_m-1
@@ -198,12 +200,12 @@ subroutine  mesh_setrho(np,ndm)
           wy1=df
         endif
 ! for check
-        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
-          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for DM: wy0,wy1=',wy0,wy1
-          write(6,*) ' y,jp0,jp1=',y_dm(i),jp0,jp1
-          stop
-        endif
+!        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
+!          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for DM: wy0,wy1=',wy0,wy1
+!          write(6,*) ' y,jp0,jp1=',y_dm(i),jp0,jp1
+!          stop
+!        endif
 ! z
         if(z_dm(i).le.z0_m) then
           kp0=nz_m-1
@@ -225,12 +227,12 @@ subroutine  mesh_setrho(np,ndm)
           wz1=df
         endif
 ! for check
-        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
-          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for DM: wz0,wz1=',wz0,wz1
-          write(6,*) ' z,kp0,kp1=',z_dm(i),kp0,kp1
-          stop
-        endif
+!        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
+!          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
+!          write(6,*) ' Error in mesh_setrho() for DM: wz0,wz1=',wz0,wz1
+!          write(6,*) ' z,kp0,kp1=',z_dm(i),kp0,kp1
+!          stop
+!        endif
 
 ! assign the density
 ! kp0
@@ -255,6 +257,39 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 #endif
 
+      if(nprocs.gt.0) then
+
+        allocate(tdvr(0:nt_m))
+        allocate(tdvs(0:nt_m))
+     
+! sum up the density from all the cores
+        npmp=0
+        do k=0,nz_m-1
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              tdvs(npmp)=rho_m(i,j,k)
+              tdvr(npmp)=0.0d0
+              npmp=npmp+1
+            enddo
+          enddo
+        enddo
+        call MPI_ALLREDUCE(tdvs,tdvr,npmp,MPI_DOUBLE_PRECISION &
+         ,MPI_SUM,MPI_COMM_WORLD,ierr)
+        npmp=0
+        do k=0,nz_m-1
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              rho_m(i,j,k)=tdvr(npmp)
+              npmp=npmp+1
+            enddo
+          enddo
+        enddo
+
+        deallocate(tdvr)
+        deallocate(tdvs)
+
+      endif
+    
 ! volume of each mesh
       vm=dx_m*dy_m*dz_m
 ! density
@@ -267,18 +302,17 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 
 ! test output
-      write(fileo,'(a6,i3.3)') 'meshrho',myrank
-      open(60,file=fileo,status='unknown')
-      do k=0,nz_m-1
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-            write(60,'(4(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
-              ,rho_m(i,j,k)
-          enddo
-        enddo
-      enddo
-      close(60)
-
+!      write(fileo,'(a6,i3.3)') 'meshrho',myrank
+!      open(60,file=fileo,status='unknown')
+!      do k=0,nz_m-1
+!        do j=0,ny_m-1
+!          do i=0,nx_m-1
+!            write(60,'(4(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
+!              ,rho_m(i,j,k)
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
 
 end subroutine
 #endif

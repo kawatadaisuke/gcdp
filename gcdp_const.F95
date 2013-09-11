@@ -58,6 +58,7 @@ module gcdp_const
       double precision,parameter :: FRSTPM=1.25d0
 ! factor for neighbour search for short range force
       double precision,parameter :: FRSHTPM=4.5d0
+!      double precision,parameter :: FRSHTPM=6.0d0
 #endif
 
 ! *** for at Table ***

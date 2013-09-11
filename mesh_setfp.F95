@@ -53,13 +53,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           wx0=1.0d0-df
           wx1=df
         endif
-! for check
-        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
-          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setf() for gas: wx0,wx1=',wx0,wx1
-          write(6,*) ' x,ip0,ip1=',x_p(pn),ip0,ip1
-          stop
-        endif
 ! y
         if(y_p(pn).le.y0_m) then
           jp0=ny_m-1
@@ -80,13 +73,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           wy0=1.0d0-df
           wy1=df
         endif
-! for check
-        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
-          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setf() for gas: wy0,wy1=',wy0,wy1
-          write(6,*) ' y,jp0,jp1=',y_p(pn),jp0,jp1
-          stop
-        endif
 ! z
         if(z_p(pn).le.z0_m) then
           kp0=nz_m-1
@@ -106,13 +92,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           df=(z_p(pn)-z_m1d(kp0))/dz_m
           wz0=1.0d0-df
           wz1=df
-        endif
-! for check
-        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
-          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for gas: wz0,wz1=',wz0,wz1
-          write(6,*) ' z,kp0,kp1=',z_p(pn),kp0,kp1
-          stop
         endif
 
 ! assign force to the particles
@@ -197,13 +176,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           wx0=1.0d0-df
           wx1=df
         endif
-! for check
-        if((wx0.lt.0.0d0.or.wx0.gt.1.0d0) &
-          .or.(wx1.lt.0.0d0.or.wx1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setf() for gas: wx0,wx1=',wx0,wx1
-          write(6,*) ' x,ip0,ip1=',x_dm(pn),ip0,ip1
-          stop
-        endif
 ! y
         if(y_dm(pn).le.y0_m) then
           jp0=ny_m-1
@@ -224,13 +196,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           wy0=1.0d0-df
           wy1=df
         endif
-! for check
-        if((wy0.lt.0.0d0.or.wy0.gt.1.0d0) &
-          .or.(wy1.lt.0.0d0.or.wy1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setf() for gas: wy0,wy1=',wy0,wy1
-          write(6,*) ' y,jp0,jp1=',y_dm(pn),jp0,jp1
-          stop
-        endif
 ! z
         if(z_dm(pn).le.z0_m) then
           kp0=nz_m-1
@@ -250,13 +215,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
           df=(z_dm(pn)-z_m1d(kp0))/dz_m
           wz0=1.0d0-df
           wz1=df
-        endif
-! for check
-        if((wz0.lt.0.0d0.or.wz0.gt.1.0d0) &
-          .or.(wz1.lt.0.0d0.or.wz1.gt.1.0d0)) then
-          write(6,*) ' Error in mesh_setrho() for gas: wz0,wz1=',wz0,wz1
-          write(6,*) ' z,kp0,kp1=',z_dm(pn),kp0,kp1
-          stop
         endif
 
 ! assign force to the particles
@@ -293,25 +251,6 @@ subroutine  mesh_setfp(nag,nas,nadm)
 
       enddo
 
-! test output
-      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,nadm-1
-        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) 
-        else
-        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i))
-        endif
-      enddo
-      close(60)
-      stop
 
 #endif
 
