@@ -210,6 +210,25 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           ndmt = ndmt+1
           ndt(il)=ndt(il)+1
         enddo
+#ifdef BOXSIM
+        if(il.eq.0) then
+          read(51) SI_lbox0(0),SI_lbox0(1),SI_lbox0(2)
+! Mpc -> 100 kpc
+          SI_lbox0(0)=SI_lbox0(0)*10.0d0
+          SI_lbox0(1)=SI_lbox0(1)*10.0d0
+          SI_lbox0(2)=SI_lbox0(2)*10.0d0
+! set box size at the initial redshift
+          SI_lbox(0)=SI_a*SI_lbox0(0)
+          SI_lbox(1)=SI_a*SI_lbox0(1)
+          SI_lbox(2)=SI_a*SI_lbox0(2)
+          if(myrank.eq.0) then
+            write(6,*) ' box size (comoving)=',SI_lbox0(0),SI_lbox0(1) &
+              ,SI_lbox0(2)
+            write(6,*) ' box size (initial) =',SI_lbox(0),SI_lbox(1) &
+              ,SI_lbox(2)
+          endif
+        endif
+#endif
         close(51)
 
       enddo
@@ -391,6 +410,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       iai = 1.0d0/SI_a
       hubi = SI_h0*HUB0*dsqrt(SI_omg0*iai*iai*iai &
        -(SI_omg0+SI_lam0-1.0)*iai*iai+SI_lam0)
+#ifdef BOXSIM
+      SI_hub=hubi
+#endif
 ! *** Calculate Initial Value ***
       rhob0=3.0d0*HUB0*SI_h0*HUB0*SI_h0/(8.0d0*M_PI*G)
       rhoba=rhob0*iai*iai*iai
@@ -408,6 +430,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         x_dm(i)=x_dm(i)*(SI_a*10.0d0)
         y_dm(i)=y_dm(i)*(SI_a*10.0d0)
         z_dm(i)=z_dm(i)*(SI_a*10.0d0)
+#ifdef BOXSIM
+        hub_dm(i)=SI_hub
+        asc_dm(i)=SI_a
+#endif
       enddo
 ! *** mass of DM for level 1 particles ***
       nc=0

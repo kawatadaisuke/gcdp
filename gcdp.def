@@ -62,7 +62,7 @@
 ! #define CENTRE0
 !
 ! *** fixed softening for DM
-#define FIXEDDMEPS
+! #define FIXEDDMEPS
 !
 ! *** DM softening limit to SI_eps*(m_dm**1/3) (default: limit)
 #define DMEPSLIM_G
@@ -75,7 +75,7 @@
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
 #define QPTREEF
-#undef QPTREEF
+! #undef QPTREEF
 !
 ! *** turn on FAST (Saitoh & Makino 2010)
 #define FASTG
@@ -131,9 +131,10 @@
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
 #define FFTW3_ESTIMATE
 !
-#define ADTESTSIM
+!#define ADTESTSIM
 ! #undef DM
 #undef GAS
+! #undef COSM
 !
 ! *** isolated galaxy
 ! #define MAXR

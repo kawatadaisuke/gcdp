@@ -7,7 +7,7 @@
 ! generating mesh points
 
 #ifdef TREEPM
-subroutine  mesh_gen()
+subroutine  mesh_gen(flag)
       use gcdp_const
       use gcdp_system
       use gcdp_pm
@@ -15,12 +15,23 @@ subroutine  mesh_gen()
       implicit none
       include 'mpif.h'
 
+      integer,intent(in) :: flag
+
       integer i,j,k
       double precision yp,zp
 !      character filen*60
 
 ! allocate memory space
-      call allocate_pm()
+      if(flag.eq.0) then
+        call allocate_pm()
+! half nx,ny,nz
+        nx2_m=nx_m/2
+        ny2_m=ny_m/2
+        nz2_m=nz_m/2
+! total number of mesh 
+        nt_m=nx_m*ny_m*nz_m
+
+      endif
 
 ! calculate grid space
       dx_m=SI_lbox(0)/dble(nx_m)
@@ -35,20 +46,16 @@ subroutine  mesh_gen()
       x0_m=-0.5d0*SI_lbox(0)+0.5d0*dx_m
       y0_m=-0.5d0*SI_lbox(1)+0.5d0*dy_m
       z0_m=-0.5d0*SI_lbox(2)+0.5d0*dz_m
-! half nx,ny,nz
-      nx2_m=nx_m/2
-      ny2_m=ny_m/2
-      nz2_m=nz_m/2
 
-      if(myrank.eq.0) then
-        write(6,*) ' Mesh info'
-        write(6,*) '   nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
-        write(6,*) '   dx,dy,dz=',dx_m,dy_m,dz_m
-        write(6,*) '   x0,y0,z0=',x0_m,y0_m,z0_m
+      if(flag.eq.0) then
+        if(myrank.eq.0) then
+          write(6,*) ' Mesh info'
+          write(6,*) '   nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
+          write(6,*) '   dx,dy,dz=',dx_m,dy_m,dz_m
+          write(6,*) '   x0,y0,z0=',x0_m,y0_m,z0_m
+        endif
       endif
 
-! total number of mesh 
-      nt_m=nx_m*ny_m*nz_m
 ! total box size
       vt_m=SI_lbox(0)*SI_lbox(1)*SI_lbox(2)
 ! mesh size
@@ -61,8 +68,11 @@ subroutine  mesh_gen()
 ! radius for short range force
       SI_rshtpm=FRSHTPM*SI_rstpm
 
-      if(myrank.eq.0) then
-        write(6,*) ' rs for TreePM=',SI_rstpm
+      if(flag.eq.0) then
+        if(myrank.eq.0) then
+          write(6,*) ' rs for TreePM=',SI_rstpm
+          write(6,*) '  rcut=',SI_rshtpm
+        endif
       endif
 
 ! mesh points 1d

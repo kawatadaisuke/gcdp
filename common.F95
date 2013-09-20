@@ -102,6 +102,7 @@ module gcdp_baryon
        ,tmzMg_p(:),tmzSi_p(:),tmzFe_p(:) &
        ,tmzZ_p(:) 
 #endif
+
 #endif
 !
 end module gcdp_baryon
@@ -170,6 +171,10 @@ module gcdp_dm
       integer,allocatable :: list_adm(:)
 ! * flag for time step changed 0: no change, otherwise changed *
       integer,allocatable :: flagt_dm(:)
+#if defined(COSM) && defined(BOXSIM)
+! Hubbble parameter and scale factor 
+       double precision,allocatable :: hub_dm(:),asc_dm(:)
+#endif
 
 end module gcdp_dm
 #endif
@@ -375,6 +380,10 @@ module gcdp_system
       double precision at_ttb(0:NATTABLE),ta_ttb(0:NATTABLE)
 ! * Cosmological Value *
       double precision SI_h0,SI_omg0,SI_lam0,SI_omgb
+#ifdef BOXSIM
+! Hubble parameter at that time
+      double precision SI_hub
+#endif
 #endif 
 #ifdef COOL
 ! * EoR redshift
@@ -392,6 +401,9 @@ module gcdp_system
 #ifdef BOXSIM
 ! *** box size ***
       double precision SI_lbox(0:2)
+#if defined(COSM) && defined(BOXSIM)
+      double precision SI_lbox0(0:2)
+#endif
 #endif
 #ifdef FIXEDP
       integer SI_fid(0:1)

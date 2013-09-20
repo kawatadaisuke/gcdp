@@ -487,6 +487,10 @@ subroutine allocate_dm_all(ndm)
       allocate(div_v_dm(0:ndm))
       allocate(list_adm(0:ndm))
       allocate(flagt_dm(0:ndm)) 
+#if defined(COSM) && defined(BOXSIM)
+      allocate(hub_dm(0:ndm))
+      allocate(asc_dm(0:ndm))
+#endif
 
 end subroutine
 
@@ -600,6 +604,10 @@ subroutine reallocate_dm_d3(ndm)
       deallocate(zetah_dm)
       deallocate(rho_dm)
       deallocate(div_v_dm)
+#if defined(COSM) && defined(BOXSIM)
+      deallocate(hub_dm)
+      deallocate(asc_dm)
+#endif
 
 ! allocate
       allocate(dtr_dm(0:ndm))
@@ -607,6 +615,10 @@ subroutine reallocate_dm_d3(ndm)
       allocate(zetah_dm(0:ndm))
       allocate(rho_dm(0:ndm))
       allocate(div_v_dm(0:ndm))
+#if defined(COSM) && defined(BOXSIM)
+      allocate(hub_dm(0:ndm))
+      allocate(asc_dm(0:ndm))
+#endif
 
 end subroutine
 

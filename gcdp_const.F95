@@ -9,7 +9,7 @@ module gcdp_const
 
       double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***
-      integer,parameter ::  NDSTEPDDEC=10
+      integer,parameter ::  NDSTEPDDEC=1
 ! maximum number of cpus
       integer,parameter :: NCPU=256
 ! maximum number of node to be sent

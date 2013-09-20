@@ -372,7 +372,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             dvx_dm(pn)=G*dvx_dm(pn)+SI_lam0*x_dm(pn)
             dvy_dm(pn)=G*dvy_dm(pn)+SI_lam0*y_dm(pn)
             dvz_dm(pn)=G*dvz_dm(pn)+SI_lam0*z_dm(pn)
-          enddo
+         enddo
 #endif
 #ifdef WTIME
           call MPI_BARRIER(MPI_COMM_WORLD,ierr)

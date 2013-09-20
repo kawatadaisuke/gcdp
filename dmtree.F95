@@ -833,6 +833,7 @@ subroutine dmmakeroot(np,cz)
       cx_dmtr(0)=(max_x+min_x)*0.5d0
       cy_dmtr(0)=(max_y+min_y)*0.5d0
       cz_dmtr(0)=(max_z+min_z)*0.5d0
+
       np_dmtr(0)=np
       pn_dmtr(0)=0
 #endif

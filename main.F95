@@ -150,7 +150,7 @@ program gcdp
       call setkernel()
 #ifdef TREEPM
 ! initial set up for TreePM
-      call mesh_gen()
+      call mesh_gen(0)
 #ifdef FFTW3
       call fftw3_init()
 #endif
@@ -320,8 +320,8 @@ program gcdp
 ! **********************
 !   Domain Decomposition
 !  **********************
-      if(nprocs.gt.1.and.flagcont.eq.0) then
-!      if(flagcont.eq.0) then
+!      if(nprocs.gt.1.and.flagcont.eq.0) then
+      if(flagcont.eq.0) then
 ! *** for baryon ***
         if(step.eq.0.and.flagcont.eq.0) then
 #ifdef RHOINI
@@ -554,24 +554,28 @@ program gcdp
       endif
 
 ! test output
-!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-!      open(60,file=fileo,status='unknown')
-!      do i=0,nadm-1
-!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-!        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) 
-!        else
-!        write(60,'(8(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i))
-!        endif
-!      enddo
-!      close(60)
+      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nadm-1
+        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+        else
+        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+        endif
+      enddo
+      close(60)
 !      stop
+
+
 #endif
 
       endif
@@ -786,6 +790,14 @@ program gcdp
            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
             ntime=MPI_WTIME()
 #endif
+#if defined(COSM) && defined(TREEPM)
+! update SI_lbox
+           call afromt(TM_tot+TM_dt,SI_a)
+           SI_lbox(0)=SI_a*SI_lbox0(0)
+           SI_lbox(1)=SI_a*SI_lbox0(1)
+           SI_lbox(2)=SI_a*SI_lbox0(2)
+
+#endif
             call updatev_pos(np,ndm)
 #ifdef WTIME
             call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -845,6 +857,10 @@ program gcdp
       else
         SI_eps=SI_eps0
       endif
+#ifdef BOXSIM
+! get Hubble parameter at n+1 step
+      call hubfroma(SI_a,SI_hub)
+#endif
 #endif
 ! ***************************
 !  Update Velocity V(n+1/2)
@@ -859,6 +875,12 @@ program gcdp
 ! **************************
 !  Update Virtual Position 
 ! **************************
+#if defined(COSM) && defined(BOXSIM)
+! update SI_lbox at n+1 step
+      SI_lbox(0)=SI_a*SI_lbox0(0)
+      SI_lbox(1)=SI_a*SI_lbox0(1)
+      SI_lbox(2)=SI_a*SI_lbox0(2)
+#endif
       call updatev_pos(np,ndm)
 ! ********************
 !   Update Position 
@@ -1076,6 +1098,8 @@ program gcdp
 
 #ifdef TREEPM
 ! ***** adding PM force *****
+! generate new mesh
+        call mesh_gen(1)
 ! assign density
         call mesh_setrho(np,ndm)
 ! calculate potential

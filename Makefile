@@ -13,12 +13,15 @@ INIOBJ = set_ini.o
 CONTOBJ = cont.o
 DEFFILE = gcdp.def gcdp_const.F95 common.F95
 ###  for MPICH 
-OPTIONS=-O3 -mcmodel=medium
+OPTIONS=-g -mcmodel=medium
 ### kepler 
-# MPI_DIR=/cluster/mpich2_3.0
+#MPI_DIR=/cluster/mpich2_3.0
+#FFTW_INC=/khome/dka/share/include
+#FFTW_LIB=/khome/dka/share/lib
 ### mac
 MPI_DIR = /Users/dkawata/share/mpi
 FFTW_INC=/usr/local/include
+FFTW_LIB=/usr/local/lib
 ### legion@UCL
 # MPI_DIR=/usr/mpi/qlogic
 # OPTIONS=-O3 -xSSSE3
@@ -31,7 +34,7 @@ FORT = ${MPI_DIR}/bin/mpif90
 MPI_INC = ${MPI_DIR}/include
 MPI_LIB = ${MPI_DIR}/lib 
 FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
-LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -lfftw3
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3
 ### for XT4
 # FORT=ftn
 # CPP=cpp

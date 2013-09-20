@@ -131,4 +131,24 @@ subroutine afromt(tn,an)
         *(tn-ta_ttb(it-1))/(ta_ttb(it)-ta_ttb(it-1))
 
 end subroutine
+
+#ifdef BOXSIM
+! *****   Definition of hubfroma()   *****
+subroutine hubfroma(an,hub)
+      use gcdp_const
+      use gcdp_system
+
+      implicit none
+
+      double precision,intent(in) :: an
+      double precision,intent(out) :: hub
+      double precision iai
+
+      iai = 1.0d0/an
+      hub = SI_h0*HUB0*dsqrt(SI_omg0*iai*iai*iai &
+       -(SI_omg0+SI_lam0-1.0)*iai*iai+SI_lam0)
+
+end subroutine
+#endif BOXSIM
+
 #endif
