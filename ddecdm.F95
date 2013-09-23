@@ -54,7 +54,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       integer,allocatable :: tivs(:),tivr(:)
       integer*8,allocatable :: phkeyr(:),phkeys(:)
       integer*8,allocatable :: phkey(:),phkey1(:)
-      double precision,allocatable :: tdvs(:),tdvr(:)
+      double precision,allocatable :: tdvs(:),tdvr(:),cx0p(:),cy0p(:),cz0p(:)
 ! *** for Paeno-Hilbert ordering ***
       integer,allocatable :: ixp(:),iyp(:),izp(:),snfp(:),c_nfp(:)
 
@@ -111,13 +111,15 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         allocate(phkey(idmr(0):idmr(1)+1))
         allocate(c_nfp(idmr(0):idmr(1)+1))
         allocate(snfp(idmr(0):idmr(1)+1))
+        allocate(cx0p(idmr(0):idmr(1)+1))
+        allocate(cy0p(idmr(0):idmr(1)+1))
+        allocate(cz0p(idmr(0):idmr(1)+1))
 
         do i=idmr(0),idmr(1)
           phkey(i)=0
-! *** use vx_dm for the position of the cell for the particles 
-          vx_dm(i)=cx0
-          vy_dm(i)=cy0
-          vz_dm(i)=cz0
+          cx0p(i)=cx0
+          cy0p(i)=cy0
+          cz0p(i)=cz0
           c_nfp(i)=0
           snfp(i)=0
         enddo
@@ -132,24 +134,24 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           write(6,*) ' level,ndmt=',level,ndmt
           stop
         endif
-! * find out which subcell it is in, use vx_dm for the centre of the cell *
+! * find out which subcell it is in *
 
         allocate(ixp(idmr(0):idmr(1)+1))
         allocate(iyp(idmr(0):idmr(1)+1))
         allocate(izp(idmr(0):idmr(1)+1))
 
         do i=idmr(0),idmr(1)
-          if(x_dm(i)-vx_dm(i).ge.0.0d0) then
+          if(x_dm(i)-cx0p(i).ge.0.0d0) then
             ixp(i)=0 
            else
              ixp(i)=1
           endif 
-          if(y_dm(i)-vy_dm(i).ge.0.0d0) then
+          if(y_dm(i)-cy0p(i).ge.0.0d0) then
             iyp(i)=0 
           else
             iyp(i)=1
           endif 
-          if(z_dm(i)-vz_dm(i).ge.0.0d0) then
+          if(z_dm(i)-cz0p(i).ge.0.0d0) then
             izp(i)=0 
           else
             izp(i)=1
@@ -162,9 +164,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** has to be phkey(i)*NDPH 
           phkey(i)=phkey(i)*NDPH+c_nfp(i)
 ! *** update cx for the cell ***
-          vx_dm(i)=dx(ixp(i))*l_sc+vx_dm(i)
-          vy_dm(i)=dx(iyp(i))*l_sc+vy_dm(i)
-          vz_dm(i)=dx(izp(i))*l_sc+vz_dm(i)
+          cx0p(i)=dx(ixp(i))*l_sc+cx0p(i)
+          cy0p(i)=dx(iyp(i))*l_sc+cy0p(i)
+          cz0p(i)=dx(izp(i))*l_sc+cz0p(i)
         enddo
 
         deallocate(ixp)
@@ -205,6 +207,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         deallocate(c_nfp)
         deallocate(snfp)
+        deallocate(cx0p)
+        deallocate(cy0p)
+        deallocate(cz0p)
 
 ! *** ordering with indexxl ***
         npnord = idmr(1)-idmr(0)+1
@@ -668,7 +673,11 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
 ! *** rho_dm,zetah_dm,omgh_dm,div_v_dm,dtr_dm
 ! *** because only active particles will update these values.
+#if defined(COSM) && defined(BOXSIM)
+      nval=7
+#else
       nval=5
+#endif
 
       allocate(tdvr(0:ndm*nval))
 
@@ -684,6 +693,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           tdvs(ndmj+npsp(ip)*2)=omgh_dm(pnord(i,0))
           tdvs(ndmj+npsp(ip)*3)=div_v_dm(pnord(i,0))
           tdvs(ndmj+npsp(ip)*4)=dtr_dm(pnord(i,0))
+#if defined(COSM) && defined(BOXSIM)
+          tdvs(ndmj+npsp(ip)*5)=hub_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip)*6)=asc_dm(pnord(i,0))
+#endif
           ndmj=ndmj+1
         enddo
         if(ip.gt.0) then
@@ -719,6 +732,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           omgh_dm(ord(ndmj))=tdvr(i+nprp(ip)*2)
           div_v_dm(ord(ndmj))=tdvr(i+nprp(ip)*3)
           dtr_dm(ord(ndmj))=tdvr(i+nprp(ip)*4)
+#if defined(COSM) && defined(BOXSIM)
+          hub_dm(ord(ndmj))=tdvr(i+nprp(ip)*5)
+          asc_dm(ord(ndmj))=tdvr(i+nprp(ip)*6)
+#endif
           ndmj=ndmj+1
         enddo
         ndm=ndm+nprp(ip)
@@ -963,9 +980,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           x_dm(i)=xc_dm(i)
           y_dm(i)=yc_dm(i)
           z_dm(i)=zc_dm(i)
-          vx_dm(i)=vnx_dm(i)
-          vy_dm(i)=vny_dm(i)
-          vz_dm(i)=vnz_dm(i)
         enddo
         nadm = ndm
 
@@ -1005,9 +1019,6 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           x_dm(i)=xc_dm(i)
           y_dm(i)=yc_dm(i)
           z_dm(i)=zc_dm(i)
-          vx_dm(i)=vnx_dm(i)
-          vy_dm(i)=vny_dm(i)
-          vz_dm(i) = vnz_dm(i)
 ! *** set dvx and etc.
           dvx_dm(i)=0.0d0
           dvy_dm(i)=0.0d0

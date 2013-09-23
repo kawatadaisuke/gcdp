@@ -469,9 +469,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** Local velocity + Hubble Flow ***
 ! *** for DM Particles ***
       do i=0,ndm-1      
-        vx_dm(i)=hubi*x_dm(i)+tx(i)/VUKMS
-        vy_dm(i)=hubi*y_dm(i)+ty(i)/VUKMS
-        vz_dm(i)=hubi*z_dm(i)+tz(i)/VUKMS
+        vnx_dm(i)=hubi*x_dm(i)+tx(i)/VUKMS
+        vny_dm(i)=hubi*y_dm(i)+ty(i)/VUKMS
+        vnz_dm(i)=hubi*z_dm(i)+tz(i)/VUKMS
       enddo
 
       deallocate(tx)
@@ -601,7 +601,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         do i=0,ndmt-1
           if(i.ge.jsta.and.i.le.jend) then
             read(51) x_dm(ndm),y_dm(ndm),z_dm(ndm) &
-            ,vx_dm(ndm),vy_dm(ndm),vz_dm(ndm),m_dm(ndm) &
+            ,vnx_dm(ndm),vny_dm(ndm),vnz_dm(ndm),m_dm(ndm) &
             ,rho_dm(ndm)
             id_dm(ndm)=nc
             ndm=ndm+1
@@ -1191,9 +1191,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         xc_dm(i)=x_dm(i)
         yc_dm(i)=y_dm(i)
         zc_dm(i)=z_dm(i)
-        vnx_dm(i)=vx_dm(i)
-        vny_dm(i)=vy_dm(i)
-        vnz_dm(i)=vz_dm(i)
 #ifdef SIM1D
         h_dm(i)=(1.0d0+ERRH)*ETAHDM*((m_dm(i)/rho_dm(i)))
 #elif defined(SIM2D)

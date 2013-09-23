@@ -1281,6 +1281,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       allocate(tmzZ_sn(0:np))
       allocate(nsw_sn(0:np))
 
+
 ! *** use TM_dt, allow TMsf_dt is different from TM_dt ***
       call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
        ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &

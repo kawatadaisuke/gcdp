@@ -774,6 +774,48 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_update=WTM_update+ectime-ntime
 #endif
+
+#ifdef WTIME
+           call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+            ntime=MPI_WTIME()
+#endif
+! ***************************
+!  Update Velocity V(n+1/2)
+!  ***************************
+      call updatev(np,ndm)
+
+! ***************************************************************
+!  Update Scale Factor (SI_a) at TM_tot+TM_dt
+! ***************************************************************
+#ifdef COSM
+      call afromt(TM_tot,SI_a)
+      if(SI_a.lt.SI_epsa) then
+        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps0
+      else
+        SI_eps=SI_eps0
+      endif
+#ifdef BOXSIM
+! a^n+1 is also used in updatev_pos
+! update SI_lbox at n+1 step
+      SI_lbox(0)=SI_a*SI_lbox0(0)
+      SI_lbox(1)=SI_a*SI_lbox0(1)
+      SI_lbox(2)=SI_a*SI_lbox0(2)
+! get Hubble parameter at n+1 step
+      call hubfroma(SI_a,SI_hub)
+#endif
+#endif
+
+! **************************
+!  Update Virtual Position 
+! **************************
+      call updatev_pos(np,ndm)
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      WTM_update=WTM_update+ectime-ntime
+#endif
+
+
 ! **********************
 !   Domain Decomposition
 !  **********************
@@ -783,27 +825,6 @@ program gcdp
 !        if(SI_flagrad.ge.-1.or.SI_flagrad.eq.-10) then
 #endif
           if(mod(totstep,NDSTEPDDEC).eq.0) then
-! ***********************************************
-!  Update Virtual Position to be used in ddec*() 
-! ***********************************************
-#ifdef WTIME
-           call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ntime=MPI_WTIME()
-#endif
-#if defined(COSM) && defined(TREEPM)
-! update SI_lbox
-           call afromt(TM_tot+TM_dt,SI_a)
-           SI_lbox(0)=SI_a*SI_lbox0(0)
-           SI_lbox(1)=SI_a*SI_lbox0(1)
-           SI_lbox(2)=SI_a*SI_lbox0(2)
-
-#endif
-            call updatev_pos(np,ndm)
-#ifdef WTIME
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ectime=MPI_WTIME()
-            WTM_update=WTM_update+ectime-ntime
-#endif
 #ifdef GAS
 ! *** for baryon ***
 #ifdef WTIME
@@ -833,6 +854,28 @@ program gcdp
 #endif
 #endif
           endif
+
+
+! ***********************************************
+!  Update Virtual Position after ddecb and ddecdm
+! ***********************************************
+#ifdef WTIME
+          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+          ntime=MPI_WTIME()
+#endif
+! ***************************
+!  Update Velocity V(n+1/2)
+!  ***************************
+          call updatev(np,ndm)
+! **************************
+!  Update Virtual Position 
+! **************************
+          call updatev_pos(np,ndm)
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      WTM_update=WTM_update+ectime-ntime
+#endif
       endif
 
 ! ************************
@@ -843,45 +886,12 @@ program gcdp
       TM_tot=TM_tot+TM_dt
       TM_lt=TM_lt+TM_dt
 
-! ***************************************************************
-!  Update Scale Factor (SI_a) at TM_tot
-! ***************************************************************
-#ifdef WTIME
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      ntime=MPI_WTIME()
-#endif
-#ifdef COSM
-      call afromt(TM_tot,SI_a)
-      if(SI_a.lt.SI_epsa) then
-        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps0
-      else
-        SI_eps=SI_eps0
-      endif
-#ifdef BOXSIM
-! get Hubble parameter at n+1 step
-      call hubfroma(SI_a,SI_hub)
-#endif
-#endif
-! ***************************
-!  Update Velocity V(n+1/2)
-!  ***************************
-      call updatev(ng,nag,nadm,nas)
 ! *********************************
 !  Update Virtual Velocity V(n+1)
 !  *********************************
 #ifdef GAS
       call updatev_vn(ng+ns)
 #endif
-! **************************
-!  Update Virtual Position 
-! **************************
-#if defined(COSM) && defined(BOXSIM)
-! update SI_lbox at n+1 step
-      SI_lbox(0)=SI_a*SI_lbox0(0)
-      SI_lbox(1)=SI_a*SI_lbox0(1)
-      SI_lbox(2)=SI_a*SI_lbox0(2)
-#endif
-      call updatev_pos(np,ndm)
 ! ********************
 !   Update Position 
 ! ********************
