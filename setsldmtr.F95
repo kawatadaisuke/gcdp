@@ -60,7 +60,11 @@ subroutine setsldmtr(nssl,nalist,ndm)
         node(pni)=0
 ! *** set largest one ***
 #ifdef MULTI_LEV
-        h_dm(pni)=(crit2*l_ldmtr(nodess_ldmtr))**2
+        if(l_ldmtr(nodess_ldmtr).gt.l_dmtr(nodess_dmtr)) then
+          h_dm(pni)=(crit2*l_ldmtr(nodess_ldmtr))**2
+        else
+          h_dm(pni)=(crit2*l_dmtr(nodess_dmtr))**2
+        endif
 #else
         h_dm(pni)=(crit2*l_dmtr(nodess_dmtr))**2
 #endif
@@ -128,7 +132,12 @@ subroutine setsldmtr(nssl,nalist,ndm)
           if(rc2.lt.h_dm(pni) &
            .or.dsqrt(rc2)-crit*l_dmtr(nd).lt.dsqrt(h_dm(pni))) then
 ! *** possible to find a particle closer ***
-            node(pni)=daughter_dmtr(nd)
+! *** check if or not it's pseudo node
+            if(proc_dmtr(nd).ne.myrank) then
+              node(pni)=next_dmtr(nd)
+            else     
+              node(pni)=daughter_dmtr(nd)
+            endif
           else
             node(pni)=next_dmtr(nd)
           endif
@@ -309,7 +318,12 @@ subroutine setsldmtr(nssl,nalist,ndm)
           if(rc2.lt.h_dm(pni) &
            .or.dsqrt(rc2)-crit*l_ldmtr(nd).lt.dsqrt(h_dm(pni))) then
 ! *** possible to find a particle closer ***
-            node(pni)=daughter_ldmtr(nd)
+! *** check if or not it's pseudo node
+            if(proc_ldmtr(nd).ne.myrank) then
+              node(pni)=next_ldmtr(nd)
+            else
+              node(pni)=daughter_ldmtr(nd)
+            endif
           else
             node(pni)=next_ldmtr(nd)
           endif

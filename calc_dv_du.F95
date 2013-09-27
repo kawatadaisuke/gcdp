@@ -153,16 +153,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 !      enddo
 !      close(60)
 
-! *** allocate work space for MPI ***
-      allocate(idisp(0:nprocs))
-      allocate(jjlen(0:nprocs))
-      allocate(ireqs(0:nprocs))
-      allocate(npproc(0:nprocs))
-      allocate(isproc(0:nprocs))
-      allocate(ieproc(0:nprocs))
-      allocate(cproc(0:nprocs))
-      allocate(npjr(0:nprocs))
-
 ! *** Basic Value ***
 #ifdef SIM1D
       crit=0.5d0
@@ -524,6 +514,17 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
 ! ***** Set du & dv in SPH Particle *****
 #ifdef GAS
+
+! *** allocate work space for MPI ***
+      allocate(idisp(0:nprocs))
+      allocate(jjlen(0:nprocs))
+      allocate(ireqs(0:nprocs))
+      allocate(npproc(0:nprocs))
+      allocate(isproc(0:nprocs))
+      allocate(ieproc(0:nprocs))
+      allocate(cproc(0:nprocs))
+      allocate(npjr(0:nprocs))
+
       if(flagu.ne.1) then
 
         do i=0,nag-1
@@ -2595,6 +2596,32 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
       deallocate(listb)
 
+      deallocate(idisp)
+      deallocate(jjlen)
+      deallocate(ireqs)
+      deallocate(npproc)
+      deallocate(isproc)
+      deallocate(ieproc)
+      deallocate(cproc)
+      deallocate(npjr)
+
+      deallocate(tdvr)
+      deallocate(flagproc)
+      deallocate(flagcom)
+      deallocate(pncomp)
+      deallocate(talist)
+#if defined(SF_EFD) || defined(SF_ZFD)
+      deallocate(tivr)
+#endif
+#ifdef METALDIFF
+      deallocate(tdzd)
+      deallocate(av)
+#endif
+
+#ifdef MHD
+      deallocate(tdmhd)
+#endif
+
 ! end of GAS
 #endif      
 
@@ -2628,31 +2655,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           ,ectime-ntime,stime(1),stime(2),stime(3),stime(4),flagv,flagu
         endif
 #endif
-      deallocate(idisp)
-      deallocate(jjlen)
-      deallocate(ireqs)
-      deallocate(npproc)
-      deallocate(isproc)
-      deallocate(ieproc)
-      deallocate(cproc)
-      deallocate(npjr)
 
-      deallocate(tdvr)
-      deallocate(flagproc)
-      deallocate(flagcom)
-      deallocate(pncomp)
-      deallocate(talist)
-#if defined(SF_EFD) || defined(SF_ZFD)
-      deallocate(tivr)
-#endif
-#ifdef METALDIFF
-      deallocate(tdzd)
-      deallocate(av)
-#endif
-
-#ifdef MHD
-      deallocate(tdmhd)
-#endif
 
 !      write(fileo,'(a5,i3.3)') 'calvu',myrank
 !      open(60,file=fileo,status='unknown')
