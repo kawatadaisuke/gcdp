@@ -71,13 +71,13 @@ subroutine setsldmtr(nssl,nalist,ndm)
       enddo 
       nlist=nssl
    77 if(nlist.eq.0) then
+#ifdef MULTI_LEV
+        goto 98
+#else
 
         deallocate(list)
         deallocate(node)
 
-#ifdef MULTI_LEV
-        goto 98
-#else
         goto 99
 #endif
       endif
@@ -214,6 +214,10 @@ subroutine setsldmtr(nssl,nalist,ndm)
       enddo 
       nlist=nssl
    78 if(nlist.eq.0) then
+
+        deallocate(list)
+        deallocate(node)
+
         goto 99
       endif
       do i=0,nlist-1
