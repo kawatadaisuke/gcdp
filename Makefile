@@ -34,7 +34,7 @@ FORT = ${MPI_DIR}/bin/mpif90
 MPI_INC = ${MPI_DIR}/include
 MPI_LIB = ${MPI_DIR}/lib 
 FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
-LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3 
 ### for XT4
 # FORT=ftn
 # CPP=cpp
@@ -47,14 +47,12 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3
 # OPTIONS=-g -O3 -xHost -align -ansi-alias -mcmodel=medium -traceback
 # FFLAGS = ${OPTIONS}
 # LIBS=-lmpi
-### for SX-6 isas 20/11/2004
-#FORT = sxmpif90
-#MPI_INC = 
-#MPI_LIB = 
-#MLIBS = 
-#OPTIONS = -Cvopt -R5 -Wf"-pvctl noassume vwork=stack"
-#FFLAGS = ${OPTIONS} 
-#LIBS = ${MLIBS}  
+### darwin
+# module add fftw/intel/3.3.3
+# FORT=mpif90
+# CPP=cpp
+# FFLAGS= -O3 -ipo -xHost -lfftw3
+#
 .SUFFIXES : .o .F95 .f90
 
 ${EXEC} : ${OBJS} ${INIOBJ}

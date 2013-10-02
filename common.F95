@@ -548,7 +548,17 @@ end module gcdp_pm
 module fftw3
       use,intrinsic :: iso_c_binding
       implicit none
+#ifdef FFTW3_MPI
+      include 'fftw3-mpi.f03'
+#else
       include 'fftw3.f03'
+#endif
+
+#ifdef FFTW3_MPI
+      integer(C_INTPTR_T) :: nx_fftw,ny_fftw,nz_fftw
+      integer(C_INTPTR_T) :: lnz_fftw,lkoff_fftw
+      integer(C_INTPTR_T) :: lny_fftw,ljoff_fftw
+#endif
 
 ! forward and backward FFT plan
       type(C_PTR) :: planf_fftw,planb_fftw

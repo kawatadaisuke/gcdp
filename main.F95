@@ -17,6 +17,9 @@ program gcdp
 #ifdef DM
       use gcdp_dm
 #endif
+#ifdef FFTW3_MPI  
+      use fftw3
+#endif
 
       implicit none
       include 'mpif.h'
@@ -76,6 +79,10 @@ program gcdp
       call MPI_INIT(ierr)
       call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
+
+#ifdef FFTW3_MPI
+      call fftw_mpi_init()
+#endif
 
 ! *** print version ***
       if(myrank.eq.0) then

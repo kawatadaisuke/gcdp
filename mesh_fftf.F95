@@ -26,6 +26,11 @@ subroutine  mesh_fftf()
       double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz
 ! *** for test file *** 
       character fileo*60
+#ifdef FFTW3_MPI
+      integer npmp,ierr
+      integer(C_INTPTR_T) :: ifftw,jfftw,kfftw
+      double precision,allocatable :: tdvs(:),tdvr(:)
+#endif
 
 ! initialisation
       do k=1,nz_m
@@ -41,10 +46,18 @@ subroutine  mesh_fftf()
       l2nz=0.5d0*dy_m
 
 ! set real space data 
+#ifdef FFTW3_MPI
+      do kfftw=1,lnz_fftw
+        do jfftw=1,ny_fftw
+          do ifftw=1,nx_fftw
+            rsd_fftw(ifftw,jfftw,kfftw)=rho_m(ifftw-1,jfftw-1 &
+              ,kfftw-1+lkoff_fftw)
+#else
       do k=1,nz_m
         do j=1,ny_m
           do i=1,nx_m
             rsd_fftw(i,j,k)=rho_m(i-1,j-1,k-1)
+#endif
           enddo
         enddo
       enddo
@@ -58,6 +71,57 @@ subroutine  mesh_fftf()
 !      write(fileo,'(a3,i3.3)') 'ksd',myrank
 !      open(60,file=fileo,status='unknown')
 
+#ifdef FFTW3_MPI
+      do jfftw=1,lny_fftw
+        j=int(jfftw+ljoff_fftw)
+        if(j.le.ny2_m+1) then
+          ky=dky_m*dble(j-1)
+        else
+          ky=-dky_m*dble(ny_m-j+1)
+        endif
+
+
+!        write(6,*) ' k,kz=',k,kz,dkz_m,nz_m,nz2_m
+
+        do kfftw=1,nz_fftw
+          k=int(kfftw)
+          if(k.le.nz2_m+1) then
+            kz=dkz_m*dble(k-1)
+          else
+            kz=-dkz_m*dble(nz_m-k+1)
+          endif
+
+          if(k.eq.1.and.j.eq.1) then
+! case of k=0, set power = 0 
+! eq. (4a) of Efstathiou et al. eq. (4a)
+            i1=2
+            ifftw=1
+            ksd_fftw(ifftw,jfftw,kfftw)=0.0d0
+          else
+            i1=1
+          endif
+
+          do ifftw=i1,nx_m/2+1
+            i=int(ifftw)
+            kx=dkx_m*dble(i-1)
+            kabs2=kx**2+ky**2+kz**2
+! x Green function
+            ksd_fftw(ifftw,jfftw,kfftw)=4.0d0*M_PI &
+              *ksd_fftw(ifftw,jfftw,kfftw)/kabs2            
+! PMTree long range force trunction
+            ksd_fftw(ifftw,jfftw,kfftw)=ksd_fftw(ifftw,jfftw,kfftw) &
+             *dexp(-kabs2*SI_rsp2tpm)
+! deconvolution for CIC
+            if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
+              kxl2nx=kx*l2nx
+              kyl2ny=ky*l2ny
+              kzl2nz=kz*l2nz
+              ksd_fftw(i,j,k)=ksd_fftw(i,j,k) &
+               /(((dsin(kxl2nx)/(kxl2nx))**4) &
+                *((dsin(kyl2ny)/(kyl2ny))**4) &
+                *((dsin(kzl2nz)/(kzl2nz))**4)) 
+            endif
+#else
       do k=1,nz_m
         if(k.le.nz2_m+1) then
           kz=dkz_m*dble(k-1)
@@ -78,7 +142,7 @@ subroutine  mesh_fftf()
 ! eq. (4a) of Efstathiou et al. eq. (4a)
             i1=2
             i=1
-            ksd_fftw(i,j,k)=0.0d0*ksd_fftw(i,j,k)
+            ksd_fftw(i,j,k)=0.0d0
           else
             i1=1
           endif
@@ -100,6 +164,7 @@ subroutine  mesh_fftf()
                 *((dsin(kyl2ny)/(kyl2ny))**4) &
                 *((dsin(kzl2nz)/(kzl2nz))**4)) 
             endif
+#endif
           enddo
 
 !          do i=i1,nx_m/2+1
@@ -134,14 +199,65 @@ subroutine  mesh_fftf()
 !      close(60)
 
 ! set real space potential data 
+#ifdef FFTW3_MPI
+
+      do k=0,nz_m-1
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+            pot_m(i,j,k)=0.0d0
+          enddo
+        enddo
+      enddo
+
+      do kfftw=1,lnz_fftw
+        do jfftw=1,ny_fftw
+          do ifftw=1,nx_fftw
+! normalised (has to be done)
+            pot_m(ifftw-1,jfftw-1,kfftw-1+lkoff_fftw)= &
+              rsd_fftw(ifftw,jfftw,kfftw)/dble(nt_m)
+#else
       do k=1,nz_m
         do j=1,ny_m
           do i=1,nx_m
 ! normalised (has to be done)
             pot_m(i-1,j-1,k-1)=rsd_fftw(i,j,k)/dble(nt_m)
+#endif
           enddo
         enddo
       enddo
+
+#ifdef FFTW3_MPI
+
+      allocate(tdvr(0:nt_m))
+      allocate(tdvs(0:nt_m))
+
+! sum up potential
+      npmp=0
+      do k=0,nz_m-1
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+            tdvs(npmp)=pot_m(i,j,k)
+            tdvr(npmp)=0.0d0
+            npmp=npmp+1
+          enddo
+        enddo
+      enddo
+      call MPI_ALLREDUCE(tdvs,tdvr,npmp,MPI_DOUBLE_PRECISION &
+       ,MPI_SUM,MPI_COMM_WORLD,ierr)
+      npmp=0
+      do k=0,nz_m-1
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+            rho_m(i,j,k)=tdvr(npmp)
+            npmp=npmp+1
+          enddo
+        enddo
+      enddo
+
+      deallocate(tdvr)
+      deallocate(tdvs)
+
+#endif
 
 ! set force
       do k=0,nz_m-1
