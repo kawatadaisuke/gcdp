@@ -77,12 +77,12 @@ program gcdp
 
 ! ***** MPI Initialization *****
       call MPI_INIT(ierr)
-      call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
-      call MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
-
 #ifdef FFTW3_MPI
       call fftw_mpi_init()
 #endif
+      call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
+      call MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
+
 
 ! *** print version ***
       if(myrank.eq.0) then
@@ -572,16 +572,16 @@ program gcdp
          /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
          ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
         else
-        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
          ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
          ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
          ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
         endif
       enddo
       close(60)
-!      stop
 
+      goto 9999
 
 #endif
 
@@ -1237,6 +1237,13 @@ program gcdp
 #endif
       endif
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+
+#ifdef FFTW3
+#ifdef FFTW3_MPI
+      call fftw_mpi_cleanup()
+#endif
+#endif
+
       call MPI_FINALIZE(ierr)
 
 end program gcdp

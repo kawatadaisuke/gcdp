@@ -51,7 +51,7 @@ subroutine  mesh_fftf()
         do jfftw=1,ny_fftw
           do ifftw=1,nx_fftw
             rsd_fftw(ifftw,jfftw,kfftw)=rho_m(ifftw-1,jfftw-1 &
-              ,kfftw-1+lkoff_fftw)
+              ,kfftw+lkoff_fftw-1)
 #else
       do k=1,nz_m
         do j=1,ny_m
@@ -63,7 +63,11 @@ subroutine  mesh_fftf()
       enddo
 
 ! forward FFT
+#ifdef FFTW3_MPI
+      call fftw_mpi_execute_dft_r2c(planf_fftw,rsd_fftw,ksd_fftw)
+#else
       call fftw_execute_dft_r2c(planf_fftw,rsd_fftw,ksd_fftw)
+#endif
 
 ! For normalisation see eq. A-9 and A-10 of Hockney & Eastwood
 
@@ -72,17 +76,14 @@ subroutine  mesh_fftf()
 !      open(60,file=fileo,status='unknown')
 
 #ifdef FFTW3_MPI
+
       do jfftw=1,lny_fftw
-        j=int(jfftw+ljoff_fftw)
+        j=jfftw+ljoff_fftw
         if(j.le.ny2_m+1) then
           ky=dky_m*dble(j-1)
         else
           ky=-dky_m*dble(ny_m-j+1)
         endif
-
-
-!        write(6,*) ' k,kz=',k,kz,dkz_m,nz_m,nz2_m
-
         do kfftw=1,nz_fftw
           k=int(kfftw)
           if(k.le.nz2_m+1) then
@@ -96,7 +97,7 @@ subroutine  mesh_fftf()
 ! eq. (4a) of Efstathiou et al. eq. (4a)
             i1=2
             ifftw=1
-            ksd_fftw(ifftw,jfftw,kfftw)=0.0d0
+            ksd_fftw(ifftw,kfftw,jfftw)=0.0d0
           else
             i1=1
           endif
@@ -105,18 +106,22 @@ subroutine  mesh_fftf()
             i=int(ifftw)
             kx=dkx_m*dble(i-1)
             kabs2=kx**2+ky**2+kz**2
+
+!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(ifftw,kfftw,jfftw) &
+!            ,kx,ky,kz,kabs2
+
 ! x Green function
-            ksd_fftw(ifftw,jfftw,kfftw)=4.0d0*M_PI &
-              *ksd_fftw(ifftw,jfftw,kfftw)/kabs2            
+            ksd_fftw(ifftw,kfftw,jfftw)=4.0d0*M_PI &
+              *ksd_fftw(ifftw,kfftw,jfftw)/kabs2            
 ! PMTree long range force trunction
-            ksd_fftw(ifftw,jfftw,kfftw)=ksd_fftw(ifftw,jfftw,kfftw) &
+            ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
              *dexp(-kabs2*SI_rsp2tpm)
 ! deconvolution for CIC
             if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
               kxl2nx=kx*l2nx
               kyl2ny=ky*l2ny
               kzl2nz=kz*l2nz
-              ksd_fftw(i,j,k)=ksd_fftw(i,j,k) &
+              ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
                /(((dsin(kxl2nx)/(kxl2nx))**4) &
                 *((dsin(kyl2ny)/(kyl2ny))**4) &
                 *((dsin(kzl2nz)/(kzl2nz))**4)) 
@@ -149,6 +154,10 @@ subroutine  mesh_fftf()
           do i=i1,nx_m/2+1
             kx=dkx_m*dble(i-1)
             kabs2=kx**2+ky**2+kz**2
+
+!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,j,k) &
+!            ,kx,ky,kz,kabs2
+
 ! x Green function
             ksd_fftw(i,j,k)=4.0d0*M_PI*ksd_fftw(i,j,k)/kabs2            
 ! PMTree long range force trunction
@@ -170,29 +179,53 @@ subroutine  mesh_fftf()
 !          do i=i1,nx_m/2+1
 !            kx=dkx_m*dble(i-1)
 !            kabs2=kx**2+ky**2+kz**2
-!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,j,k)*dv_m &
+!
+! note: ksd is complex, and two double output
+! #ifdef FFTW3_MPI
+!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,kfftw,jfftw) &
+! #else
+!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(i,j,k) &
+! #endif
 !            ,kx,ky,kz,kabs2
 !          enddo
 
         enddo
       enddo
 
-!      close(60)
+      close(60)
 
 ! backward FFT
+#ifdef FFTW3_MPI
+      call fftw_mpi_execute_dft_c2r(planb_fftw,ksd_fftw,rsd_fftw)
+#else
       call fftw_execute_dft_c2r(planb_fftw,ksd_fftw,rsd_fftw)
+#endif
 
 ! test output
 !      write(fileo,'(a3,i3.3)') 'rsd',myrank
 !      open(60,file=fileo,status='unknown')
+! #ifdef FFTW3_MPI
+!      do k=1,lnz_fftw
+! #else
 !      do k=1,nz_m
+! #endif
 !        do j=1,ny_m
 !          do i=1,nx_m
+! #ifdef FFTW3_MPI
+!            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1+lkoff_fftw) &
+!             ,y_m(i-1,j-1,k-1+lkoff_fftw) &
+!             ,z_m(i-1,j-1,k-1+lkoff_fftw) &
+!             ,rsd_fftw(i,j,k)/dble(nt_m) &
+!             ,dsqrt(x_m(i-1,j-1,k-1+lkoff_fftw)**2 &
+!              +y_m(i-1,j-1,k-1+lkoff_fftw)**2 &
+!              +z_m(i-1,j-1,k-1+lkoff_fftw)**2)
+! #else
 !            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1),y_m(i-1,j-1,k-1) &
 !             ,z_m(i-1,j-1,k-1) &
 !             ,rsd_fftw(i,j,k)/dble(nt_m) &
 !             ,dsqrt(x_m(i-1,j-1,k-1)**2+y_m(i-1,j-1,k-1)**2 &
 !              +z_m(i-1,j-1,k-1)**2)
+!#endif
 !          enddo
 !        enddo
 !      enddo
@@ -213,7 +246,7 @@ subroutine  mesh_fftf()
         do jfftw=1,ny_fftw
           do ifftw=1,nx_fftw
 ! normalised (has to be done)
-            pot_m(ifftw-1,jfftw-1,kfftw-1+lkoff_fftw)= &
+            pot_m(ifftw-1,jfftw-1,kfftw+lkoff_fftw-1)= &
               rsd_fftw(ifftw,jfftw,kfftw)/dble(nt_m)
 #else
       do k=1,nz_m
@@ -221,6 +254,7 @@ subroutine  mesh_fftf()
           do i=1,nx_m
 ! normalised (has to be done)
             pot_m(i-1,j-1,k-1)=rsd_fftw(i,j,k)/dble(nt_m)
+
 #endif
           enddo
         enddo
@@ -248,7 +282,7 @@ subroutine  mesh_fftf()
       do k=0,nz_m-1
         do j=0,ny_m-1
           do i=0,nx_m-1
-            rho_m(i,j,k)=tdvr(npmp)
+            pot_m(i,j,k)=tdvr(npmp)
             npmp=npmp+1
           enddo
         enddo

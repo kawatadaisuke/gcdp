@@ -27,9 +27,14 @@ subroutine  fftw3_init()
       ny_fftw=int(ny_m,C_INTPTR_T)
       nz_fftw=int(nz_m,C_INTPTR_T)
 ! get local data size
+! note: offset starts from 0
       alloc_local=fftw_mpi_local_size_3d_transposed( &
        nz_fftw,ny_fftw,nx_fftw,MPI_COMM_WORLD &
       ,lnz_fftw,lkoff_fftw,lny_fftw,ljoff_fftw)
+
+!      write(6,*) ' myrank,lny,off,lnz,off=',lny_fftw,ljoff_fftw &
+!       ,lnz_fftw,lkoff_fftw
+
 ! allocate data array pointer
       poid_fftw=fftw_alloc_complex(alloc_local)
 ! real and k-space data pointer
@@ -38,21 +43,21 @@ subroutine  fftw3_init()
       call c_f_pointer(poid_fftw,ksd_fftw,[nx_fftw/2+1,nz_fftw,lny_fftw])
 ! note: nz,ny,nx order, because column ->. row measure 
       planf_fftw=fftw_mpi_plan_dft_r2c_3d(nz_fftw,ny_fftw,nx_fftw &
-       ,rsd_fftw,ksd_fftw &
+       ,rsd_fftw,ksd_fftw,MPI_COMM_WORLD &
 #ifdef FFTW3_ESTIMATE
-       ,FFTW_ESTIMATE &
+       ,ior(FFTW_ESTIMATE,FFTW_MPI_TRANSPOSED_OUT))
 #else
-       ,FFTW_MEASURE &
+       ,ior(FFTW_MEASURE,FFTW_MPI_TRANSPOSED_OUT))
 #endif
-       ,FFTW_MPI_TRANSPOSED_OUT)
+
+
       planb_fftw=fftw_mpi_plan_dft_c2r_3d(nz_fftw,ny_fftw,nx_fftw &
-        ,ksd_fftw,rsd_fftw &
+        ,ksd_fftw,rsd_fftw,MPI_COMM_WORLD &
 #ifdef FFTW3_ESTIMATE
-       ,FFTW_ESTIMATE &
+       ,ior(FFTW_ESTIMATE,FFTW_MPI_TRANSPOSED_IN))
 #else
-       ,FFTW_MEASURE &
+       ,ior(FFTW_MEASURE,FFTW_MPI_TRANSPOSED_IN))
 #endif
-       ,FFTW_MPI_TRANSPOSED_IN)
 
 #else
 ! allocate data array pointer
