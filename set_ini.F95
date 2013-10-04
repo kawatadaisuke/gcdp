@@ -1571,6 +1571,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef BOXSIM
         write(60,'(a10,3(1pE13.5))') ' box size=',SI_lbox(0) &
          ,SI_lbox(1),SI_lbox(2)
+#ifdef COSM
+!                                     12345678901234567890123456789012345
+        write(60,'(a22,3(1pE13.5))') ' box size (comoving) =',SI_lbox0(0) &
+         ,SI_lbox0(1),SI_lbox0(2)
+#endif
 #endif
 #ifdef TREEPM
         write(60,'(a15,3I10)') ' Mesh nx,ny,nz=',nx_m,ny_m,nz_m

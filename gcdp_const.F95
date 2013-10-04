@@ -220,7 +220,7 @@ module gcdp_const
 ! *** star formation threshold ***
 ! *** nh ***
 ! *** NSTH: only for softening length ***
-      double precision,parameter :: NSTH=10.0d0
+      double precision,parameter :: NSTH=0.1d0
 ! *** NSTHLIM: density limit
       double precision,parameter :: NSTHLIM=200.0d0
 ! *** Hopkins13 self-gravity criterion for SF

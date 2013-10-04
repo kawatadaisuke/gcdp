@@ -23,6 +23,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       use gcdp_mhd
 #endif
       use gcdp_system
+#ifdef TREEPM
+      use gcdp_pm
+#endif
  
       implicit none
       include 'mpif.h'
@@ -48,6 +51,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       integer flagtime,Ini_flagcop
       character filei*60
       character fileo*60
+#if defined(COSM) && defined(BOXSIM)
+      double precision iai
+#endif
 #ifdef MHD
       integer ndbmhd
 #endif
@@ -110,6 +116,17 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           TM_t0 = TM_t0/TMUGYR
         endif
 #endif
+#ifdef TREEPM
+        read(50,*) nx_m,ny_m,nz_m
+        if((mod(nx_m,2).ne.0)) then
+          if(myrank.eq.0) then
+            write(6,*) ' Error in set_ini(): nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
+            write(6,*) ' nx_m should be able to be devided by 2.'
+          endif
+          call MPI_FINALIZE(ierr)
+          stop
+        endif
+#endif
         read(50,*) Ini_flagcop
         if(Ini_flagcop.ne.0) then
           read(50,*) step
@@ -137,6 +154,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
             read(tchar(11:23),'(1pE13.5)') SI_lbox(0)
             read(tchar(24:36),'(1pE13.5)') SI_lbox(1)
             read(tchar(37:49),'(1pE13.5)') SI_lbox(2)
+#ifdef COSM
+            read(50,'(a22,3(1pE13.5))') tchar,SI_lbox0(0),SI_lbox0(1) &
+              ,SI_lbox0(2)
+#endif
             goto 70
           endif
         enddo
@@ -156,6 +177,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           open(51,file='output/data/cont.dat',status='old',form='unformatted')
 ! *** Read continue data ***
           read(51) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
+#ifdef BOXSIM
+           ,SI_lbox(0),SI_lbox(1),SI_lbox(2) &
+#ifdef COSM
+           ,SI_lbox0(0),SI_lbox0(1),SI_lbox0(2) &
+#endif
+#endif
 #if defined(COSM) || defined(COOL)
            ,TM_tot,TM_sdt,TM_lt,TM_ldtmin,TM_k,TM_kn,SI_a,SI_eps,SI_mms &
 #elif defined(STAR)
@@ -279,6 +306,26 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 
       deallocate(tivr)
 
+
+#ifdef TREEPM
+! send grid information for TREEPM calculation
+      nivalc=3
+
+      allocate(tivr(0:nivalc))
+
+      if(myrank.eq.0) then
+        tivr(0)=nx_m
+        tivr(1)=ny_m
+        tivr(2)=nz_m
+      endif
+      call MPI_BCAST(tivr,nivalc,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      nx_m=tivr(0)
+      ny_m=tivr(1)
+      nz_m=tivr(2)
+
+      deallocate(tivr)
+#endif
+
 #ifdef COSM
 #ifdef STAR
       ndvalc=17+NYEL
@@ -375,6 +422,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       enddo
 #endif
 #endif
+#if defined(COSM) && defined(BOXSIM)
+! *** Set Hubble parameter ***
+      iai = 1.0d0/SI_a
+      SI_hub = SI_h0*HUB0*dsqrt(SI_omg0*iai*iai*iai &
+       -(SI_omg0+SI_lam0-1.0)*iai*iai+SI_lam0)
+#endif
 
       deallocate(tdvr)
 
@@ -404,17 +457,33 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 
 #ifdef BOXSIM
 
-      allocate(tdvr(0:2))
+#ifdef COSM
+      ndvalc=6
+#else
+      ndvalc=3
+#endif
+
+      allocate(tdvr(0:ndvalc-1))
 
       if(myrank.eq.0) then
         tdvr(0)=SI_lbox(0)
         tdvr(1)=SI_lbox(1)
         tdvr(2)=SI_lbox(2)
+#ifdef COSM
+        tdvr(3)=SI_lbox0(0)
+        tdvr(4)=SI_lbox0(1)
+        tdvr(5)=SI_lbox0(2)
+#endif       
       endif
-      call MPI_BCAST(tdvr,3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(tdvr,ndvalc,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
       SI_lbox(0)=tdvr(0)
       SI_lbox(1)=tdvr(1)
       SI_lbox(2)=tdvr(2)
+#ifdef COSM
+      SI_lbox0(0)=tdvr(3)
+      SI_lbox0(1)=tdvr(4)
+      SI_lbox0(2)=tdvr(5)
+#endif       
 
       deallocate(tdvr)
 
@@ -464,7 +533,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         ndbcon=25
 #endif
         nibcon=1
+#if defined(COSM) && defined(BOXSIM)
+        nddmcon=14
+#else
         nddmcon=12
+#endif
         nidmcon=1
       else
         if(myrank.eq.0) then
@@ -510,6 +583,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         endif
 #ifdef BOXSIM
         write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
+#ifdef COSM
+        write(6,*) ' box size (comoving)=',SI_lbox0(0),SI_lbox0(1) &
+          ,SI_lbox0(2)
+#endif
 #endif
       endif
 
@@ -1286,10 +1363,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
             nas=tivr(6)
           endif
           npjr(ip)=tivr(1)
+
+          deallocate(tivr)
+
         enddo
 
 ! allocate DM values
-      call allocate_dm_all(npjr(ip))
+        call allocate_dm_all(ndm)
 
 ! *** read integer variables ***
         do iv=0,nivaldm-1
@@ -1506,6 +1586,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
                   do i=0,npjr(ip)-1 
                     dtr_dm(i)=tdvr(i)
                   enddo
+#if defined(COSM) && defined(BOXSIM)
+                else if(iv.eq.12) then
+                  do i=0,npjr(ip)-1 
+                    hub_dm(i)=tdvr(i)
+                  enddo
+                else if(iv.eq.13) then
+                  do i=0,npjr(ip)-1 
+                    asc_dm(i)=tdvr(i)
+                  enddo
+#endif
                 endif
               endif
 

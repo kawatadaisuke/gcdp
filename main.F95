@@ -561,27 +561,27 @@ program gcdp
       endif
 
 ! test output
-      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,nadm-1
-        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-        else
-         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-        endif
-      enddo
-      close(60)
+!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,nadm-1
+!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+!        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+!        else
+!         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+!        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+!        endif
+!      enddo
+!      close(60)
 
-      goto 9999
+!      goto 9999
 
 #endif
 
@@ -656,6 +656,7 @@ program gcdp
         endif
         goto 9999
       endif
+
 
 ! ***********************
 !  Calculate local time
@@ -1113,6 +1114,7 @@ program gcdp
 !      close(60)
 !      stop
 
+
 #ifdef TREEPM
 ! ***** adding PM force *****
 ! generate new mesh
@@ -1124,6 +1126,15 @@ program gcdp
 ! assign force to particles
         call mesh_setfp(nag,nas,nadm)
 #endif
+
+!      write(fileo,'(a4,i3.3,i4.4)') 'test',myrank,totstep
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        write(60,'(12(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,vnx_dm(i),vnx_dm(i),vnx_dm(i) &
+!         ,xc_dm(i),yc_dm(i),zc_dm(i)
+!      enddo
 
 ! *************************
 !  Update Velocity V(n+1)

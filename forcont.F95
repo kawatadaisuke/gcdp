@@ -51,6 +51,12 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
          ,form='unformatted')
 ! /*** Output continue data ***/
          write(60) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
+#ifdef BOXSIM
+           ,SI_lbox(0),SI_lbox(1),SI_lbox(2) &
+#ifdef COSM
+           ,SI_lbox0(0),SI_lbox0(1),SI_lbox0(2) &
+#endif
+#endif
          ,TM_tot,TM_sdt,TM_lt,TM_ldtmin,TM_k,TM_kn,SI_a,SI_eps,SI_mms &
 #ifdef COSM
          ,SI_omg0,SI_lam0,SI_h0,SI_eps0,SI_epsa &
@@ -72,7 +78,11 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #endif
       nivaldm=2
       ndvaldm=9
+#if defined(COSM) && defined(BOXSIM)
+      nddmcon=14
+#else
       nddmcon=12
+#endif
       ndbcon=24
       nibcon=1
       nidmcon=1
@@ -908,6 +918,16 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
             do i=0,npj-1 
               tdvs(i)=dtr_dm(i)
             enddo
+#if defined(COSM) && defined(BOXSIM)
+          else if(iv.eq.12) then
+            do i=0,npj-1 
+              tdvs(i)=hub_dm(i)
+            enddo
+          else if(iv.eq.13) then
+            do i=0,npj-1 
+              tdvs(i)=asc_dm(i)
+            enddo
+#endif
           endif
           if(myrank.lt.SI_nof) then
             write(64) (tdvs(i),i=0,npj-1)
