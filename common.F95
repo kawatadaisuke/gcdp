@@ -533,14 +533,23 @@ module gcdp_pm
       double precision x0_m,y0_m,z0_m
 ! mesh 1D coordinates
       double precision,allocatable :: x_m1d(:),y_m1d(:),z_m1d(:)
-! mesh point coordinates
-      double precision,allocatable :: x_m(:,:,:),y_m(:,:,:),z_m(:,:,:)
 ! density
       double precision,allocatable :: rho_m(:,:,:)
 ! potential
       double precision,allocatable :: pot_m(:,:,:)
 ! force
       double precision,allocatable :: fx_m(:,:,:),fy_m(:,:,:),fz_m(:,:,:)
+
+#ifdef FFTW3_MPI
+      integer lnz_m,lzoff_m,npj_m
+      integer,allocatable :: lnz_mp(:),lzoff_mp(:)
+! for DM particle data for partial grid data
+      integer ndm_m
+      integer,allocatable :: procdm_m(:),ndmsproc_m(:)
+      double precision,allocatable :: xdm_m(:),ydm_m(:),zdm_m(:),mdm_m(:)
+      double precision,allocatable :: fxdm_m(:),fydm_m(:),fzdm_m(:)
+#endif
+
 end module gcdp_pm
 #endif
 

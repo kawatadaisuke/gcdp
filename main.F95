@@ -156,12 +156,11 @@ program gcdp
 ! setting kernel for SPH and softening
       call setkernel()
 #ifdef TREEPM
-! initial set up for TreePM
-      call mesh_gen(0)
 #ifdef FFTW3
       call fftw3_init()
 #endif
-
+! initial set up for TreePM
+      call mesh_gen(0)
 #endif
 #ifdef MEXT
 ! set up the external potential
@@ -561,27 +560,27 @@ program gcdp
       endif
 
 ! test output
-!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-!      open(60,file=fileo,status='unknown')
-!      do i=0,nadm-1
-!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-!        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-!        else
-!         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-!        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-!        endif
-!      enddo
-!      close(60)
+      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nadm-1
+        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+        else
+         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+        endif
+      enddo
+      close(60)
 
-!      goto 9999
+      goto 9999
 
 #endif
 

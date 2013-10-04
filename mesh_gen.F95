@@ -11,6 +11,9 @@ subroutine  mesh_gen(flag)
       use gcdp_const
       use gcdp_system
       use gcdp_pm
+#ifdef FFTW3_MPI
+      use fftw3
+#endif
 
       implicit none
       include 'mpif.h'
@@ -20,10 +23,51 @@ subroutine  mesh_gen(flag)
       integer i,j,k
       double precision yp,zp
 !      character filen*60
+#ifdef FFTW3_MPI
+      integer ierr
+      integer,allocatable :: tivs(:),tivr(:)
+#endif
 
 ! allocate memory space
       if(flag.eq.0) then
-        call allocate_pm()
+
+#ifdef FFTW3_MPI
+        lnz_m=int(lnz_fftw)
+        lzoff_m=int(lkoff_fftw)
+
+        write(6,*) ' myrank,lnz,lzoff=',myrank,lnz_m,lzoff_m
+
+        allocate(lnz_mp(0:nprocs))
+        allocate(lzoff_mp(0:nprocs))
+
+        allocate(tivs(0:nprocs*2))
+        allocate(tivr(0:nprocs*2))
+
+        do i=0,2*nprocs-1
+          tivs(i)=0
+          tivr(i)=0
+        enddo
+        tivs(myrank)=lnz_m
+        tivs(nprocs+myrank)=lzoff_m
+        call MPI_ALLREDUCE(tivs,tivr,2*nprocs,MPI_INTEGER &
+          ,MPI_SUM,MPI_COMM_WORLD,ierr)
+        do i=0,nprocs-1
+          lnz_mp(i)=tivr(i)
+          lzoff_mp(i)=tivr(i+nprocs)
+
+          if(myrank.eq.0) then
+            write(6,*) ' rank,lnz,lzoff=',i,lnz_mp(i),lzoff_mp(i)
+          endif
+        enddo
+
+        deallocate(tivs)
+        deallocate(tivr)
+
+        call allocate_pm(nx_m,ny_m,lnz_m)
+#else
+        call allocate_pm(nx_m,ny_m,nz_m)
+#endif
+
 ! half nx,ny,nz
         nx2_m=nx_m/2
         ny2_m=ny_m/2
@@ -84,18 +128,6 @@ subroutine  mesh_gen(flag)
       enddo
       do i=0,nz_m-1
         z_m1d(i)=z0_m+dz_m*dble(i)
-      enddo
-! mesh points 3d
-      do k=0,nz_m-1
-        zp=z_m1d(k)
-        do j=0,ny_m-1
-          yp=y_m1d(j)
-          do i=0,nx_m-1
-            x_m(i,j,k)=z_m1d(i)
-            y_m(i,j,k)=yp
-            z_m(i,j,k)=zp
-          enddo
-        enddo
       enddo
 
 end subroutine

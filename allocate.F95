@@ -943,21 +943,19 @@ end subroutine
 ! For PM
 
 #ifdef TREEPM
-subroutine allocate_pm()
+subroutine allocate_pm(nx,ny,nz)
       use gcdp_pm
       implicit none
+      integer nx,ny,nz
 
-      allocate(x_m1d(0:nx_m-1))
-      allocate(y_m1d(0:ny_m-1))
-      allocate(z_m1d(0:nz_m-1))
-      allocate(x_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(y_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(z_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(rho_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(pot_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(fx_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(fy_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
-      allocate(fz_m(0:nx_m-1,0:ny_m-1,0:nz_m-1))
+      allocate(x_m1d(0:nx-1))
+      allocate(y_m1d(0:ny-1))
+      allocate(z_m1d(0:nz-1))
+      allocate(rho_m(0:nx-1,0:ny-1,0:nz-1))
+      allocate(pot_m(0:nx-1,0:ny-1,0:nz-1))
+      allocate(fx_m(0:nx-1,0:ny-1,0:nz-1))
+      allocate(fy_m(0:nx-1,0:ny-1,0:nz-1))
+      allocate(fz_m(0:nx-1,0:ny-1,0:nz-1))
 
 end subroutine
 #endif
