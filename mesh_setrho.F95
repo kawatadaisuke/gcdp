@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! *********************************************
 !  mesh_setrho.F95 for GCD+
-!  13 Aug. 2013   written by D. Kawata
+!  07 Oct. 2013   written by D. Kawata
 ! *********************************************
 
 ! generating mesh points
@@ -31,7 +31,7 @@ subroutine  mesh_setrho(np,ndm)
       double precision,allocatable :: tdvs(:),tdvr(:)
 #ifdef FFTW3_MPI
       integer npjs,kp0proc,kp1proc,nval,ip,isend,irecv,pni
-      integer,allocatable :: npjr(:),idisp(:),jjlen(:),ireqs(:)
+      integer,allocatable :: npjr(:),idisp(:),jjlen(:)
       integer,allocatable :: pncomp(:),proccomp(:),lcomp(:)
       double precision,allocatable :: trbuf(:)
 #endif
@@ -50,7 +50,6 @@ subroutine  mesh_setrho(np,ndm)
           enddo
         enddo
       enddo
-
 
 ! assign baryon mass
 #if defined(GAS) || defined(STAR)
@@ -164,8 +163,12 @@ subroutine  mesh_setrho(np,ndm)
 
 #ifdef FFTW3_MPI
 ! set which particle send to which proc
-      allocate(pncomp(0:2*nprocs))
-      allocate(proccomp(0:2*nprocs))
+      allocate(pncomp(0:2*ndm))
+      allocate(proccomp(0:2*ndm))
+
+      do ip=0,nprocs-1
+        write(6,*) ' lnz,lzoff=',lnz_mp(ip),lzoff_mp(ip),myrank
+      enddo
 
       npjs=0
       do i=0,ndm-1
@@ -195,11 +198,15 @@ subroutine  mesh_setrho(np,ndm)
         enddo
         kp1proc=nprocs-1
    71   continue
+
         if(kp0proc.eq.kp1proc) then
           pncomp(npjs)=i
           proccomp(npjs)=kp0proc
           npjs=npjs+1
         else
+
+          write(6,*) ' crossing two cores',i,z_dm(i)
+
           pncomp(npjs)=i
           proccomp(npjs)=kp0proc
           npjs=npjs+1
@@ -210,7 +217,9 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 ! set sending values, and idisp and jjlen
       nval=4
-    
+
+      write(6,*) ' npjs,nprocs,myrank=',npjs,nprocs,myrank
+
       allocate(idisp(0:nprocs))
       allocate(jjlen(0:nprocs))
       allocate(lcomp(0:npjs))
@@ -245,16 +254,19 @@ subroutine  mesh_setrho(np,ndm)
       deallocate(proccomp)
 
 ! getting the total number of particles to recieved at each proc
-      npj_m=0
+
+      allocate(npjr(0:nprocs))
+
+      ndm_m=0
       do ip=0,nprocs-1
         irecv=0
         call MPI_SCATTER(jjlen,1,MPI_INTEGER &
          ,irecv,1,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
         npjr(ip)=irecv
-        npj_m=npj_m+irecv
+        ndm_m=ndm_m+irecv
       enddo
 
-      write(6,*) ' myrank,npj=',myrank,npj_m
+      write(6,*) ' myrank,npj=',myrank,ndm_m
 
       allocate(tdvs(0:npjs*nval))
 
@@ -264,7 +276,7 @@ subroutine  mesh_setrho(np,ndm)
         tdvs(nval*i)=x_dm(pni)
         tdvs(nval*i+1)=y_dm(pni)
         tdvs(nval*i+2)=z_dm(pni)
-        tdvs(nval*i+2)=m_dm(pni)
+        tdvs(nval*i+3)=m_dm(pni)
       enddo
 ! reset sending parameters
       do i=0,nprocs-1
@@ -273,10 +285,11 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 
 ! deallocated at mesh_fftf
-      allocate(xdm_m(0:npj_m))
-      allocate(ydm_m(0:npj_m))
-      allocate(zdm_m(0:npj_m))
-      allocate(mdm_m(0:npj_m))
+      allocate(xdm_m(0:ndm_m))
+      allocate(ydm_m(0:ndm_m))
+      allocate(zdm_m(0:ndm_m))
+      allocate(mdm_m(0:ndm_m))
+      allocate(procdm_m(0:ndm_m))
 
 ! sending and receiving the data
       irecv=0
@@ -306,13 +319,26 @@ subroutine  mesh_setrho(np,ndm)
       deallocate(jjlen)
       deallocate(idisp)
 
+      write(fileo,'(a4,i3.3)') 'dm_m',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,ndm_m-1
+        write(60,'(4(1pE13.5))') xdm_m(i),ydm_m(i),zdm_m(i),mdm_m(i)
+      enddo
+      close(60)
+
 #else
+! deallocated at mesh_fftf
+      allocate(xdm_m(0:ndm))
+      allocate(ydm_m(0:ndm))
+      allocate(zdm_m(0:ndm))
+      allocate(mdm_m(0:ndm))
+
 ! setting all the data to *_m
       ndm_m=ndm
       do i=0,ndm_m-1
-        xdm_m(i)=m_dm(i)
-        ydm_m(i)=m_dm(i)
-        zdm_m(i)=m_dm(i)
+        xdm_m(i)=x_dm(i)
+        ydm_m(i)=y_dm(i)
+        zdm_m(i)=z_dm(i)
         mdm_m(i)=m_dm(i)
       enddo
 #endif
@@ -402,8 +428,10 @@ subroutine  mesh_setrho(np,ndm)
 !          stop
 !        endif
 #ifdef FFTW3_MPI
-        if((kp0.lt.lzoff_m.or.kp0.ge.lzoff_m+lnz_m) &
-          .or.(kp1.lt.lzoff_m.or.kp1.ge.lzoff_m+lnz_m)) then
+        kp0=kp0-lzoff_m
+        kp1=kp1-lzoff_m
+
+        if(kp0.lt.0.or.kp0.ge.lnz_m) then
           write(6,*) ' Error in mesh_setrho(): myrank=',myrank
           write(6,*) '  kp0 or kp1 is outside the local grid'
           write(6,*) ' kp0,kp1,lnz,lzoff=',kp0,kp1,lnz_m,lzoff_m
@@ -495,11 +523,24 @@ subroutine  mesh_setrho(np,ndm)
 #endif
         do j=0,ny_m-1
           do i=0,nx_m-1
+#ifdef FFTW3_MPI
+            write(60,'(3I10,(1pE13.5))') i,j,k+lzoff_m,rho_m(i,j,k)
+#else
             write(60,'(3I10,(1pE13.5))') i,j,k,rho_m(i,j,k)
+#endif
           enddo
         enddo
       enddo
       close(60)
+
+!      write(fileo,'(a3,i3.3)') 'adm',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        write(60,'(4(1pE13.5))') x_dm(i),y_dm(i),z_dm(i),m_dm(i)
+!      enddo
+!      close(60)
+
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       stop
 
 end subroutine
