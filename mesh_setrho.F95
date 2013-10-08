@@ -166,9 +166,9 @@ subroutine  mesh_setrho(np,ndm)
       allocate(pncomp(0:2*ndm))
       allocate(proccomp(0:2*ndm))
 
-      do ip=0,nprocs-1
-        write(6,*) ' lnz,lzoff=',lnz_mp(ip),lzoff_mp(ip),myrank
-      enddo
+!      do ip=0,nprocs-1
+!        write(6,*) ' lnz,lzoff=',lnz_mp(ip),lzoff_mp(ip),myrank
+!      enddo
 
       npjs=0
       do i=0,ndm-1
@@ -204,9 +204,6 @@ subroutine  mesh_setrho(np,ndm)
           proccomp(npjs)=kp0proc
           npjs=npjs+1
         else
-
-          write(6,*) ' crossing two cores',i,z_dm(i)
-
           pncomp(npjs)=i
           proccomp(npjs)=kp0proc
           npjs=npjs+1
@@ -217,8 +214,6 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 ! set sending values, and idisp and jjlen
       nval=4
-
-      write(6,*) ' npjs,nprocs,myrank=',npjs,nprocs,myrank
 
       allocate(idisp(0:nprocs))
       allocate(jjlen(0:nprocs))
@@ -265,8 +260,6 @@ subroutine  mesh_setrho(np,ndm)
         npjr(ip)=irecv
         ndm_m=ndm_m+irecv
       enddo
-
-      write(6,*) ' myrank,npj=',myrank,ndm_m
 
       allocate(tdvs(0:npjs*nval))
 
@@ -319,12 +312,12 @@ subroutine  mesh_setrho(np,ndm)
       deallocate(jjlen)
       deallocate(idisp)
 
-      write(fileo,'(a4,i3.3)') 'dm_m',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,ndm_m-1
-        write(60,'(4(1pE13.5))') xdm_m(i),ydm_m(i),zdm_m(i),mdm_m(i)
-      enddo
-      close(60)
+!      write(fileo,'(a4,i3.3)') 'dm_m',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm_m-1
+!        write(60,'(4(1pE13.5))') xdm_m(i),ydm_m(i),zdm_m(i),mdm_m(i)
+!      enddo
+!      close(60)
 
 #else
 ! deallocated at mesh_fftf
@@ -514,7 +507,7 @@ subroutine  mesh_setrho(np,ndm)
       enddo
 
 ! test output
-      write(fileo,'(a6,i3.3)') 'meshrho',myrank
+      write(fileo,'(a7,i3.3)') 'meshrho',myrank
       open(60,file=fileo,status='unknown')
 #ifdef FFTW3_MPI
       do k=0,lnz_m-1

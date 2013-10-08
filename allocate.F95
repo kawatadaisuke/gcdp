@@ -943,19 +943,34 @@ end subroutine
 ! For PM
 
 #ifdef TREEPM
+#ifdef FFTW3_MPI
+subroutine allocate_pm(nx,ny,nz,lnz)
+#else
 subroutine allocate_pm(nx,ny,nz)
+#endif
       use gcdp_pm
       implicit none
       integer nx,ny,nz
+#ifdef FFTW3_MPI
+      integer lnz
+#endif
 
       allocate(x_m1d(0:nx-1))
       allocate(y_m1d(0:ny-1))
       allocate(z_m1d(0:nz-1))
+#ifdef FFTW3_MPI
+      allocate(rho_m(0:nx-1,0:ny-1,0:lnz-1))
+      allocate(pot_m(0:nx-1,0:ny-1,0:lnz-1))
+      allocate(fx_m(0:nx-1,0:ny-1,0:lnz-1))
+      allocate(fy_m(0:nx-1,0:ny-1,0:lnz-1))
+      allocate(fz_m(0:nx-1,0:ny-1,0:lnz-1))
+#else
       allocate(rho_m(0:nx-1,0:ny-1,0:nz-1))
       allocate(pot_m(0:nx-1,0:ny-1,0:nz-1))
       allocate(fx_m(0:nx-1,0:ny-1,0:nz-1))
       allocate(fy_m(0:nx-1,0:ny-1,0:nz-1))
       allocate(fz_m(0:nx-1,0:ny-1,0:nz-1))
+#endif
 
 end subroutine
 #endif

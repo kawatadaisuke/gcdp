@@ -63,7 +63,7 @@ subroutine  mesh_gen(flag)
         deallocate(tivs)
         deallocate(tivr)
 
-        call allocate_pm(nx_m,ny_m,lnz_m)
+        call allocate_pm(nx_m,ny_m,nz_m,lnz_m)
 #else
         call allocate_pm(nx_m,ny_m,nz_m)
 #endif
