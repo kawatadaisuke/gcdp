@@ -533,8 +533,8 @@ subroutine  mesh_setrho(np,ndm)
 !      enddo
 !      close(60)
 
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      stop
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      stop
 
 end subroutine
 #endif

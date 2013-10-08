@@ -1,4 +1,4 @@
-#include "gcdp.def"
+  #include "gcdp.def"
 ! *********************************************
 !  mesh_fftf.F95 for GCD+
 !  9 Sep. 2013   written by D. Kawata
@@ -26,8 +26,11 @@ subroutine  mesh_fftf()
       double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz
 ! *** for test file *** 
       character fileo*60
+      integer ierr
 #ifdef FFTW3_MPI
-      integer npmp,ierr
+      integer ip,srank,rrank,koff,nsend
+      integer istatus(MPI_STATUS_SIZE)
+      integer npmp,ireqs,ireqr
       integer(C_INTPTR_T) :: ifftw,jfftw,kfftw
       double precision,allocatable :: tdvs(:),tdvr(:)
 #endif
@@ -234,7 +237,7 @@ subroutine  mesh_fftf()
 ! set real space potential data 
 #ifdef FFTW3_MPI
 
-      do k=0,nz_m-1
+      do k=0,lnz_m+5
         do j=0,ny_m-1
           do i=0,nx_m-1
             pot_m(i,j,k)=0.0d0
@@ -246,7 +249,8 @@ subroutine  mesh_fftf()
         do jfftw=1,ny_fftw
           do ifftw=1,nx_fftw
 ! normalised (has to be done)
-            pot_m(ifftw-1,jfftw-1,kfftw+lkoff_fftw-1)= &
+! first 3 and last 3 arrays will be imported from the other cores -1+3=+2
+            pot_m(ifftw-1,jfftw-1,kfftw+lkoff_fftw+2)= &
               rsd_fftw(ifftw,jfftw,kfftw)/dble(nt_m)
 #else
       do k=1,nz_m
@@ -261,37 +265,180 @@ subroutine  mesh_fftf()
       enddo
 
 #ifdef FFTW3_MPI
+      if(nprocs.gt.1) then
+! send and receive potential of first 3 marginal grid 
+! sending proc
+        srank=myrank+1
+        if(srank.ge.nprocs) then
+          srank=srank-nprocs
+        endif
+! receiving proc
+        rrank=myrank-1
+        if(rrank.lt.0) then
+         rrank=rrank+nprocs
+        endif
+! offset for sending pot_m lzoff(ips)-3-lzoff(myrank)+3
+        koff=lzoff_mp(srank)-3
+        if(koff.lt.0) then
+          koff=koff+nz_m
+        endif
+        koff=koff-lzoff_m+3
 
-      allocate(tdvr(0:nt_m))
-      allocate(tdvs(0:nt_m))
+        if(koff.lt.3.or.koff.ge.lnz_m+3) then
+          write(6,*) ' Error in mesh_fftf(): setting first 3 marginal grid'
+          write(6,*) ' myrank,srank,rrank,koff=',myrank,srank,rrank
+          write(6,*) ' lzoff(srank,myrank)=',lzoff_mp(srank),lzoff_m
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
 
-! sum up potential
-      npmp=0
-      do k=0,nz_m-1
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-            tdvs(npmp)=pot_m(i,j,k)
-            tdvr(npmp)=0.0d0
-            npmp=npmp+1
+        allocate(tdvs(0:nx_m*ny_m*3))
+        allocate(tdvr(0:nx_m*ny_m*3))
+
+        nsend=0
+        do k=koff,koff+2
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              tdvs(nsend)=pot_m(i,j,k)
+              tdvr(nsend)=0.0d0
+              nsend=nsend+1
+            enddo
           enddo
         enddo
-      enddo
-      call MPI_ALLREDUCE(tdvs,tdvr,npmp,MPI_DOUBLE_PRECISION &
-       ,MPI_SUM,MPI_COMM_WORLD,ierr)
-      npmp=0
-      do k=0,nz_m-1
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-            pot_m(i,j,k)=tdvr(npmp)
-            npmp=npmp+1
+        if(nsend.ne.nx_m*ny_m*3) then
+          write(6,*) 'Error in mesh_fftf():'
+          write(6,*) ' setting sending data for first 3 merginal grid'
+          write(6,*) ' nsend=',nsend,' should be',nx_m*ny_m*3
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
+
+        call MPI_ISEND(tdvs,nsend,MPI_DOUBLE_PRECISION,srank,1 &
+         ,MPI_COMM_WORLD,ireqs,ierr)
+        call MPI_IRECV(tdvr,nsend,MPI_DOUBLE_PRECISION,rrank,1 &
+         ,MPI_COMM_WORLD,ireqr,ierr)
+        call MPI_WAIT(ireqs,istatus,ierr)
+        call MPI_WAIT(ireqr,istatus,ierr)
+
+        nsend=0
+        do k=0,2
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              pot_m(i,j,k)=tdvr(nsend)
+              nsend=nsend+1
+            enddo
           enddo
         enddo
-      enddo
 
-      deallocate(tdvr)
-      deallocate(tdvs)
+! send and receive potential of last 3 marginal grid 
+! sending proc
+        srank=myrank-1
+        if(srank.lt.0) then
+          srank=srank+nprocs
+        endif
+! receiving proc
+        rrank=myrank+1
+        if(rrank.ge.nprocs) then
+          rrank=rrank-nprocs
+        endif
+! offset for sending pot_m lzoff(ips)+lnz(ips)-1+3-lzoff(myrank)+3
+        koff=lzoff_mp(srank)+lnz_mp(srank)+2
+        if(koff.lt.nz_m) then
+          koff=koff-nz_m
+        endif
+        koff=koff-lzoff_m+3
+
+        if(koff.lt.3.or.koff.ge.lnz_m+3) then
+          write(6,*) ' Error in mesh_fftf(): setting last 3 marginal grid'
+          write(6,*) ' myrank,srank,rrank,koff=',myrank,srank,rrank
+          write(6,*) ' lzoff(srank,myrank)=',lzoff_mp(srank),lzoff_m
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
+
+        nsend=0
+        do k=koff,koff+2
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              tdvs(nsend)=pot_m(i,j,k)
+              tdvr(nsend)=0.0d0
+              nsend=nsend+1
+            enddo
+          enddo
+        enddo
+        if(nsend.ne.nx_m*ny_m*3) then
+          write(6,*) 'Error in mesh_fftf():'
+          write(6,*) ' setting sending data for last 3 merginal grid'
+          write(6,*) ' nsend=',nsend,' should be',nx_m*ny_m*3
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
+
+        call MPI_ISEND(tdvs,nsend,MPI_DOUBLE_PRECISION,srank,2 &
+         ,MPI_COMM_WORLD,ireqs,ierr)
+        call MPI_IRECV(tdvr,nsend,MPI_DOUBLE_PRECISION,rrank,2 &
+         ,MPI_COMM_WORLD,ireqr,ierr)
+        call MPI_WAIT(ireqs,istatus,ierr)
+        call MPI_WAIT(ireqr,istatus,ierr)
+
+        nsend=0
+        do k=lnz_m,lnz_m+2
+          do j=0,ny_m-1
+            do i=0,nx_m-1
+              pot_m(i,j,k)=tdvr(nsend)
+              nsend=nsend+1
+            enddo
+          enddo
+        enddo
+
+        deallocate(tdvs)
+        deallocate(tdvr)
+
+     else
+
+       do j=0,ny_m-1
+         do i=0,nx_m-1
+           pot_m(i,j,0)=pot_m(i,j,lnz_m-3+3)
+           pot_m(i,j,1)=pot_m(i,j,lnz_m-2+3)
+           pot_m(i,j,2)=pot_m(i,j,lnz_m-1+3)
+           pot_m(i,j,lnz_m+3)=pot_m(i,j,3)
+           pot_m(i,j,lnz_m+4)=pot_m(i,j,4)
+           pot_m(i,j,lnz_m+5)=pot_m(i,j,5)
+         enddo
+       enddo
+
+     endif
 
 #endif
+
+     write(fileo,'(a3,i3.3)') 'pot',myrank
+     open(60,file=fileo,status='unknown')
+#ifdef FFTW3_MPI
+      do k=0,lnz_m-1+6
+#else
+      do k=0,nz_m-1
+#endif
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+#ifdef FFTW3_MPI
+            kp1=k+lzoff_m-3
+            if(kp1.lt.0) then
+              kp1=kp1+nz_m
+            endif
+            if(kp1.ge.nz_m) then
+              kp1=kp1-nz_m
+            endif
+#else
+            kp1=k
+#endif
+            write(60,'(3I10,1pE13.5)') i,j,kp1,pot_m(i,j,k)
+          enddo
+        enddo
+      enddo
+      close(60)
+
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      stop
 
 ! set force
       do k=0,nz_m-1

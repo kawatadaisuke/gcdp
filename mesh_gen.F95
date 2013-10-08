@@ -35,7 +35,20 @@ subroutine  mesh_gen(flag)
         lnz_m=int(lnz_fftw)
         lzoff_m=int(lkoff_fftw)
 
-        write(6,*) ' myrank,lnz,lzoff=',myrank,lnz_m,lzoff_m
+        if(myrank.eq.0.and.lzoff_m.ne.0) then
+          write(6,*) ' Error in mesh_gen(): lzoff(0) should be zero'
+          write(6,*) ' lzoff(0)=',lzoff_m
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
+        if(myrank.eq.nprocs-1.and.lzoff_m+lnz_m-1.ne.nz_m-1) then
+          write(6,*) ' Error in mesh_gen(): lzoff(nprocs-1) should be nz-1'
+          write(6,*) ' lzoff,lnz(nprocs-1)=',lzoff_m,lnz_m
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
+        endif
+
+!        write(6,*) ' myrank,lnz,lzoff=',myrank,lnz_m,lzoff_m
 
         allocate(lnz_mp(0:nprocs))
         allocate(lzoff_mp(0:nprocs))
@@ -58,6 +71,28 @@ subroutine  mesh_gen(flag)
           if(myrank.eq.0) then
             write(6,*) ' rank,lnz,lzoff=',i,lnz_mp(i),lzoff_mp(i)
           endif
+          if(i.ne.0.and.lzoff_mp(i-1).gt.lzoff_mp(i)-3) then
+            if(myrank.eq.0) then
+            write(6,*) &
+             ' Error in mesh_gen(): need at least 3 grids in neighbour proc.'
+            write(6,*) ' myrank,ip,lzoff(i-1,i)=' &
+             ,myrank,i,lzoff_mp(i-1),lzoff_mp(i)
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD,ierr)
+            stop
+          endif
+          if(i.ne.nprocs-1.and.lzoff_mp(i)+lnz_mp(i)+2 &
+            .gt.lzoff_mp(i+1)+lnz_mp(i+1)-1) then
+            if(myrank.eq.0) then
+            write(6,*) &
+             ' Error in mesh_gen(): need at least 3 grids in neighbour proc.'
+            write(6,*) ' myrank,ip,lzoff(i,i+1)=' &
+              ,myrank,i,lzoff_mp(i),lzoff_mp(i+1)
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD,ierr)
+            stop
+          endif
+! proc i and procs-1 are not checked, but should be ok.
         enddo
 
         deallocate(tivs)

@@ -157,69 +157,91 @@ subroutine  mesh_setfp(nag,nas,nadm)
       do i=0,nadm-1
         pn=list_adm(i)
 ! x
-        if(x_dm(pn).le.x0_m) then
+        if(xdm_m(pn).le.x0_m) then
           ip0=nx_m-1
           ip1=0
-          df=(x_m1d(0)-x_dm(pn))/dx_m
+          df=(x_m1d(0)-xdm_m(pn))/dx_m
           wx0=df
           wx1=1.0d0-df
-        else if(x_dm(pn).ge.x_m1d(nx_m-1)) then
+        else if(xdm_m(pn).ge.x_m1d(nx_m-1)) then
           ip0=nx_m-1
           ip1=0
-          df=(x_dm(pn)-x_m1d(ip0))/dx_m
+          df=(xdm_m(pn)-x_m1d(ip0))/dx_m
           wx0=1.0d0-df
           wx1=df
         else
-          ip0=int((x_dm(pn)-x0_m)/dx_m)
+          ip0=int((xdm_m(pn)-x0_m)/dx_m)
           ip1=ip0+1
-          df=(x_dm(pn)-x_m1d(ip0))/dx_m
+          df=(xdm_m(pn)-x_m1d(ip0))/dx_m
           wx0=1.0d0-df
           wx1=df
         endif
 ! y
-        if(y_dm(pn).le.y0_m) then
+        if(ydm_m(pn).le.y0_m) then
           jp0=ny_m-1
           jp1=0
-          df=(y_m1d(0)-y_dm(pn))/dy_m
+          df=(y_m1d(0)-ydm_m(pn))/dy_m
           wy0=df
           wy1=1.0d0-df
-        else if(y_dm(pn).ge.y_m1d(ny_m-1)) then
+        else if(ydm_m(pn).ge.y_m1d(ny_m-1)) then
           jp0=ny_m-1
           jp1=0
-          df=(y_dm(pn)-y_m1d(jp0))/dy_m
+          df=(ydm_m(pn)-y_m1d(jp0))/dy_m
           wy0=1.0d0-df
           wy1=df
         else
-          jp0=int((y_dm(pn)-y0_m)/dy_m)
+          jp0=int((ydm_m(pn)-y0_m)/dy_m)
           jp1=jp0+1
-          df=(y_dm(pn)-y_m1d(jp0))/dy_m
+          df=(ydm_m(pn)-y_m1d(jp0))/dy_m
           wy0=1.0d0-df
           wy1=df
         endif
 ! z
-        if(z_dm(pn).le.z0_m) then
+        if(zdm_m(pn).le.z0_m) then
           kp0=nz_m-1
           kp1=0
-          df=(z_m1d(0)-z_dm(pn))/dz_m
+          df=(z_m1d(0)-zdm_m(pn))/dz_m
           wz0=df
           wz1=1.0d0-df
-        else if(z_dm(pn).ge.z_m1d(nz_m-1)) then
+        else if(zdm_m(pn).ge.z_m1d(nz_m-1)) then
           kp0=nz_m-1
           kp1=0
-          df=(z_dm(pn)-z_m1d(kp0))/dz_m
+          df=(zdm_m(pn)-z_m1d(kp0))/dz_m
           wz0=1.0d0-df
           wz1=df
         else
-          kp0=int((z_dm(pn)-z0_m)/dz_m)
+          kp0=int((zdm_m(pn)-z0_m)/dz_m)
           kp1=kp0+1
-          df=(z_dm(pn)-z_m1d(kp0))/dz_m
+          df=(zdm_m(pn)-z_m1d(kp0))/dz_m
           wz0=1.0d0-df
           wz1=df
         endif
+#ifdef FFTW3_MPI
+! editing...
+! if outside of the local grid, set wz=0.0 
+        if(kp0.lt.lzoff_m) then
+          kp0=lzoff_m
+          wz0=0.0d0
+        else if(kp0.ge.lzoff_m+lnz_m) then
+          kp0=lzoff_m+lnz_m-1
+          wz0=0.0d0
+        endif
+        if(kp1.lt.lzoff_m) then
+          kp1=lzoff_m
+          wz1=0.0d0
+        else if(kp1.ge.lzoff_m+lnz_m) then
+          kp1=lzoff_m+lnz_m-1
+          wz1=0.0d0
+        endif
+#endif
 
 ! assign force to the particles
 ! dvx_p kp0
+#ifdef FFTW3_MPI
+        fxdm_m(pn)=wx0*wy0*wz0*fx_m(ip0,jp0,kp0) &
+#else
         dvx_dm(pn)=dvx_dm(pn)+wx0*wy0*wz0*fx_m(ip0,jp0,kp0) &
+#endif
          +wx1*wy0*wz0*fx_m(ip1,jp0,kp0) &
          +wx1*wy1*wz0*fx_m(ip1,jp1,kp0) &
          +wx0*wy1*wz0*fx_m(ip0,jp1,kp0) &
