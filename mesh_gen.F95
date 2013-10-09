@@ -67,7 +67,10 @@ subroutine  mesh_gen(flag)
         do i=0,nprocs-1
           lnz_mp(i)=tivr(i)
           lzoff_mp(i)=tivr(i+nprocs)
+        enddo
 
+! check
+        do i=0,nprocs-1
           if(myrank.eq.0) then
             write(6,*) ' rank,lnz,lzoff=',i,lnz_mp(i),lzoff_mp(i)
           endif

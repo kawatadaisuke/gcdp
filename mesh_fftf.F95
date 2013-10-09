@@ -21,7 +21,7 @@ subroutine  mesh_fftf()
       integer i,j,k,i1
       integer ip2,ip1,im1,im2
       integer jp2,jp1,jm1,jm2
-      integer kp2,kp1,km1,km2
+      integer kp2,kp1,km1,km2,kp
       double precision kx,ky,kz,kabs2
       double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz
 ! *** for test file *** 
@@ -36,7 +36,11 @@ subroutine  mesh_fftf()
 #endif
 
 ! initialisation
+#ifdef FFTW3_MPI
+      do k=1,lnz_m
+#else
       do k=1,nz_m
+#endif
         do j=1,ny_m
           do i=1,2*(nx_m/2+1)
             rsd_fftw(i,j,k)=0.0d0
@@ -54,7 +58,7 @@ subroutine  mesh_fftf()
         do jfftw=1,ny_fftw
           do ifftw=1,nx_fftw
             rsd_fftw(ifftw,jfftw,kfftw)=rho_m(ifftw-1,jfftw-1 &
-              ,kfftw+lkoff_fftw-1)
+              ,kfftw-1)
 #else
       do k=1,nz_m
         do j=1,ny_m
@@ -118,7 +122,7 @@ subroutine  mesh_fftf()
               *ksd_fftw(ifftw,kfftw,jfftw)/kabs2            
 ! PMTree long range force trunction
             ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
-             *dexp(-kabs2*SI_rsp2tpm)
+              *dexp(-kabs2*SI_rsp2tpm)
 ! deconvolution for CIC
             if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
               kxl2nx=kx*l2nx
@@ -250,7 +254,7 @@ subroutine  mesh_fftf()
           do ifftw=1,nx_fftw
 ! normalised (has to be done)
 ! first 3 and last 3 arrays will be imported from the other cores -1+3=+2
-            pot_m(ifftw-1,jfftw-1,kfftw+lkoff_fftw+2)= &
+            pot_m(ifftw-1,jfftw-1,kfftw+2)= &
               rsd_fftw(ifftw,jfftw,kfftw)/dble(nt_m)
 #else
       do k=1,nz_m
@@ -341,16 +345,16 @@ subroutine  mesh_fftf()
         if(rrank.ge.nprocs) then
           rrank=rrank-nprocs
         endif
-! offset for sending pot_m lzoff(ips)+lnz(ips)-1+3-lzoff(myrank)+3
+! offset for sending pot_m lzoff(ips)+lnz(ips)-1+3-lzoff(myrank)+3-2
         koff=lzoff_mp(srank)+lnz_mp(srank)+2
-        if(koff.lt.nz_m) then
+        if(koff.ge.nz_m) then
           koff=koff-nz_m
         endif
-        koff=koff-lzoff_m+3
+        koff=koff-lzoff_m+3-2
 
         if(koff.lt.3.or.koff.ge.lnz_m+3) then
           write(6,*) ' Error in mesh_fftf(): setting last 3 marginal grid'
-          write(6,*) ' myrank,srank,rrank,koff=',myrank,srank,rrank
+          write(6,*) ' myrank,srank,rrank,koff=',myrank,srank,rrank,koff
           write(6,*) ' lzoff(srank,myrank)=',lzoff_mp(srank),lzoff_m
           call MPI_ABORT(MPI_COMM_WORLD,ierr)
           stop
@@ -382,7 +386,7 @@ subroutine  mesh_fftf()
         call MPI_WAIT(ireqr,istatus,ierr)
 
         nsend=0
-        do k=lnz_m,lnz_m+2
+        do k=lnz_m+3,lnz_m+5
           do j=0,ny_m-1
             do i=0,nx_m-1
               pot_m(i,j,k)=tdvr(nsend)
@@ -437,11 +441,26 @@ subroutine  mesh_fftf()
       enddo
       close(60)
 
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      stop
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      stop
 
 ! set force
+#ifdef FFTW3_MPI
+      do k=0,lnz_m+1
+! pot_m k+2 corresponds to k 
+        kp=k+2
+        kp2=k+4
+        kp1=k+3
+        km2=k
+        km1=k+1
+        if((kp2.lt.0.or.kp2.ge.lnz_m+6) &
+         .or.(km2.lt.0.or.km2.ge.lnz_m+6)) then
+          write(6,*) ' Error in mesh_fftf(): kp for force calculation'
+          write(6,*) '  myrank,k,kp2,km2=',myrank,k,kp2,km2
+        endif
+#else
       do k=0,nz_m-1
+        kp=k
         kp2=k+2
         if(kp2.gt.nz_m-1) then
           kp2=kp2-nz_m
@@ -458,6 +477,7 @@ subroutine  mesh_fftf()
         if(km1.lt.0) then
           km1=km1+nz_m
         endif
+#endif
         do j=0,ny_m-1
           jp2=j+2
           if(jp2.gt.ny_m-1) then
@@ -494,11 +514,11 @@ subroutine  mesh_fftf()
             endif
 
             fx_m(i,j,k)=(1.0d0/dx_m) &
-             *((2.0d0/3.0d0)*(pot_m(ip1,j,k)-pot_m(im1,j,k)) &
-             -((1.0d0/12.0d0)*(pot_m(ip2,j,k)-pot_m(im2,j,k))))
+             *((2.0d0/3.0d0)*(pot_m(ip1,j,kp)-pot_m(im1,j,kp)) &
+             -((1.0d0/12.0d0)*(pot_m(ip2,j,kp)-pot_m(im2,j,kp))))
             fy_m(i,j,k)=(1.0d0/dy_m) &
-             *((2.0d0/3.0d0)*(pot_m(i,jp1,k)-pot_m(i,jm1,k)) &
-             -((1.0d0/12.0d0)*(pot_m(i,jp2,k)-pot_m(i,jm2,k))))
+             *((2.0d0/3.0d0)*(pot_m(i,jp1,kp)-pot_m(i,jm1,kp)) &
+             -((1.0d0/12.0d0)*(pot_m(i,jp2,kp)-pot_m(i,jm2,kp))))
             fz_m(i,j,k)=(1.0d0/dz_m) &
              *((2.0d0/3.0d0)*(pot_m(i,j,kp1)-pot_m(i,j,km1)) &
              -((1.0d0/12.0d0)*(pot_m(i,j,kp2)-pot_m(i,j,km2))))
@@ -507,20 +527,36 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
-!     write(fileo,'(a4,i3.3)') 'fpot',myrank
-!      open(60,file=fileo,status='unknown')
-!      do k=0,nz_m-1
-!        do j=0,ny_m-1
-!          do i=0,nx_m-1
-!            write(60,'(8(1pE13.5))') x_m(i,j,k),y_m(i,j,k),z_m(i,j,k) &
-!             ,pot_m(i,j,k)/dble(nt_m) &
-!!             ,pot_m(i,j,k) &
-!             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k) &
-!             ,dsqrt(x_m(i,j,k)**2+y_m(i,j,k)**2+z_m(i,j,k)**2)
-!          enddo
-!        enddo
-!      enddo
-!      close(60)
+     write(fileo,'(a5,i3.3)') 'fmesh',myrank
+     open(60,file=fileo,status='unknown')
+#ifdef FFTW3_MPI
+      do k=0,lnz_m-1+2
+#else
+      do k=0,nz_m-1
+#endif
+        do j=0,ny_m-1
+          do i=0,nx_m-1
+#ifdef FFTW3_MPI
+            kp1=k+lzoff_m-1
+            if(kp1.lt.0) then
+              kp1=kp1+nz_m
+            endif
+            if(kp1.ge.nz_m) then
+              kp1=kp1-nz_m
+            endif
+#else
+            kp1=k
+#endif
+            write(60,'(3I10,3(1pE13.5))') i,j,kp1 &
+             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k)
+          enddo
+        enddo
+      enddo
+      close(60)
+
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      stop
+
 
 end subroutine
 #endif
