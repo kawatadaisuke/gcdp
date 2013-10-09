@@ -137,7 +137,7 @@
 !#define ADTESTSIM
 ! #undef DM
 #undef GAS
-#undef COSM
+! #undef COSM
 !
 ! *** isolated galaxy
 ! #define MAXR

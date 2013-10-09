@@ -580,7 +580,7 @@ program gcdp
       enddo
       close(60)
 
-      goto 9999
+!      goto 9999
 
 #endif
 

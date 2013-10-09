@@ -543,13 +543,7 @@ module gcdp_pm
 #ifdef FFTW3_MPI
       integer lnz_m,lzoff_m
       integer,allocatable :: lnz_mp(:),lzoff_mp(:)
-! for DM particle data for partial grid data
-      integer,allocatable :: procdm_m(:),ndmsproc_m(:)
 #endif
-      integer ndm_m
-      double precision,allocatable :: xdm_m(:),ydm_m(:),zdm_m(:),mdm_m(:)
-      double precision,allocatable :: fxdm_m(:),fydm_m(:),fzdm_m(:)
-
 
 end module gcdp_pm
 #endif

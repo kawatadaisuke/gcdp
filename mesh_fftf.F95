@@ -1,4 +1,4 @@
-  #include "gcdp.def"
+#include "gcdp.def"
 ! *********************************************
 !  mesh_fftf.F95 for GCD+
 !  9 Sep. 2013   written by D. Kawata
@@ -199,7 +199,7 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
-      close(60)
+!      close(60)
 
 ! backward FFT
 #ifdef FFTW3_MPI
@@ -415,35 +415,6 @@ subroutine  mesh_fftf()
 
 #endif
 
-     write(fileo,'(a3,i3.3)') 'pot',myrank
-     open(60,file=fileo,status='unknown')
-#ifdef FFTW3_MPI
-      do k=0,lnz_m-1+6
-#else
-      do k=0,nz_m-1
-#endif
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-#ifdef FFTW3_MPI
-            kp1=k+lzoff_m-3
-            if(kp1.lt.0) then
-              kp1=kp1+nz_m
-            endif
-            if(kp1.ge.nz_m) then
-              kp1=kp1-nz_m
-            endif
-#else
-            kp1=k
-#endif
-            write(60,'(3I10,1pE13.5)') i,j,kp1,pot_m(i,j,k)
-          enddo
-        enddo
-      enddo
-      close(60)
-
-!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-!      stop
-
 ! set force
 #ifdef FFTW3_MPI
       do k=0,lnz_m+1
@@ -527,35 +498,36 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
-     write(fileo,'(a5,i3.3)') 'fmesh',myrank
-     open(60,file=fileo,status='unknown')
-#ifdef FFTW3_MPI
-      do k=0,lnz_m-1+2
-#else
-      do k=0,nz_m-1
-#endif
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-#ifdef FFTW3_MPI
-            kp1=k+lzoff_m-1
-            if(kp1.lt.0) then
-              kp1=kp1+nz_m
-            endif
-            if(kp1.ge.nz_m) then
-              kp1=kp1-nz_m
-            endif
-#else
-            kp1=k
-#endif
-            write(60,'(3I10,3(1pE13.5))') i,j,kp1 &
-             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k)
-          enddo
-        enddo
-      enddo
-      close(60)
+!     write(fileo,'(a5,i3.3)') 'fmesh',myrank
+!     open(60,file=fileo,status='unknown')
 
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      stop
+!#ifdef FFTW3_MPI
+!      do k=0,lnz_m-1+2
+!#else
+!      do k=0,nz_m-1
+!#endif
+!        do j=0,ny_m-1
+!          do i=0,nx_m-1
+!#ifdef FFTW3_MPI
+!            kp1=k+lzoff_m-1
+!            if(kp1.lt.0) then
+!              kp1=kp1+nz_m
+!            endif
+!            if(kp1.ge.nz_m) then
+!              kp1=kp1-nz_m
+!            endif
+!#else
+!            kp1=k
+!#endif
+!            write(60,'(3I10,3(1pE13.5))') i,j,kp1 &
+!             ,fx_m(i,j,k),fy_m(i,j,k),fz_m(i,j,k)
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
+
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      stop
 
 
 end subroutine
