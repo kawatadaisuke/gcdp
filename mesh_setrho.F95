@@ -429,11 +429,18 @@ subroutine  mesh_setrho(np,ndm)
         if(kp0.lt.0) then
           kp0=0
           wz0=0.0d0
-        endif
-        if(kp1.ge.lnz_m) then
+        else if(kp0.ge.lnz_m) then
+          kp0=lnz_m-1
+          wz0=0.0d0
+        endif          
+        if(kp1.lt.0) then
+          kp1=0
+          wz1=0.0d0
+        else if(kp1.ge.lnz_m) then
           kp1=lnz_m-1
           wz1=0.0d0
         endif          
+
         if(kp0.ge.lnz_m.or.kp1.lt.0) then
           write(6,*) ' Error in mesh_setrho(): out of range kp0 or kp1'
           write(6,*) ' myrank,kp0,kp1,lnz,lzoff=',myrank,kp0,kp1,lnz_m,lzoff_m

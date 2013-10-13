@@ -376,12 +376,20 @@ subroutine  mesh_setfp(nag,nas,nadm)
           wz1=df
         endif
 #ifdef FFTW3_MPI
-! in local grid 
+! in local grid   
         kp0=kp0-lzoff_m+1
         kp1=kp1-lzoff_m+1
-        if((kp0.lt.0.or.kp0.gt.lnz_m).or.(kp1.lt.0.or.kp1.gt.lnz_m)) then
+        if(kp0.gt.lnz_m) then
+          kp0=kp0-nz_m
+        endif
+        if(kp1.lt.0) then
+          kp1=kp1+nz_m
+        endif
+        if((kp0.lt.0.or.kp0.gt.lnz_m+1).or.(kp1.lt.0.or.kp1.gt.lnz_m+1)) then
           write(6,*) ' Error in mesh_setfp(): kp0 or kp1 out of the range'
           write(6,*) ' myrank,kp0,kp1,z=',myrank,kp0,kp1,zp_m(i)
+          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+          stop
         endif
 #endif
 
@@ -466,7 +474,7 @@ subroutine  mesh_setfp(nag,nas,nadm)
       irecv=0
       do ip=0,nprocs-1
 
-        allocate(trbuf(0:npjr(ip)*nval))
+        allocate(trbuf(0:npsproc(ip)*nval))
 
 ! use npsproc for number of receiving data
         call MPI_SCATTERV(tdvs,jjlen,idisp,MPI_DOUBLE_PRECISION &
