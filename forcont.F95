@@ -28,7 +28,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
        ,totstep,lstep 
       integer i,ip,iv,nivalb,nivaldm,ndvaldm,pn
       integer ipsta,ipend,ipd
-      integer npj
+      integer npj,iwdummy
       integer ndbval,ndbhyd,ndbsf,ndbmet,ndbcon,nddmcon,nibcon,nidmcon
 #ifdef MHD
       integer ndbmhd
@@ -49,6 +49,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       if(myrank.eq.0) then
         open(60,file='./output/data/cont.dat',status='unknown' &
          ,form='unformatted')
+         iwdummy=0
 ! /*** Output continue data ***/
          write(60) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
 #ifdef BOXSIM
@@ -67,7 +68,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #ifdef STAR
         ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
 #endif
-        ,0
+        ,iwdummy
         close(60)
       endif
 

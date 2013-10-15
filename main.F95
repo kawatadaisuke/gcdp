@@ -64,6 +64,8 @@ program gcdp
       parameter (JOBTIME=604800.0d0)
 ! 48 hours
 !      parameter (JOBTIME=172800.0d0)
+! 36 hours
+!      parameter (JOBTIME=129600.0d0)
 ! 12 hours
 !      parameter (JOBTIME=43200.0d0)
 ! 8 hours

@@ -4,8 +4,8 @@
 !  18 Apr. 2014  written by D.KAWATA
 ! *************************************** 
 
-subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
-      step,totstep,lstep,flagcont)
+subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
+      ,step,totstep,lstep,flagcont)
       use gcdp_const
 #if defined(GAS) || defined(STAR)
       use gcdp_baryon
@@ -58,7 +58,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       integer ndbmhd
 #endif
 ! for work
-      integer ierr
+      integer ierr,irdummy
       integer,allocatable :: istatus(:)
       integer,allocatable :: npjr(:),ireqs(:),ireqr(:)
       integer,allocatable :: tivr(:)
@@ -172,8 +172,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         close(50)
         if(Ini_flagcop.eq.0) then
 
-          allocate(tivr(0:1))
-
           open(51,file='output/data/cont.dat',status='old',form='unformatted')
 ! *** Read continue data ***
           read(51) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
@@ -183,34 +181,22 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
            ,SI_lbox0(0),SI_lbox0(1),SI_lbox0(2) &
 #endif
 #endif
-#if defined(COSM) || defined(COOL)
            ,TM_tot,TM_sdt,TM_lt,TM_ldtmin,TM_k,TM_kn,SI_a,SI_eps,SI_mms &
-#elif defined(STAR)
-           ,TM_tot,TM_sdt,TM_lt,TM_ldtmin,TM_k,TM_kn,SI_a,SI_eps,SI_mms &
-#else
-           ,TM_tot,TM_sdt,TM_lt,TM_ldtmin,TM_k,TM_kn,SI_a,SI_eps,SI_mms
-#endif
 #ifdef COSM
 #if defined(COOL) || defined(STAR)
            ,SI_omg0,SI_lam0,SI_h0,SI_eps0,SI_epsa &
 #else
-           ,SI_omg0,SI_lam0,SI_h0,SI_eps0,SI_epsa 
+           ,SI_omg0,SI_lam0,SI_h0,SI_eps0,SI_epsa &
 #endif
 #endif
 #ifdef COOL
-#ifdef STAR
            ,SI_flagrad &
-#else
-           ,SI_flagrad 
-#endif
 #endif
 #ifdef STAR
            ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
-            ,tivr(0)
 #endif
+           ,irdummy
           close(51)
-
-          deallocate(tivr)
 
         else
 
@@ -218,6 +204,8 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           allocate(tdvr(0:1))
 
           open(50,file='./output/ana/system.dat',status='old')
+          write(6,*) ' myrank,step=',myrank,step
+
           do i=0,step
             read(50,*) 
           enddo
