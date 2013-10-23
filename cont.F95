@@ -1325,10 +1325,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             stop
           endif
         endif
+
+        allocate(tivr(0:6))
+
         do ip=ipsta,ipend,ipd
-
-          allocate(tivr(0:6))
-
           if(myrank.lt.SI_nof) then
             read(52) (tivr(i),i=0,6)
             if(ip.ne.myrank) then
@@ -1351,10 +1351,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             nas=tivr(6)
           endif
           npjr(ip)=tivr(1)
-
-          deallocate(tivr)
-
         enddo
+
+        deallocate(tivr)
 
 ! allocate DM values
         call allocate_dm_all(ndm)
