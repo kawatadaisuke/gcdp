@@ -1332,12 +1332,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           if(myrank.lt.SI_nof) then
             read(52) (tivr(i),i=0,6)
             if(ip.ne.myrank) then
-              call MPI_ISEND(tivr,8,MPI_INTEGER,ip,1,MPI_COMM_WORLD &
+              call MPI_ISEND(tivr,7,MPI_INTEGER,ip,1,MPI_COMM_WORLD &
                ,ireqs(ip),ierr)
               call MPI_WAIT(ireqs(ip),istatus,ierr)
             endif
           else
-            call MPI_IRECV(tivr,8,MPI_INTEGER,rrank,1,MPI_COMM_WORLD &
+            call MPI_IRECV(tivr,7,MPI_INTEGER,rrank,1,MPI_COMM_WORLD &
              ,ireqr(ip),ierr)
             call MPI_WAIT(ireqr(ip),istatus,ierr)
           endif
