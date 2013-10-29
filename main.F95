@@ -797,7 +797,7 @@ program gcdp
 !  Update Scale Factor (SI_a) at TM_tot+TM_dt
 ! ***************************************************************
 #ifdef COSM
-      call afromt(TM_tot,SI_a)
+      call afromt(TM_tot+TM_dt,SI_a)
       if(SI_a.lt.SI_epsa) then
         SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps0
       else
