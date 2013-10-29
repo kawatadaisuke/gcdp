@@ -793,6 +793,14 @@ program gcdp
 !  ***************************
       call updatev(np,ndm)
 
+! ************************
+!  Update Time and Step
+! ************************
+      lstep=lstep+1
+      totstep=totstep+1
+      TM_tot=TM_tot+TM_dt
+      TM_lt=TM_lt+TM_dt
+
 ! ***************************************************************
 !  Update Scale Factor (SI_a) at TM_tot+TM_dt
 ! ***************************************************************
@@ -886,14 +894,6 @@ program gcdp
       WTM_update=WTM_update+ectime-ntime
 #endif
       endif
-
-! ************************
-!  Update Time and Step
-! ************************
-      lstep=lstep+1
-      totstep=totstep+1
-      TM_tot=TM_tot+TM_dt
-      TM_lt=TM_lt+TM_dt
 
 ! *********************************
 !  Update Virtual Velocity V(n+1)

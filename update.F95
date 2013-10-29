@@ -108,9 +108,12 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
       do i=0,nadm-1
         pn=list_adm(i)         
 #if defined(COSM) && defined(BOXSIM)
+! update H and a
+        hub_dm(pn)=SI_hub
+        asc_dm(pn)=SI_a
 ! x peculiar velocity
         vnx_dm(pn)=(1.0d0/(1.0d0+SI_hub*dt_dm(pn))) &
-         *(vx_dm(pn)+(1.0d0/SI_a)*dvx_dm(pn)*0.5d0*dt_dm(pn)) 
+         *(vx_dm(pn)+(1.0d0/SI_a)*dvx_dm(pn)*0.5d0*dt_dm(pn))
 ! physical velocity
         vnx_dm(pn)=SI_hub*xc_dm(pn)+SI_a*vnx_dm(pn)
 ! y peculiar velocity
@@ -123,9 +126,6 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
          *(vz_dm(pn)+(1.0d0/SI_a)*dvz_dm(pn)*0.5d0*dt_dm(pn)) 
 ! physical velocity
         vnz_dm(pn)=SI_hub*zc_dm(pn)+SI_a*vnz_dm(pn)
-! update H and a
-        hub_dm(pn)=SI_hub
-        asc_dm(pn)=SI_a
 #else
         vnx_dm(pn)=vx_dm(pn)+(dt_dm(pn)*dvx_dm(pn))*0.5d0
         vny_dm(pn)=vy_dm(pn)+(dt_dm(pn)*dvy_dm(pn))*0.5d0
