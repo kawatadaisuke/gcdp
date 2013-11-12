@@ -5,7 +5,7 @@
 !
 ! *** cosmological simulation
 #define COSM
-#define MULTI_LEV
+! #define MULTI_LEV
 !
 ! *** hydrodynamics
 #define GAS

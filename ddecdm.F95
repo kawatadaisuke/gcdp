@@ -57,6 +57,11 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       double precision,allocatable :: tdvs(:),tdvr(:),cx0p(:),cy0p(:),cz0p(:)
 ! *** for Paeno-Hilbert ordering ***
       integer,allocatable :: ixp(:),iyp(:),izp(:),snfp(:),c_nfp(:)
+! subcell
+      integer numsc,pnumsc,nscnf
+      integer,allocatable :: npsc(:),dpsc(:),scp(:),nppsc(:)
+! for counting the time
+      double precision ntime,ctime,c1time
 
 ! *** mergin of tree level to make a key for the particles ***
       level_mergin = 1
@@ -115,6 +120,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         allocate(cy0p(idmr(0):idmr(1)+1))
         allocate(cz0p(idmr(0):idmr(1)+1))
 
+! time
+!        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!        ntime=MPI_WTIME()
+
         do i=idmr(0),idmr(1)
           phkey(i)=0
           cx0p(i)=cx0
@@ -124,6 +133,26 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           snfp(i)=0
         enddo
         level = 0
+
+! allocate daughter subcell
+        numsc=NDTREE
+
+        allocate(npsc(0:numsc))
+        allocate(dpsc(0:numsc))
+
+        do i=0,NDTREE-1
+          npsc(i)=0
+          dpsc(i)=0
+        enddo
+
+! record current subcell for particles
+        
+        allocate(scp(idmr(0):idmr(1)+1))
+
+        do i=idmr(0),idmr(1)
+          scp(i)=0
+        enddo
+
 ! *****   start iteration in level *****
    77   level=level+1	  
         l_sc = 0.5d0*l_sc
@@ -157,9 +186,12 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
             izp(i)=1
           endif 
         enddo
-        do i=idmr(0),idmr(1)
 ! *** set c and state ***
-          call phcurve(snfp(i),c_nfp(i),ixp(i),iyp(i),izp(i),level)
+
+        call phcurven(idmr(0),idmr(1),snfp,c_nfp &
+         ,ixp,iyp,izp,level)
+
+        do i=idmr(0),idmr(1)
 ! *** asign the ph key ***
 ! *** has to be phkey(i)*NDPH 
           phkey(i)=phkey(i)*NDPH+c_nfp(i)
@@ -173,35 +205,64 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         deallocate(iyp)
         deallocate(izp)
 
-! *** check the number of particles whose key overlap>8 ***
+        do i=idmr(0),idmr(1)
+! allocate subcell
+          scp(i)=dpsc(scp(i))+c_nfp(i)
+! counting number of particles in subcell
+          npsc(scp(i))=npsc(scp(i))+1
+        enddo
+
         if(maxlevel.eq.0) then
-
-          allocate(nd_nfp(idmr(0):idmr(1)+1))
-     
-          do i=idmr(0),idmr(1)
-            nd_nfp(i)=0
-            do j=idmr(0),idmr(1)
-              if(phkey(i).eq.phkey(j).and.i.ne.j) then
-                nd_nfp(i)=nd_nfp(i)+1
-              endif
-            enddo
-            if(nd_nfp(i).gt.int(NDPH)) then
-
-              deallocate(nd_nfp)
-
-              goto 77
+! make new subcell
+          pnumsc=numsc
+          numsc=0
+          nscnf=0
+! counting numsc for the next level
+          do i=0,pnumsc-1
+            if(npsc(i).gt.NDTREE) then
+              nscnf=nscnf+1
+            endif
+            if(npsc(i).gt.0) then
+              do j=0,NDTREE-1
+                numsc=numsc+1
+              enddo
             endif
           enddo
+          if(nscnf.gt.0.and.numsc*NDTREE.lt.MAXNODE) then
 
-          deallocate(nd_nfp)
+            allocate(nppsc(0:pnumsc))
 
+            do i=0,pnumsc-1
+              nppsc(i)=npsc(i)
+            enddo
+
+            deallocate(dpsc)
+            deallocate(npsc)
+
+            allocate(dpsc(0:pnumsc))
+            allocate(npsc(0:numsc))
+
+            numsc=0
+            do i=0,pnumsc-1
+              if(nppsc(i).gt.0) then
+                dpsc(i)=numsc
+                do j=0,NDTREE-1
+                  npsc(numsc)=0
+                  numsc=numsc+1
+                enddo
+              endif
+            enddo
+
+            deallocate(nppsc)
+
+! goto lower level
+            goto 77
+          endif
 ! *** get the max level among the processors ***
           call MPI_ALLREDUCE(level,maxlevel,1,MPI_INTEGER &
-           ,MPI_MAX,MPI_COMM_WORLD,ierr)
-          maxlevel = maxlevel+level_mergin
-!          write(6,*) it,myrank,' dm level,maxlevel=',level,maxlevel
-          goto 77
-        else if(level+1.le.maxlevel) then
+             ,MPI_MAX,MPI_COMM_WORLD,ierr)
+        endif
+        if(level.lt.maxlevel) then
           goto 77
         endif
 
@@ -210,12 +271,23 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         deallocate(cx0p)
         deallocate(cy0p)
         deallocate(cz0p)
+        deallocate(dpsc)
+        deallocate(npsc)
+        deallocate(scp)
 
 ! *** ordering with indexxl ***
         npnord = idmr(1)-idmr(0)+1
 
         allocate(phkey1(1:npnord+1))
         allocate(ord1(1:npnord+1))
+
+! time
+!        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!        ctime=MPI_WTIME()
+!        if(myrank.eq.0) then
+!          write(6,*) ' assign key=',ctime-ntime
+!        endif   
+!        ntime=ctime
   
         nin=0
         do i=idmr(0),idmr(1)
@@ -233,6 +305,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         do i=0,npnord-1
           ord(pnord(i,it))=i
         enddo
+
+! time
+!        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!        ctime=MPI_WTIME()
+!        if(myrank.eq.0) then
+!          write(6,*) ' sorting within the core=',ctime-ntime
+!        endif   
+!        ntime=ctime
 
         deallocate(ord1)
         allocate(phkeyr(idmr(0):idmr(1)+1))
@@ -344,6 +424,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       allocate(srank(0:nprocs))
       allocate(rrank(0:nprocs))
 
+! time
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      ctime=MPI_WTIME()
+!      if(myrank.eq.0) then
+!        write(6,*) ' global sorting =',ctime-ntime
+!      endif   
+!      ntime=ctime
+
       do j = 0,nprocs-1
         srank(j) = myrank+j
         if(srank(j).ge.nprocs) then
@@ -419,6 +507,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo 
 
       deallocate(talist)
+
+! time
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      ctime=MPI_WTIME()
+!      if(myrank.eq.0) then
+!        write(6,*) ' assign the core to be sent =',ctime-ntime
+!      endif   
+!      ntime=ctime
 
 ! *** start data transfer ***
 ! get number of particles -> nprp and np
@@ -961,6 +1057,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
         deallocate(nalist)
 
+! time
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      ctime=MPI_WTIME()
+!      if(myrank.eq.0) then
+!        write(6,*) ' data transfer =',ctime-ntime
+!      endif   
+!      ntime=ctime
+
 ! *** setup virtual timestep ***
         do i=0,ndm-1
 #ifdef FIXEDDMP
@@ -1026,6 +1130,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         endif
       enddo
 #endif
+
+!      write(fileo,'(a6,i6.6)') 'ddecdm',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        write(60,'(3(1pE13.5),2I10)') x_dm(i),y_dm(i),z_dm(i) &
+!         ,ord(pnord(i,0)),pnord(i,0)
+!      enddo
+!      close(60)
 
 end subroutine
 #endif

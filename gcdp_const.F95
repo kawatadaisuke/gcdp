@@ -40,6 +40,10 @@ module gcdp_const
 #endif
 
 ! *** for Tree ***
+! number of dauthter tree
+      integer,parameter :: NDTREE=8
+! maximum number of node for ddec
+      integer,parameter :: MAXNODE=80000000
 ! Margin for Size of root tree
       double precision,parameter :: MGROOT=1.001d0
 ! Torelance Parameter, following Gadget-2 parameters
