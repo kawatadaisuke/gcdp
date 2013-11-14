@@ -47,6 +47,7 @@ subroutine dmtreebuild(np)
       integer,allocatable :: clist(:),slist(:),s_sc(:),lvlist(:),paretrcm(:)
 ! *** for Paeno-Hilbert ordering ***
       integer,allocatable :: ixp(:),iyp(:),izp(:)
+      integer,allocatable :: infp(:),cpnfp(:),spnfp(:)
       integer,allocatable :: pn_nfp(:),nd_nfp(:),c_nfp(:),label_nfp(:),snfp(:)
       integer,allocatable :: list(:),talist(:),nalist(:),node(:)
       integer,allocatable :: np_sc(:),pare_tr(:),nd_sc(:),pare_sc(:),c_sc(:) &
@@ -191,8 +192,8 @@ subroutine dmtreebuild(np)
         else
           izp(i)=1
         endif 
-        call phcurve(snfp(i),c_nfp(i),ixp(i),iyp(i),izp(i),level)
       enddo
+      call phcurven(0,numnfp,snfp,c_nfp,ixp,iyp,izp,level)
 
       deallocate(ixp)
       deallocate(iyp)
@@ -314,20 +315,42 @@ subroutine dmtreebuild(np)
       deallocate(nd_sc)
 
 ! *** rebuild not finished particle list ***
+
+      allocate(infp(0:numnfp))
+      allocate(spnfp(0:numnfp))
+      allocate(cpnfp(0:numnfp))
+
       numtmp = 0
       do i=0,numnfp-1
+        spnfp(i)=snfp(i)
+        cpnfp(i)=c_nfp(i)
         if(label_nfp(i).eq.0) then
 ! *** need further refinement
           pn_nfp(numtmp)=pn_nfp(i)
           nd_nfp(numtmp)=nd_nfp(i)
-! *** update c and s
-          snfp(numtmp)=snfp(i)
-          c_nfp(numtmp)=c_nfp(i)
-          label_nfp(numtmp)=0
+          infp(numtmp)=i
           numtmp=numtmp+1
         endif
       enddo
       numnfp=numtmp
+! *** update c, s and label
+
+      deallocate(snfp)
+      deallocate(c_nfp)
+      deallocate(label_nfp)
+      allocate(snfp(0:numnfp))
+      allocate(c_nfp(0:numnfp))
+      allocate(label_nfp(0:numnfp))
+
+      do i=0,numnfp
+        snfp(i)=spnfp(infp(i))
+        c_nfp(i)=cpnfp(infp(i))
+        label_nfp(i)=0
+      enddo
+
+      deallocate(spnfp)
+      deallocate(cpnfp)
+      deallocate(infp)
 
 ! *** stsc is starting node at this level
 ! *** numtmp is the number of new node
