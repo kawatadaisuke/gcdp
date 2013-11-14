@@ -212,55 +212,60 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           npsc(scp(i))=npsc(scp(i))+1
         enddo
 
-        if(maxlevel.eq.0) then
 ! make new subcell
-          pnumsc=numsc
-          numsc=0
-          nscnf=0
+        pnumsc=numsc
+        numsc=0
+        nscnf=0
 ! counting numsc for the next level
-          do i=0,pnumsc-1
-            if(npsc(i).gt.NDTREE) then
-              nscnf=nscnf+1
-            endif
-            if(npsc(i).gt.0) then
-              do j=0,NDTREE-1
-                numsc=numsc+1
-              enddo
-            endif
-          enddo
+        do i=0,pnumsc-1
+          if(npsc(i).gt.NDTREE) then
+            nscnf=nscnf+1
+          endif
+          if(npsc(i).gt.0) then
+            do j=0,NDTREE-1
+              numsc=numsc+1
+            enddo
+          endif
+        enddo
+
+        allocate(nppsc(0:pnumsc))
+
+        do i=0,pnumsc-1
+          nppsc(i)=npsc(i)
+        enddo
+
+        deallocate(dpsc)
+        deallocate(npsc)
+
+        allocate(dpsc(0:pnumsc))
+        allocate(npsc(0:numsc))
+
+        numsc=0
+        do i=0,pnumsc-1
+          if(nppsc(i).gt.0) then
+            dpsc(i)=numsc
+            do j=0,NDTREE-1
+              npsc(numsc)=0
+              numsc=numsc+1
+            enddo
+          endif
+        enddo
+
+        deallocate(nppsc)
+
+        if(maxlevel.eq.0) then
           if(nscnf.gt.0.and.numsc*NDTREE.lt.MAXNODE) then
-
-            allocate(nppsc(0:pnumsc))
-
-            do i=0,pnumsc-1
-              nppsc(i)=npsc(i)
-            enddo
-
-            deallocate(dpsc)
-            deallocate(npsc)
-
-            allocate(dpsc(0:pnumsc))
-            allocate(npsc(0:numsc))
-
-            numsc=0
-            do i=0,pnumsc-1
-              if(nppsc(i).gt.0) then
-                dpsc(i)=numsc
-                do j=0,NDTREE-1
-                  npsc(numsc)=0
-                  numsc=numsc+1
-                enddo
-              endif
-            enddo
-
-            deallocate(nppsc)
-
 ! goto lower level
             goto 77
           endif
+
+!          write(6,*) ' maxlev,myrank=',level,myrank
 ! *** get the max level among the processors ***
           call MPI_ALLREDUCE(level,maxlevel,1,MPI_INTEGER &
              ,MPI_MAX,MPI_COMM_WORLD,ierr)
+
+
+
         endif
         if(level.lt.maxlevel) then
           goto 77
