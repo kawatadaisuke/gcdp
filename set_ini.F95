@@ -957,7 +957,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             np=np+1
           else
             read(51)
+#ifdef METAL
             read(52)
+#endif
           endif
           nc=nc+1
         enddo
