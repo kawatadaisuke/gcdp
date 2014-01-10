@@ -121,8 +121,10 @@ subroutine  mesh_fftf()
             ksd_fftw(ifftw,kfftw,jfftw)=4.0d0*M_PI &
               *ksd_fftw(ifftw,kfftw,jfftw)/kabs2            
 ! PMTree long range force trunction
+#ifndef PMONLY
             ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
               *dexp(-kabs2*SI_rsp2tpm)
+#endif
 ! deconvolution for CIC
             if((kx.gt.0.0d0.and.ky.gt.0.0d0).and.kz.gt.0.0d0) then
               kxl2nx=kx*l2nx

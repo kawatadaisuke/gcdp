@@ -325,7 +325,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           ntime=MPI_WTIME()
 #endif
 #ifdef SGRAV
+#ifndef PMONLY
           call dmtreeforce(ndm,nadm,np,flags)
+#endif
 #endif
 
 ! *** Set dv in DM Particle ***

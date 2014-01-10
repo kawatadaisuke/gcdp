@@ -127,6 +127,7 @@
 !
 ! *** TreePM
 #define TREEPM
+#define PMONLY
 #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
 #define FFTW3_ESTIMATE
@@ -137,7 +138,7 @@
 !#define ADTESTSIM
 ! #undef DM
 #undef GAS
-! #undef COSM
+#undef COSM
 !
 ! *** isolated galaxy
 ! #define MAXR
