@@ -522,7 +522,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
         nibcon=1
 #if defined(COSM) && defined(BOXSIM)
-        nddmcon=14
+        nddmcon=15
 #else
         nddmcon=12
 #endif
@@ -1581,6 +1581,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                 else if(iv.eq.13) then
                   do i=0,npjr(ip)-1 
                     asc_dm(i)=tdvr(i)
+                  enddo
+                else if(iv.eq.14) then
+                  do i=0,npjr(ip)-1 
+                    tc_dm(i)=tdvr(i)
                   enddo
 #endif
                 endif

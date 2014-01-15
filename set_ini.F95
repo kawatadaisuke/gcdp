@@ -433,6 +433,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef BOXSIM
         hub_dm(i)=SI_hub
         asc_dm(i)=SI_a
+        tc_dm(i)=TM_tot
 #endif
       enddo
 ! *** mass of DM for level 1 particles ***

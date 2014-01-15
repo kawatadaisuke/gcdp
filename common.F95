@@ -172,8 +172,8 @@ module gcdp_dm
 ! * flag for time step changed 0: no change, otherwise changed *
       integer,allocatable :: flagt_dm(:)
 #if defined(COSM) && defined(BOXSIM)
-! Hubbble parameter and scale factor 
-       double precision,allocatable :: hub_dm(:),asc_dm(:)
+! Hubbble parameter, scale factor, and cosmic time
+       double precision,allocatable :: hub_dm(:),asc_dm(:),tc_dm(:)
 #endif
 
 end module gcdp_dm
@@ -383,6 +383,8 @@ module gcdp_system
 #ifdef BOXSIM
 ! Hubble parameter at that time
       double precision SI_hub
+! * table for 1/a and 1/a^2
+      double precision ia_ttb(0:NATTABLE),ia2_ttb(0:NATTABLE)
 #endif
 #endif 
 #ifdef COOL

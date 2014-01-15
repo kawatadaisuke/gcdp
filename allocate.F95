@@ -490,6 +490,7 @@ subroutine allocate_dm_all(ndm)
 #if defined(COSM) && defined(BOXSIM)
       allocate(hub_dm(0:ndm))
       allocate(asc_dm(0:ndm))
+      allocate(tc_dm(0:ndm))
 #endif
 
 end subroutine
@@ -607,6 +608,7 @@ subroutine reallocate_dm_d3(ndm)
 #if defined(COSM) && defined(BOXSIM)
       deallocate(hub_dm)
       deallocate(asc_dm)
+      deallocate(tc_dm)
 #endif
 
 ! allocate
@@ -618,6 +620,7 @@ subroutine reallocate_dm_d3(ndm)
 #if defined(COSM) && defined(BOXSIM)
       allocate(hub_dm(0:ndm))
       allocate(asc_dm(0:ndm))
+      allocate(tc_dm(0:ndm))
 #endif
 
 end subroutine

@@ -80,7 +80,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       nivaldm=2
       ndvaldm=9
 #if defined(COSM) && defined(BOXSIM)
-      nddmcon=14
+      nddmcon=15
 #else
       nddmcon=12
 #endif
@@ -927,6 +927,10 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
           else if(iv.eq.13) then
             do i=0,npj-1 
               tdvs(i)=asc_dm(i)
+            enddo
+          else if(iv.eq.14) then
+            do i=0,npj-1 
+              tdvs(i)=tc_dm(i)
             enddo
 #endif
           endif
