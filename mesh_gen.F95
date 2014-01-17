@@ -71,9 +71,9 @@ subroutine  mesh_gen(flag)
 
 ! check
         do i=0,nprocs-1
-          if(myrank.eq.0) then
-            write(6,*) ' rank,lnz,lzoff=',i,lnz_mp(i),lzoff_mp(i)
-          endif
+!          if(myrank.eq.0) then
+!            write(6,*) ' rank,lnz,lzoff=',i,lnz_mp(i),lzoff_mp(i)
+!          endif
           if(i.ne.0.and.lzoff_mp(i-1).gt.lzoff_mp(i)-3) then
             if(myrank.eq.0) then
             write(6,*) &

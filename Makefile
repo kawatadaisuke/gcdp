@@ -47,12 +47,12 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # CPP=cpp
 # OPTIONS=-g -O3 -xHost -align -ansi-alias -mcmodel=medium -traceback
 # FFLAGS = ${OPTIONS}
-# LIBS=-lmpi
+# LIBS=-lmpi -lfftw3_mpi -lfftw3
 ### darwin
 # module add fftw/intel/3.3.3
 # FORT=mpif90
 # CPP=cpp
-# FFLAGS= -O3 -ipo -xHost -lfftw3
+# FFLAGS= -O3 -ipo -xHost -lfftw3 -lfftw3_mpi -lfftw3
 #
 .SUFFIXES : .o .F95 .f90
 

@@ -440,6 +440,9 @@ module gcdp_system
       ,WTM_starfd,WTM_setvaldm,WTM_time &
       ,WTM_setvals,WTM_setvalfd,WTM_feedb,WTM_bf,WTM_dmf &
       ,WTM_update,WTM_updateu
+#ifdef TREEPM
+      double precision WTM_pm
+#endif
 
 ! **** for Random Numbrer ***
       integer idum      

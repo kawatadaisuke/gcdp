@@ -128,6 +128,9 @@ program gcdp
       WTM_dmf=0.0d0
       WTM_update=0.0d0
       WTM_updateu=0.0d0
+#ifdef TREEPM
+      WTM_pm=0.0d0
+#endif
 
 ! *************************
 !  Set Initial Condition
@@ -546,6 +549,10 @@ program gcdp
         endif
 
 #ifdef TREEPM
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ntime=MPI_WTIME()
+#endif
 ! TreePM long-range force
 ! ***** adding PM force *****
 ! assign density
@@ -555,11 +562,15 @@ program gcdp
 ! assign force to particles
         call mesh_setfp(nag,nas,nadm)
 
+#ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       ectime=MPI_WTIME()
+      WTM_pm=WTM_pm+ectime-ntime
       if(myrank.eq.0) then
         write(6,*) ' mesh force end',ectime-ntime
       endif
+#endif
+
 
 ! test output
       write(fileo,'(a4,i3.3)') 'fdmp',myrank
@@ -1117,6 +1128,10 @@ program gcdp
 
 
 #ifdef TREEPM
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ntime=MPI_WTIME()
+#endif
 ! ***** adding PM force *****
 ! generate new mesh
         call mesh_gen(1)
@@ -1126,6 +1141,11 @@ program gcdp
         call mesh_fftf()
 ! assign force to particles
         call mesh_setfp(nag,nas,nadm)
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      WTM_pm=WTM_pm+ectime-ntime
+#endif
 #endif
 
 !      write(fileo,'(a4,i3.3,i4.4)') 'test',myrank,totstep
@@ -1246,6 +1266,9 @@ program gcdp
         write(6,*) ' feedback=',WTM_starfd
         write(6,*) '  setvalfd=',WTM_setvalfd
         write(6,*) '  feedb=',WTM_feedb
+#ifdef TREEPM
+        write(6,*) ' PM force=',WTM_pm
+#endif
 #endif
       endif
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
