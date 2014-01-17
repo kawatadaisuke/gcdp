@@ -193,7 +193,7 @@ subroutine integrate1oa(np,t0,t1,in1oa)
           *(t1(ip)-ta_ttb(it1-1))/(ta_ttb(it1)-ta_ttb(it1-1))
 
         if(it0.eq.it1) then
-          in1oa(ip)=(ia1-ia0)*(t1(ip)-t0(ip))
+          in1oa(ip)=0.5d0*(ia1+ia0)*(t1(ip)-t0(ip))
         else
           in1oa(ip)=0.0d0
           tn=t0(ip)
@@ -208,10 +208,14 @@ subroutine integrate1oa(np,t0,t1,in1oa)
               tn=t1(ip)
               ian=ia1
             endif
-            in1oa(ip)=in1oa(ip)+(ian-pian)*(tn-ptn)
+            in1oa(ip)=in1oa(ip)+0.5d0*(ian+pian)*(tn-ptn)
+
           enddo
         endif
       enddo
+  
+   
+
 end subroutine
 
 ! 1/a^2 integration
@@ -250,7 +254,7 @@ subroutine integrate1oa2(np,t0,t1,in1oa2)
           *(t1(ip)-ta_ttb(it1-1))/(ta_ttb(it1)-ta_ttb(it1-1))
 
         if(it0.eq.it1) then
-          in1oa2(ip)=(ia21-ia20)*(t1(ip)-t0(ip))
+          in1oa2(ip)=0.5d0*(ia21+ia20)*(t1(ip)-t0(ip))
         else
           in1oa2(ip)=0.0d0
           tn=t0(ip)
@@ -265,7 +269,7 @@ subroutine integrate1oa2(np,t0,t1,in1oa2)
               tn=t1(ip)
               ian2=ia21
             endif
-            in1oa2(ip)=in1oa2(ip)+(ian2-pian2)*(tn-ptn)
+            in1oa2(ip)=in1oa2(ip)+0.5d0*(ian2+pian2)*(tn-ptn)
           enddo
         endif
       enddo

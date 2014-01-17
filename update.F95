@@ -58,11 +58,13 @@ subroutine updatev(np,ndm)
         vx_dm(i)=pvx+(asc_dm(i)**2)*dvx_dm(i)*int1oa(i)
         vy_dm(i)=pvy+(asc_dm(i)**2)*dvy_dm(i)*int1oa(i)
         vz_dm(i)=pvz+(asc_dm(i)**2)*dvz_dm(i)*int1oa(i)
+
 #else
         vx_dm(i)=vnx_dm(i)+(vdt_dm(i)*dvx_dm(i))*0.5d0
         vy_dm(i)=vny_dm(i)+(vdt_dm(i)*dvy_dm(i))*0.5d0
         vz_dm(i)=vnz_dm(i)+(vdt_dm(i)*dvz_dm(i))*0.5d0
 #endif
+
       enddo
 #if defined(COSM) && defined(BOXSIM)
       deallocate(t0)
@@ -152,6 +154,10 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         vnx_dm(pn)=SI_hub*xc_dm(pn)+vx_dm(pn)/SI_a+SI_a*dvx_dm(pn)*int1oa(i)
         vny_dm(pn)=SI_hub*yc_dm(pn)+vy_dm(pn)/SI_a+SI_a*dvy_dm(pn)*int1oa(i)
         vnz_dm(pn)=SI_hub*zc_dm(pn)+vz_dm(pn)/SI_a+SI_a*dvz_dm(pn)*int1oa(i)
+
+!        if(id_dm(pn).eq.0) then
+!          write(6,*) xc_dm(pn)/SI_a,yc_dm(pn)/SI_a,zc_dm(pn)/SI_a,vnx_dm(pn)-SI_hub*xc_dm(pn)
+!        endif
 ! update H, a and t
         hub_dm(pn)=SI_hub
         asc_dm(pn)=SI_a
@@ -162,9 +168,9 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         vnz_dm(pn)=vz_dm(pn)+(dt_dm(pn)*dvz_dm(pn))*0.5d0
 #endif
 
-c        if(pn.eq.0) then
-c          write(6,*) SI_a*xc_dm(pn),vnx_dm(pn)
-c        endif
+!        if(id_dm(pn).eq.0) then
+!          write(6,*) xc_dm(pn)/SI_a,yc_dm(pn)/SI_a,zc_dm(pn)/,vx_dm(pn),dvx_dm(pn)
+!        endif
 
       enddo
 

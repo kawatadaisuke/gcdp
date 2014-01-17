@@ -226,7 +226,7 @@ module gcdp_const
 ! *** NSTH: only for softening length ***
       double precision,parameter :: NSTH=0.1d0
 ! *** NSTHLIM: density limit
-      double precision,parameter :: NSTHLIM=200.0d0
+      double precision,parameter :: NSTHLIM=10.0d0
 ! *** Hopkins13 self-gravity criterion for SF
 !      double precision,parameter :: ALPHASF=1.0d0
 !      double precision,parameter :: BETASF=0.5d0
