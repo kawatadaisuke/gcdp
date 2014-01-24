@@ -193,7 +193,7 @@ subroutine dmtreebuild(np)
           izp(i)=1
         endif 
       enddo
-      call phcurven(0,numnfp,snfp,c_nfp,ixp,iyp,izp,level)
+      call phcurven(0,numnfp-1,snfp,c_nfp,ixp,iyp,izp,level)
 
       deallocate(ixp)
       deallocate(iyp)
@@ -342,7 +342,7 @@ subroutine dmtreebuild(np)
       allocate(c_nfp(0:numnfp))
       allocate(label_nfp(0:numnfp))
 
-      do i=0,numnfp
+      do i=0,numnfp-1
         snfp(i)=spnfp(infp(i))
         c_nfp(i)=cpnfp(infp(i))
         label_nfp(i)=0

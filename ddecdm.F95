@@ -24,7 +24,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
       integer,intent(in) :: ndmt,step
       integer,intent(inout) :: ndm,nadm
-      integer i,j,k,level,maxlevel,level_mergin,ip,nin,ierr
+      integer i,j,k,level,maxlevel,level_mergin,ip,nin,ierr,pn
 #ifdef FIXEDDMP
       integer nc
 #endif
@@ -172,7 +172,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         do i=idmr(0),idmr(1)
           if(x_dm(i)-cx0p(i).ge.0.0d0) then
             ixp(i)=0 
-           else
+          else
              ixp(i)=1
           endif 
           if(y_dm(i)-cy0p(i).ge.0.0d0) then
@@ -286,6 +286,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         allocate(phkey1(1:npnord+1))
         allocate(ord1(1:npnord+1))
 
+
 ! time
 !        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !        ctime=MPI_WTIME()
@@ -301,6 +302,15 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         enddo
 
         call indexxl(npnord,phkey1,ord1)
+
+!        write(fileo,'(a5,i6.6)') 'orddm',myrank
+!        open(60,file=fileo,status='unknown')
+!        do i=1,npnord
+!          pn=ord1(i)-1
+!          write(60,'(3(1pE13.5),I10)') x_dm(pn),y_dm(pn),z_dm(pn) &
+!           ,phkey1(pn)
+!        enddo
+!        close(60)
 
         deallocate(phkey1)
 

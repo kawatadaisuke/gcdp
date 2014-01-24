@@ -214,8 +214,6 @@ subroutine integrate1oa(np,t0,t1,in1oa)
         endif
       enddo
   
-   
-
 end subroutine
 
 ! 1/a^2 integration

@@ -24,8 +24,15 @@ MPI_DIR = /Users/dkawata/share/mpi
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
 ### legion@UCL
-# MPI_DIR=/usr/mpi/qlogic
-# OPTIONS=-O3 -xSSSE3
+# module load compilers/gnu/4.6.3
+# module load mpi/openmpi/1.6.5-blcr/gnu.4.6.3
+# module load fftw/3.3.1/double/openmpi/gnu.4.6.3
+# mpirun: /shared/ucl/apps/openmpi/gcc463-blcr/1.6.5/bin/mpirun
+#
+# MPI_DIR=/shared/ucl/apps/openmpi/gcc463-blcr/1.6.5
+# OPTIONS=-O3
+# FFTW_INC=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/include
+# FFTW_LIB=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/lib
 ### guillimin
 # MPI_DIR=/software/tools/openmpi-1.4.3-intel/
 # OPTIONS=-O3 -ldl
