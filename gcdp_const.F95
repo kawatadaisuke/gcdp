@@ -25,6 +25,7 @@ module gcdp_const
 ! specific heat
       double precision,parameter :: GAM=5.0d0/3.0d0
 !      double precision,parameter :: GAM=2.0d0
+!      double precision,parameter :: GAM=1.4d0
 
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
@@ -211,7 +212,7 @@ module gcdp_const
 ! *** star formation threshold ***
 ! *** nh ***
 ! *** NSTH: only for softening length ***
-      double precision,parameter :: NSTH=10.0d0
+      double precision,parameter :: NSTH=0.1d0
 ! *** NSTHLIM: density limit
       double precision,parameter :: NSTHLIM=200.0d0
 ! *** Hopkins13 self-gravity criterion for SF

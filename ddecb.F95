@@ -950,7 +950,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 #endif
 
 #ifdef MHD
-      nval=15
+      nval=16
+#ifdef DCLEAN
+      nval=nval+4
+#endif
 
       allocate(tdvr(0:np*nval))
 
@@ -975,7 +978,14 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           tdvs(npj+npsp(ip)*11)=pdbz_p(list(i))
           tdvs(npj+npsp(ip)*12)=divb_p(list(i))
           tdvs(npj+npsp(ip)*13)=arotb_p(list(i))
-          tdvs(npj+npsp(ip)*14)=alpb_p(list(i))
+          tdvs(npj+npsp(ip)*14)=agradb_p(list(i))
+          tdvs(npj+npsp(ip)*15)=alpb_p(list(i))
+#ifdef DCLEAN
+          tdvs(npj+npsp(ip)*16)=psi_p(list(i))
+          tdvs(npj+npsp(ip)*17)=ppsi_p(list(i))
+          tdvs(npj+npsp(ip)*18)=dpsi_p(list(i))
+          tdvs(npj+npsp(ip)*19)=pdpsi_p(list(i))
+#endif
           npj=npj+1
         enddo
         if(ip.gt.0) then
@@ -999,7 +1009,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
         np=np+nprp(ip)
       enddo
 
-! reallocate metal0 values
+! reallocate mhd values
       call allocate_mhd(np)
 
       npj=0
@@ -1020,7 +1030,14 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
             pdbz_p(ord(npj))=tdvr(i+nprp(ip)*11)
             divb_p(ord(npj))=tdvr(i+nprp(ip)*12)
             arotb_p(ord(npj))=tdvr(i+nprp(ip)*13)
-            alpb_p(ord(npj))=tdvr(i+nprp(ip)*14)
+            agradb_p(ord(npj))=tdvr(i+nprp(ip)*14)
+            alpb_p(ord(npj))=tdvr(i+nprp(ip)*15)
+#ifdef DCLEAN
+            psi_p(ord(npj))=tdvr(i+nprp(ip)*16)
+            ppsi_p(ord(npj))=tdvr(i+nprp(ip)*17)
+            dpsi_p(ord(npj))=tdvr(i+nprp(ip)*18)
+            pdpsi_p(ord(npj))=tdvr(i+nprp(ip)*19)
+#endif
             npj=npj+1
          enddo
          np=np+nprp(ip)

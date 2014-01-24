@@ -15,8 +15,9 @@ DEFFILE = gcdp.def gcdp_const.F95 common.F95
 OPTIONS=-g -mcmodel=medium
 ### kepler 
 # MPI_DIR=/cluster/mpich2_3.0
-### mac
-MPI_DIR = /Users/dkawata/share/mpi
+### MAC
+# MPI_DIR=/Users/dkawata/share/mpi
+MPI_DIR=/usr/local
 ### legion@UCL
 # MPI_DIR=/usr/mpi/qlogic
 # OPTIONS=-O3 -xSSSE3
@@ -42,14 +43,18 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS}
 # OPTIONS=-g -O3 -xHost -align -ansi-alias -mcmodel=medium -traceback
 # FFLAGS = ${OPTIONS}
 # LIBS=-lmpi
+### darwin
+# FORT=mpif90
+# CPP=cpp
+# FFLAGS= -O3 -ipo -xHost
 ### for SX-6 isas 20/11/2004
-#FORT = sxmpif90
-#MPI_INC = 
-#MPI_LIB = 
-#MLIBS = 
-#OPTIONS = -Cvopt -R5 -Wf"-pvctl noassume vwork=stack"
-#FFLAGS = ${OPTIONS} 
-#LIBS = ${MLIBS}  
+# FORT = sxmpif90
+# MPI_INC = 
+# MPI_LIB = 
+# MLIBS = 
+# OPTIONS = -Cvopt -R5 -Wf"-pvctl noassume vwork=stack"
+# FFLAGS = ${OPTIONS} 
+# LIBS = ${MLIBS}  
 .SUFFIXES : .o .F95 .f90
 
 ${EXEC} : ${OBJS} ${INIOBJ}

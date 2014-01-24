@@ -1316,9 +1316,9 @@ subroutine set_value(ng,nag,ns,flag)
 ! * define div(v) & |rot(v)| *
   999 do i=0,np-1 
         pn=list_ap(i)
-        div_v_p(pn)=-div_v_p(pn)/rho_p(pn)
+        div_v_p(pn)=-div_v_p(pn)/(rho_p(pn)*omgh_p(pn))
         arot_v_p(pn)=dsqrt(tx(pn)*tx(pn)+ty(pn)*ty(pn) &
-         +tz(pn)*tz(pn))/rho_p(pn)
+         +tz(pn)*tz(pn))/(rho_p(pn)*dabs(omgh_p(pn)))
       enddo
 
 #ifdef GEPSLIM_G

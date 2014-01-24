@@ -61,9 +61,9 @@ subroutine setsldmtr(nssl,nalist,ndm)
 ! *** set largest one ***
 #ifdef MULTI_LEV
         if(l_ldmtr(nodess_ldmtr).gt.l_dmtr(nodess_dmtr)) then
-          h_dm(pni)=(crit2*l_ldmtr(nodess_ldmtr))**2
+           h_dm(pni)=(crit2*l_ldmtr(nodess_ldmtr))**2
         else
-          h_dm(pni)=(crit2*l_dmtr(nodess_dmtr))**2
+           h_dm(pni)=(crit2*l_dmtr(nodess_dmtr))**2
         endif
 #else
         h_dm(pni)=(crit2*l_dmtr(nodess_dmtr))**2
@@ -72,7 +72,7 @@ subroutine setsldmtr(nssl,nalist,ndm)
       nlist=nssl
    77 if(nlist.eq.0) then
 #ifdef MULTI_LEV
-        goto 98
+         goto 98
 #else
 
         deallocate(list)
@@ -130,16 +130,16 @@ subroutine setsldmtr(nssl,nalist,ndm)
 #endif
           rc2=xij*xij+yij*yij+zij*zij
           if(rc2.lt.h_dm(pni) &
-           .or.dsqrt(rc2)-crit*l_dmtr(nd).lt.dsqrt(h_dm(pni))) then
+               .or.dsqrt(rc2)-crit*l_dmtr(nd).lt.dsqrt(h_dm(pni))) then
 ! *** possible to find a particle closer ***
 ! *** check if or not it's pseudo node
-            if(proc_dmtr(nd).ne.myrank) then
-              node(pni)=next_dmtr(nd)
-            else     
-              node(pni)=daughter_dmtr(nd)
-            endif
+             if(proc_dmtr(nd).ne.myrank) then
+                node(pni)=next_dmtr(nd)
+             else     
+                node(pni)=daughter_dmtr(nd)
+             endif
           else
-            node(pni)=next_dmtr(nd)
+             node(pni)=next_dmtr(nd)
           endif
         else if(pn.ne.pni) then
 ! *** need to recalculate rij, because cx_dmtr is the center of the node. ***
@@ -215,8 +215,8 @@ subroutine setsldmtr(nssl,nalist,ndm)
       nlist=nssl
    78 if(nlist.eq.0) then
 
-        deallocate(list)
-        deallocate(node)
+         deallocate(list)
+         deallocate(node)
 
         goto 99
       endif
@@ -320,16 +320,16 @@ subroutine setsldmtr(nssl,nalist,ndm)
           node(pni)=next_ldmtr(nd)
         else
           if(rc2.lt.h_dm(pni) &
-           .or.dsqrt(rc2)-crit*l_ldmtr(nd).lt.dsqrt(h_dm(pni))) then
+               .or.dsqrt(rc2)-crit*l_ldmtr(nd).lt.dsqrt(h_dm(pni))) then
 ! *** possible to find a particle closer ***
 ! *** check if or not it's pseudo node
-            if(proc_ldmtr(nd).ne.myrank) then
-              node(pni)=next_ldmtr(nd)
-            else
-              node(pni)=daughter_ldmtr(nd)
-            endif
+             if(proc_ldmtr(nd).ne.myrank) then
+                node(pni)=next_ldmtr(nd)
+             else
+                node(pni)=daughter_ldmtr(nd)
+             endif
           else
-            node(pni)=next_ldmtr(nd)
+             node(pni)=next_ldmtr(nd)
           endif
         endif
       enddo

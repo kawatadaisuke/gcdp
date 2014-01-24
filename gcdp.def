@@ -131,20 +131,20 @@
 ! #define MEXT
 ! #define CENTRE0
 !
-! #undef COSM
-! #undef MULTI_LEV
-! #undef DM
+!#undef COSM
+!#undef MULTI_LEV
+!#undef DM
 #undef GAS
 ! *** adiabati! ***
-! #undef COOL
-! #undef STAR
-! #undef SF
-! #undef METAL
-! #undef SF_EFD
-! #undef SF_ZFD
-! #undef METALDIFF
-! #undef UTHLIM_JM
-! #undef UTHLIM_POLY
+#undef COOL
+#undef STAR
+#undef SF
+#undef METAL
+#undef SF_EFD
+#undef SF_ZFD
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
 
 ! *** for test simulation ****
 ! *** no individual timestep
@@ -364,7 +364,7 @@
 #ifdef MHD
 !
 ! *** Balsara switch off ***
-#define BALSWCHOFF
+! #define BALSWCHOFF
 ! #undef BALSWCHOFF
 !
 ! *** Borve divB corrector ***
@@ -375,9 +375,25 @@
 #define TIMEDIS
 ! #undef TIMEDIS
 !
-! *** Balsara switch off
-#define BALSWCHOFF
-! #undef BALSWCHOFF
+! *** Choice of resistivity scheme
+#ifdef TIMEDIS
+! *** Tricco & Price
+#define TP12
+! #undef TP12
+! *** Price & Monaghan 2005 
+! #define PM05
+! #undef PM05
+#endif 
+!
+! *** Dedner divergence cleaning
+#define DCLEAN
+! #undef DCLEAN
+!
+#ifdef DCLEAN
+! *** Dedner energy cons term
+#define DENER
+! #undef DENER
+#endif
 !
 ! *** Battery Generation
 ! #define BBAT
@@ -390,5 +406,6 @@
 #undef TIMEDIS
 #undef BALSWCHOFF
 #undef BBAT
+#undef DCLEAN
 
 #endif

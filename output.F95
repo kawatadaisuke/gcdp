@@ -362,13 +362,22 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
               pn=list_ap(i)
               valfip=(bx_p(pn)+by_p(pn)+bz_p(pn))/dsqrt(rho_p(pn))
               pbp=0.5d0*(bx_p(pn)**2+by_p(pn)**2+bz_p(pn)**2)
-              write(68,168) xc_p(pn),yc_p(pn),zc_p(pn) &
-               ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn),u_p(pn) &
-               ,p_p(pn),bx_p(pn),by_p(pn),bz_p(pn),divb_p(pn),arotb_p(pn) &
-               ,alpb_p(pn),valfip,pbp,divberr_p(pn) &
-               ,dvx_p(pn),dvy_p(pn),dvz_p(pn),dbx_p(pn),dby_p(pn),dbz_p(pn) &
-               ,pdbx_p(pn),pdby_p(pn),pdbz_p(pn)
-  168          format(28(1pE13.5))
+              write(68,168) xc_p(pn),yc_p(pn),zc_p(pn),vnx_p(pn) &
+                   ,vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn),u_p(pn) &
+                   ,p_p(pn),bx_p(pn),by_p(pn),bz_p(pn),divb_p(pn) &
+                   ,arotb_p(pn),agradb_p(pn),alpb_p(pn),valfip,pbp &
+#ifdef DCLEAN
+                   ,psi_p(pn),maxvmhd_p(pn) &
+#endif
+                   ,divberr_p(pn) !&
+!                   ,dvx_p(pn),dvy_p(pn),dvz_p(pn),dbx_p(pn),dby_p(pn) &
+!                   ,dbz_p(pn),pdbx_p(pn),pdby_p(pn),pdbz_p(pn)
+#ifdef DCLEAN
+  168          format(22(1pE13.5))
+#else
+  168          format(20(1pE13.5))
+#endif
+!  168          format(29(1pE13.5))
             enddo
             close(68)
 
@@ -939,7 +948,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
             deallocate(tivr)
 
 #ifdef MHD
-            ndbmhd=9
+            ndbmhd=10
+#ifdef DCLEAN
+            ndbmhd=ndbmhd+2
+#endif            
             if (myrank.lt.SI_nof) then
               write(filename, '(a20,i6.6,a1,i4.4)') &
                 './output/data/bbmhds',step,'n',myrank
@@ -970,22 +982,36 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
                   enddo
               else if (iv.eq.5) then
                   do i=0,npj-1
-                     tdvs(i)=alpb_p(i)
+                     tdvs(i)=agradb_p(i)
                   enddo
               else if (iv.eq.6) then
+                  do i=0,npj-1
+                     tdvs(i)=alpb_p(i)
+                  enddo
+              else if (iv.eq.7) then
                   do i=0,npj-1
                     valfip=(bx_p(i)+by_p(i)+bz_p(i))/dsqrt(rho_p(i))
                     tdvs(i)=valfip
                   enddo
-              else if (iv.eq.7) then
+              else if (iv.eq.8) then
                   do i=0,npj-1
                     pbp=0.5d0*(bx_p(i)**2+by_p(i)**2+bz_p(i)**2)
                     tdvs(i)=pbp
                   enddo
-              else if (iv.eq.8) then
+              else if (iv.eq.9) then
                   do i=0,npj-1
                      tdvs(i)=divberr_p(i)
                   enddo
+#ifdef DCLEAN
+              else if (iv.eq.10) then
+                  do i=0,npj-1
+                     tdvs(i)=psi_p(i)
+                  enddo
+              else if (iv.eq.11) then
+                  do i=0,npj-1
+                     tdvs(i)=maxvmhd_p(i)
+                  enddo
+#endif
               endif
               if (myrank.lt.SI_nof) then
                 write(67) (tdvs(i),i=0,npj-1)

@@ -27,8 +27,8 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       implicit none
       include 'mpif.h'
 
-      integer,intent(out) :: npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
-        step,totstep,lstep,flagcont
+      integer,intent(out) :: npt,ndmt,np,ng,ndm,ns,nag,nadm,nas &
+           ,nagravg,step,totstep,lstep,flagcont
 
       integer i,pn,ifl,ip,iv,nst
       integer inprocs,inof,inpt,indmt,indm1t
@@ -123,7 +123,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         read(50,'(a19,4(1pE13.5))') tchar,SI_h0,SI_omg0,SI_lam0,Ini_OMGg
 #endif
 ! *** need a better accuracy, changed since pv30.4 ***
-        read(50,'(a5,1pE25.17)') tchar,OF_odt
+        read(50,'(a5,1pE25.17)')tchar,OF_odt
 #ifdef COSM
         read(50,'(a19,3(1pE25.17))') tchar,SI_eps0,dtmp(0),SI_epsa
         SI_eps=SI_eps0
@@ -148,11 +148,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
        write(6,*) ' Error: continuing BCX_FIX simulation is not supported yet.'
        stop 
 #endif
-        close(50)
-        if(Ini_flagcop.eq.0) then
-
+       close(50)
+       if(Ini_flagcop.eq.0) then
+          
           allocate(tivr(0:1))
-
+          
           open(51,file='output/data/cont.dat',status='old',form='unformatted')
 ! *** Read continue data ***
           read(51) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
@@ -179,27 +179,27 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 #endif
 #ifdef STAR
            ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
-            ,tivr(0)
+            ,tivr(0),tivr(1)
 #endif
           close(51)
 
           deallocate(tivr)
-
-        else
+          
+       else
 
           allocate(tivr(0:2))
-          allocate(tdvr(0:1))
-
+          allocate(tdvr(0:0))
+          
           open(50,file='./output/ana/system.dat',status='old')
           do i=0,step
-            read(50,*) 
+             read(50,*) 
           enddo
           read(50,150) TM_tot,totstep,step,ngt,tivr(0),nst &
 #ifdef STAR
-           ,SI_flagrad,SI_a,mgt,tdvr(0),mst,mbt,mmet,SI_mms &
-           ,SI_esns,tnsn,SI_zsns(0),SI_zsns(1),SI_zsns(2),SI_zsns(3) &
-           ,SI_zsns(4),SI_zsns(5),SI_zsns(6),SI_zsns(7),SI_zsns(8) &
-           ,SI_tnsf,tivr(1),tivr(2) 
+              ,SI_flagrad,SI_a,mgt,tdvr(0),mst,mbt,mmet,SI_mms &
+              ,SI_esns,tnsn,SI_zsns(0),SI_zsns(1),SI_zsns(2),SI_zsns(3) &
+              ,SI_zsns(4),SI_zsns(5),SI_zsns(6),SI_zsns(7),SI_zsns(8) &
+              ,SI_tnsf,tivr(1),tivr(2) 
   150     format((1pE13.5),6I10,7(1pE13.5),11(1pE13.5),3I10)
 #else
            ,SI_flagrad,SI_a,mgt,tdvr(0),mst,mbt,mmet,SI_mms 
@@ -214,14 +214,14 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           deallocate(tivr)
           deallocate(tdvr)
 
-        endif
+       endif
 
-        if(Ini_flagcop.eq.0) then
+       if(Ini_flagcop.eq.0) then
           if(TM_kn.eq.TM_k.and.SI_flagout.ne.0) then
-            OF_todt=OF_todt+OF_odt
-            SI_flagout = 0
-          end if
-        else
+             OF_todt=OF_todt+OF_odt
+             SI_flagout = 0
+          endif
+       else
           SI_flagout=0
           TM_dt=0.0d0
           TM_sdt=0.0d0
@@ -231,7 +231,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           TM_kn=0
 ! *** This may need to be revised.
           OF_todt = OF_odt+TM_tot
-        endif
+       endif
       endif
 
 ! *** for integer values ***
@@ -451,7 +451,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       ndbmet=0
 #endif
 #ifdef MHD
-      ndbmhd=9
+      ndbmhd=10
+#ifdef DCLEAN
+      ndbmhd=ndbmhd+1
+#endif
 #endif
 
       if(Ini_flagcop.eq.0) then
@@ -727,13 +730,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           open(53,file=fileo,status='unknown',form='unformatted')
           read(53) inpt,indmt,indm1t,dtmp(0),dtmp(1)
           read(53) inprocs,inof,invald
-! ndbhyd=7 in output.F, and set 7 here
+! ndbhyd=8 in output.F, but set to 5 here
           if(ndbhyd.ne.invald.and.Ini_flagcop.eq.0) then
             write(6,*) myrank,' Error: ndbhyd is inconsistent'
             write(6,*) ' in file, cont.F=',invald,ndbhyd
             stop
-          else
-            ndbhyd=invald
           endif
         endif
 ! *** read hydro values ***
@@ -785,9 +786,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
         if(myrank.lt.SI_nof) then
           close(53)
         endif
-
 ! *** Read MHD values ***
-#ifdef MHD       
+#ifdef MHD 
+        call allocate_mhd(npjr(myrank))
+      
         if(myrank.lt.SI_nof) then
           if(Ini_flagcop.eq.0) then
             write(fileo,'(a17,i4.4,a4)') 'output/data/pbmhd',myrank,'.dat'
@@ -816,6 +818,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
                ,rrank,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
               call MPI_WAIT(ireqr(ip),istatus,ierr)
             endif
+
             if(ip.eq.myrank) then
               if(iv.eq.0)  then
                 do i=0,npjr(ip)-1
@@ -839,20 +842,30 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
                 enddo
               else if (iv.eq.5) then
                 do i=0,npjr(ip)-1
-                  alpb_p(i)=tdvr(i)
+                  agradb_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.6) then
                 do i=0,npjr(ip)-1
-                  valfi_p(i)=tdvr(i)
+                  alpb_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.7) then
                 do i=0,npjr(ip)-1
-                  pb_p(i)=tdvr(i)
+                  valfi_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.8) then
                 do i=0,npjr(ip)-1
+                  pb_p(i)=tdvr(i)
+                enddo
+              else if (iv.eq.9) then
+                do i=0,npjr(ip)-1
                   divberr_p(i)=tdvr(i)
                 enddo
+#ifdef DCLEAN
+              else if (iv.eq.10) then
+                do i=0,npjr(ip)-1
+                  psi_p(i)=tdvr(i)
+                enddo
+#endif
               endif
             endif
 
@@ -860,6 +873,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
 
           enddo
         enddo
+        if(myrank.lt.SI_nof) then
+          close(58)
+        endif
 #endif
 
 #ifdef STAR
@@ -1263,6 +1279,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
             stop
           endif
         endif
+
+        allocate(tivr(0:6))
+
         do ip=ipsta,ipend,ipd
 
           allocate(tivr(0:6))
@@ -1291,8 +1310,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           npjr(ip)=tivr(1)
         enddo
 
+        deallocate(tivr)
+
 ! allocate DM values
-      call allocate_dm_all(npjr(ip))
+      call allocate_dm_all(ndm)
 
 ! *** read integer variables ***
         do iv=0,nivaldm-1
@@ -1621,6 +1642,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
           pdbx_p(i)=0.0d0
           pdby_p(i)=0.0d0
           pdbz_p(i)=0.0d0
+#ifdef DCLEAN
+          ppsi_p(i)=psi_p(i)
+          dpsi_p(i)=0.0d0
+          pdpsi_p(i)=0.0d0
+#endif
         enddo
 #endif
 
@@ -1662,9 +1688,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       dtmp(2)=TM_tot
       TMsf_dt = 0.0d0
       TM_dt=0.0d0
-      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
-       ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
-       ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
+      call dtyields(ng,ns)
 ! for both gas and stars 
       do i = 0,ng+ns-1
         pn=i
@@ -1694,9 +1718,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg, &
       TM_tot=TM_tot-TMsf_dt
 ! *** dtyield at T-DTSF, to keep previous time step t*_p
 ! *** for new feedback particles
-      call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &
-       ,tmzC_sn,tmzN_sn,tmzO_sn,tmzNe_sn,tmzMg_sn &
-       ,tmzSi_sn,tmzFe_sn,tmzZ_sn,nsw_sn)
+      call dtyields(ng,ns)
 
       allocate(mfd(0:np))
 
