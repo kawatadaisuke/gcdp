@@ -316,8 +316,10 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 
 #ifdef MHD
 ! *** file for MHD values ***
-      ndbmhd=9
-
+      ndbmhd=10
+#ifdef DCLEAN
+      ndbmhd=ndbmhd+1
+#endif
       if(myrank.lt.SI_nof) then
         write(fileo,'(a17,i4.4,a4)') 'output/data/pbmhd',myrank,'.dat'
         open(68,file=fileo,status='unknown',form='unformatted')
@@ -347,20 +349,30 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
           enddo
         else if (iv.eq.5) then
           do i=0,npj-1
-            tdvs(i)=alpb_p(i)
+            tdvs(i)=agradb_p(i)
           enddo
         else if (iv.eq.6) then
           do i=0,npj-1
-            tdvs(i)=valfi_p(i)
+            tdvs(i)=alpb_p(i)
           enddo
         else if (iv.eq.7) then
           do i=0,npj-1
-            tdvs(i)=pb_p(i)
+            tdvs(i)=valfi_p(i)
           enddo
         else if (iv.eq.8) then
           do i=0,npj-1
+            tdvs(i)=pb_p(i)
+          enddo
+        else if (iv.eq.9) then
+          do i=0,npj-1
             tdvs(i)=divberr_p(i)
           enddo
+#ifdef DCLEAN
+        else if (iv.eq.10) then
+          do i=0,npj-1
+            tdvs(i)=psi_p(i)
+          enddo
+#endif
         endif
         if(myrank.lt.SI_nof) then
           write(68) (tdvs(i),i=0,npj-1)
