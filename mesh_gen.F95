@@ -44,8 +44,8 @@ subroutine  mesh_gen(flag)
         if(myrank.eq.nprocs-1.and.lzoff_m+lnz_m-1.ne.nz_m-1) then
           write(6,*) ' Error in mesh_gen(): lzoff(nprocs-1) should be nz-1'
           write(6,*) ' lzoff,lnz(nprocs-1)=',lzoff_m,lnz_m
-          call MPI_ABORT(MPI_COMM_WORLD,ierr)
-          stop
+!          call MPI_ABORT(MPI_COMM_WORLD,ierr)
+!          stop
         endif
 
 !        write(6,*) ' myrank,lnz,lzoff=',myrank,lnz_m,lzoff_m

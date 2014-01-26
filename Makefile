@@ -61,6 +61,17 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # CPP=cpp
 # FFLAGS= -O3 -ipo -xHost -lfftw3 -lfftw3_mpi -lfftw3
 #
+### iridis
+# module load openmpi/1.3.3/intel
+# module load fftw/3.3.1/intel/double
+FORT=mpif90
+CPP=cpp
+FFTW_INC=/local/software/rh53/fftw/3.3.1/intel/double/include
+FFTW_LIB=/local/software/rh53/fftw/3.3.1/intel/double/lib
+OPTIONS= -O3
+FFLAGS = ${OPTIONS} -I${FFTW_INC}
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+#
 .SUFFIXES : .o .F95 .f90
 
 ${EXEC} : ${OBJS} ${INIOBJ}

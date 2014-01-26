@@ -51,9 +51,9 @@ subroutine updatev(np,ndm)
       do i=0,ndm-1
 #if defined(COSM) && defined(BOXSIM)
 ! a^2 * peculiar velocity
-        pvx=(asc_dm(i)**2)*(vnx_dm(i)-hub_dm(i)*xc_dm(i))
-        pvy=(asc_dm(i)**2)*(vny_dm(i)-hub_dm(i)*yc_dm(i))
-        pvz=(asc_dm(i)**2)*(vnz_dm(i)-hub_dm(i)*zc_dm(i))
+        pvx=asc_dm(i)*(vnx_dm(i)-hub_dm(i)*xc_dm(i))
+        pvy=asc_dm(i)*(vny_dm(i)-hub_dm(i)*yc_dm(i))
+        pvz=asc_dm(i)*(vnz_dm(i)-hub_dm(i)*zc_dm(i))
 ! store a^2 vpec at n+1/2
         vx_dm(i)=pvx+(asc_dm(i)**2)*dvx_dm(i)*int1oa(i)
         vy_dm(i)=pvy+(asc_dm(i)**2)*dvy_dm(i)*int1oa(i)

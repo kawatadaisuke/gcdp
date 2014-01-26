@@ -61,9 +61,9 @@ program gcdp
       integer tivs(0:3),tivr(0:3)
 ! *****   parameter values   *****
 ! 1 week
-      parameter (JOBTIME=604800.0d0)
-! 48 hours
-!      parameter (JOBTIME=172800.0d0)
+!      parameter (JOBTIME=604800.0d0)
+! 60 hours
+      parameter (JOBTIME=216000.0d0)
 ! 36 hours
 !      parameter (JOBTIME=129600.0d0)
 ! 12 hours
@@ -573,26 +573,25 @@ program gcdp
 
 
 ! test output
-      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,nadm-1
-        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-        else
-         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-        endif
-      enddo
-      close(60)
-
+!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,nadm-1
+!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+!        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+!        else
+!         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+!        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
+!        endif
+!      enddo
+!      close(60)
 !      goto 9999
 
 #endif
