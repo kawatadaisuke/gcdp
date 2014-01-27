@@ -20,7 +20,7 @@ subroutine updatev(np,ndm)
       integer i,pn
 #if defined(COSM) && defined(BOXSIM)
 ! a^2 x peculiar velocities
-      double precision pvx,pvy,pvz
+      double precision pvx,pvy,pvz,hmdtp,hpdtp,dtp
       double precision,allocatable :: int1oa(:),t0(:),t1(:)
 #endif
 
@@ -34,6 +34,7 @@ subroutine updatev(np,ndm)
 #endif
 #ifdef DM
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! time at n+1/3
       allocate(t0(0:ndm))
       allocate(t1(0:ndm))
@@ -45,11 +46,12 @@ subroutine updatev(np,ndm)
       enddo
 ! integrate 1/a from n to n+1/2 for each particle)
       call integrate1oa(ndm,t0,t1,int1oa)
-
+#endif
 #endif
 ! *** DM Particle ***
       do i=0,ndm-1
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! a^2 * peculiar velocity
         pvx=asc_dm(i)*(vnx_dm(i)-hub_dm(i)*xc_dm(i))
         pvy=asc_dm(i)*(vny_dm(i)-hub_dm(i)*yc_dm(i))
@@ -58,7 +60,20 @@ subroutine updatev(np,ndm)
         vx_dm(i)=pvx+(asc_dm(i)**2)*dvx_dm(i)*int1oa(i)
         vy_dm(i)=pvy+(asc_dm(i)**2)*dvy_dm(i)*int1oa(i)
         vz_dm(i)=pvz+(asc_dm(i)**2)*dvz_dm(i)*int1oa(i)
-
+#else
+! Katz et al. (1996)
+! peculiar velocity 
+        pvx=(vnx_dm(i)-hub_dm(i)*xc_dm(i))/asc_dm(i)
+        pvy=(vny_dm(i)-hub_dm(i)*yc_dm(i))/asc_dm(i)
+        pvz=(vnz_dm(i)-hub_dm(i)*zc_dm(i))/asc_dm(i)
+! store peculiar velocity
+        dtp=0.5d0*vdt_dm(i)
+        hmdtp=(1.0d0-hub_dm(i)*dtp)
+        hpdtp=(1.0d0+hub_dm(i)*dtp)
+        vx_dm(i)=pvx*hmdtp/hpdtp+dvx_dm(i)*dtp/(asc_dm(i)*hpdtp)
+        vy_dm(i)=pvy*hmdtp/hpdtp+dvy_dm(i)*dtp/(asc_dm(i)*hpdtp)
+        vz_dm(i)=pvz*hmdtp/hpdtp+dvz_dm(i)*dtp/(asc_dm(i)*hpdtp)
+#endif
 #else
         vx_dm(i)=vnx_dm(i)+(vdt_dm(i)*dvx_dm(i))*0.5d0
         vy_dm(i)=vny_dm(i)+(vdt_dm(i)*dvy_dm(i))*0.5d0
@@ -67,9 +82,11 @@ subroutine updatev(np,ndm)
 
       enddo
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
       deallocate(t0)
       deallocate(t1)
       deallocate(int1oa)
+#endif
 #endif
 #endif
       return
@@ -112,6 +129,9 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
       integer i,pn
 #if defined(COSM) && defined(BOXSIM)   
       double precision,allocatable :: t0(:),t1(:),int1oa(:)
+#ifndef Q97INTDT
+      double precision dtp,hmdtp,hpdtp
+#endif
 #endif
 
 #ifdef GAS
@@ -135,6 +155,7 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
 #ifdef DM
 ! *** DM Particles *** 
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
       allocate(t0(0:nadm))
       allocate(t1(0:nadm))
       allocate(int1oa(0:nadm))
@@ -142,14 +163,16 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
       do i=0,nadm-1
         pn=list_adm(i)
         t0(i)=tc_dm(pn)+0.5d0*dt_dm(pn)
-        t1(i)=TM_dt
+        t1(i)=TM_tot
       enddo
 ! integrate(1/a) from n+1/2 to n+1 for each particle
       call integrate1oa(nadm,t0,t1,int1oa)
 #endif
+#endif
       do i=0,nadm-1
         pn=list_adm(i)         
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! x  physical velocity
         vnx_dm(pn)=SI_hub*xc_dm(pn)+vx_dm(pn)/SI_a+SI_a*dvx_dm(pn)*int1oa(i)
         vny_dm(pn)=SI_hub*yc_dm(pn)+vy_dm(pn)/SI_a+SI_a*dvy_dm(pn)*int1oa(i)
@@ -158,6 +181,18 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
 !        if(id_dm(pn).eq.0) then
 !          write(6,*) xc_dm(pn)/SI_a,yc_dm(pn)/SI_a,zc_dm(pn)/SI_a,vnx_dm(pn)-SI_hub*xc_dm(pn)
 !        endif
+#else
+        dtp=0.5d0*dt_dm(pn)
+        hmdtp=1.0d0-SI_hub*dtp
+        hpdtp=1.0d0+SI_hub*dtp
+! proper velocity
+        vnx_dm(pn)=SI_hub*xc_dm(pn)+vx_dm(pn)*hmdtp*SI_a/hpdtp &
+          +dvx_dm(pn)*dtp/hpdtp
+        vny_dm(pn)=SI_hub*yc_dm(pn)+vy_dm(pn)*hmdtp*SI_a/hpdtp &
+          +dvy_dm(pn)*dtp/hpdtp
+        vnz_dm(pn)=SI_hub*zc_dm(pn)+vz_dm(pn)*hmdtp*SI_a/hpdtp &
+          +dvz_dm(pn)*dtp/hpdtp
+#endif
 ! update H, a and t
         hub_dm(pn)=SI_hub
         asc_dm(pn)=SI_a
@@ -175,9 +210,11 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
       enddo
 
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
       deallocate(t0)
       deallocate(t1)
       deallocate(int1oa)
+#endif
 #endif
 #endif
 #ifdef STAR
@@ -349,9 +386,13 @@ subroutine updatev_pos(np,ndm)
         if(id_dm(i).lt.SI_fiddm(0).or.id_dm(i).gt.SI_fiddm(1)) then
 #endif
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! vx_dm a^2 vpec at n+1/2
 ! SI_a at n+1 step
         x_dm(i)=SI_a*((xc_dm(i)/asc_dm(i))+vx_dm(i)*int1oa2(i))
+#else
+        x_dm(i)=SI_a*((xc_dm(i)/asc_dm(i))+vx_dm(i)*vdt_dm(i))
+#endif
 #else
         x_dm(i)=xc_dm(i)+vdt_dm(i)*vx_dm(i)
 #endif
@@ -367,9 +408,13 @@ subroutine updatev_pos(np,ndm)
         z_dm(i)=0.0d0
 #else
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! vy_dm a^2 vpec at n+1/2
 ! SI_a at n+1 step
         y_dm(i)=SI_a*((yc_dm(i)/asc_dm(i))+vy_dm(i)*int1oa2(i))
+#else
+        y_dm(i)=SI_a*((yc_dm(i)/asc_dm(i))+vy_dm(i)*vdt_dm(i))
+#endif
 #else
         y_dm(i)=yc_dm(i)+vdt_dm(i)*vy_dm(i)
 #endif
@@ -384,9 +429,13 @@ subroutine updatev_pos(np,ndm)
         z_dm(i)=0.0d0
 #else
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
 ! vy_dm a^2 vpec at n+1/2
 ! SI_a at n+1 step
         z_dm(i)=SI_a*((zc_dm(i)/asc_dm(i))+vz_dm(i)*int1oa2(i))
+#else
+        z_dm(i)=SI_a*((zc_dm(i)/asc_dm(i))+vz_dm(i)*vdt_dm(i))
+#endif
 #else
         z_dm(i)=zc_dm(i)+vdt_dm(i)*vz_dm(i)
 #endif
@@ -405,9 +454,11 @@ subroutine updatev_pos(np,ndm)
       enddo
 
 #if defined(COSM) && defined(BOXSIM)
+#ifdef Q97INTDT
       deallocate(t0)
       deallocate(t1)
       deallocate(int1oa2)
+#endif
 #endif
 
 #ifdef MAXR 

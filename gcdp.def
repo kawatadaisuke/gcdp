@@ -135,6 +135,12 @@
 #define FFTW3_MPI
 #
 !
+! *** integrator for cosmological simulation
+! apply Quinn et al. 1997 leapfrog integrator (see also Gadget-2)
+#define Q97INTDT
+! #undef Q97INTDT
+! otherwise Katz et al. (1996): TREESPH integrator
+!
 !#define ADTESTSIM
 ! #undef DM
 #undef GAS
@@ -410,4 +416,3 @@
 #define BCY_PERIOD
 #define BCZ_PERIOD
 #endif
-

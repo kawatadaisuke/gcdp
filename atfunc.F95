@@ -209,7 +209,6 @@ subroutine integrate1oa(np,t0,t1,in1oa)
               ian=ia1
             endif
             in1oa(ip)=in1oa(ip)+0.5d0*(ian+pian)*(tn-ptn)
-
           enddo
         endif
       enddo
