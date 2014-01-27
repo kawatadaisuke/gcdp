@@ -357,7 +357,10 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
 
 #ifdef COSM
 ! check dtmax is smaller than the HUBDT fraction of hubble time
-      if(dtmax.gt.HUBDT*TM_tot) then
+      if(dtmin.gt.HUBDT*TM_tot) then
+        dtmin=HUBDT*TM_tot
+        dtmax=HUBDT*TM_tot
+      else if(dtmax.gt.HUBDT*TM_tot) then
         dtmax=HUBDT*TM_tot
       endif
 #endif
