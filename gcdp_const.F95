@@ -154,6 +154,10 @@ module gcdp_const
 #endif
 ! *** number of small timesteps after EoR. ***
       integer,parameter :: NITEOR=10
+#ifdef COSM
+! *** dt < HUBDT*TM_tot
+      double precision,parameter :: HUBDT=0.01d0
+#endif
 
 ! *** For Arithmetic Value ***
       double precision,parameter :: THIRD=1.0d0/3.0d0

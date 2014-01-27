@@ -355,6 +355,13 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
       endif
 #endif
 
+#ifdef COSM
+! check dtmax is smaller than the HUBDT fraction of hubble time
+      if(dtmax.gt.HUBDT*TM_tot) then
+        dtmax=HUBDT*TM_tot
+      endif
+#endif
+
 ! *** define time steps ***
       TM_k=int(dlog(dtmax/dtmin)/dlog(2.0d0))
       if(step.le.5) then
