@@ -378,10 +378,10 @@
 ! *** Choice of resistivity scheme
 #ifdef TIMEDIS
 ! *** Tricco & Price
-#define TP12
+! #define TP12
 ! #undef TP12
 ! *** Price & Monaghan 2005 
-! #define PM05
+#define PM05
 ! #undef PM05
 #endif 
 !
@@ -393,6 +393,12 @@
 ! *** Dedner energy cons term
 #define DENER
 ! #undef DENER
+! *** Symmetric divergence operator (not recommended TP12)
+#define DIVSYM
+! #undef DIVSYM
+! *** Cleaning Limiter
+#define DLIM
+! #undef DLIM
 #endif
 !
 ! *** Battery Generation

@@ -257,6 +257,14 @@ program gcdp
 #ifdef DENER
         write(6,*) '   ###    with energy cons term    ###'
 #endif
+#ifdef DIVSYM
+        write(6,*) '   ###  symmetric operator div-B   ###'
+#else
+        write(6,*) '   ###  difference operator div-B  ###'
+#endif
+#ifdef DLIM
+        write(6,*) '   ###        with limiter         ###'
+#endif
 #endif
 #ifdef BBAT
         write(6,*) '   ###  include Biermann battery source  ###'
@@ -265,13 +273,13 @@ program gcdp
         write(6,*) '   ###  include self-gravity  ###'
 #endif
 #ifdef COOL
-        write(6,*) ' ###  include cooling  ###'
+        write(6,*) '   ###  include cooling  ###'
 #endif
 #ifdef STAR
-        write(6,*) ' ###  include star ###'
+        write(6,*) '   ###  include star ###'
 #endif
 #ifdef SF
-        write(6,*) ' ###  include star formation  ###'
+        write(6,*) '   ###  include star formation  ###'
 #endif
 #ifdef SF_EFD
         write(6,*) '   ###  include energy feedback  ###'
