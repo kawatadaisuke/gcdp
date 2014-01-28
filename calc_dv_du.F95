@@ -1316,7 +1316,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #ifdef DIVSYM
         tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2)-(mdwip(i) &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*xijp(i) &
-             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8))
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
         tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2)-tdvr(listb(i)+npj*8) &
              *((mdwip(i)*tdpsi(listb(i))*xijp(i))/(tdvr(listb(i)+npj*11) &
@@ -1343,7 +1343,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #ifdef DIVSYM
         tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3)-(mdwip(i) &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*yijp(i) &
-             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8))
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
         tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3)-tdvr(listb(i)+npj*8) &
              *((mdwip(i)*tdpsi(listb(i))*yijp(i))/(tdvr(listb(i)+npj*11) &
@@ -1370,7 +1370,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #ifdef DIVSYM
         tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4)-(mdwip(i) &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*zijp(i) &
-             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8))
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
         tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4)-tdvr(listb(i)+npj*8) &
              *((mdwip(i)*tdpsi(listb(i))*zijp(i))/(tdvr(listb(i)+npj*11) &
