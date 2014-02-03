@@ -1318,10 +1318,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*xijp(i) &
              /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
-        tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2)-tdvr(listb(i)+npj*8) &
-             *((mdwip(i)*tdpsi(listb(i))*xijp(i))/(tdvr(listb(i)+npj*11) &
-             *tdvr(listb(i)+npj*8)**2)+(mdwjp(i)*psi_p(nblistb(i))*xijp(i)) &
-             /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2))
+        tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *xijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*xijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
 #endif
 #endif
 
@@ -1345,10 +1346,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*yijp(i) &
              /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
-        tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3)-tdvr(listb(i)+npj*8) &
-             *((mdwip(i)*tdpsi(listb(i))*yijp(i))/(tdvr(listb(i)+npj*11) &
-             *tdvr(listb(i)+npj*8)**2)+(mdwjp(i)*psi_p(nblistb(i))*yijp(i)) &
-             /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2))
+        tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *yijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*yijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
 #endif
 #endif
            
@@ -1372,10 +1374,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
              *(tdpsi(listb(i))-psi_p(nblistb(i)))*zijp(i) &
              /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
 #else
-        tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4)-tdvr(listb(i)+npj*8) &
-             *((mdwip(i)*tdpsi(listb(i))*zijp(i))/(tdvr(listb(i)+npj*11) &
-             *tdvr(listb(i)+npj*8)**2)+(mdwjp(i)*psi_p(nblistb(i))*zijp(i)) &
-             /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2))
+        tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *zijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*zijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
 #endif
 #endif
       enddo
@@ -1974,7 +1977,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         npj=ncompi
 
         deallocate(tdpsi)
-        allocate(tdpsi(0:npj*2))
+        allocate(tdpsi(0:npj*5))
         
         do ip=0,nprocs-1
            
@@ -2591,7 +2594,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 
 #ifdef MHD
-! *** for integer values ***
         isend=0
         snmhdval=4
 #ifdef DCLEAN
@@ -2625,7 +2627,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         allocate(tdmhd(0:npj*nvalmhd))
 #ifdef DCLEAN
         deallocate(tdpsi)
-        allocate(tdpsi(0:npj*2))
+        allocate(tdpsi(0:npj*5))
 #endif
 
 ! *** sending and reveiving the data ***
@@ -2674,7 +2676,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         enddo
 #endif
 #ifdef DCLEAN
-        do i=npj,npj*2-1
+        do i=npj,npj*5-1
            tdpsi(i)=0.0d0
         enddo
 #endif
