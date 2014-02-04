@@ -156,7 +156,7 @@ module gcdp_const
       integer,parameter :: NITEOR=10
 #ifdef COSM
 ! *** dt < HUBDT*TM_tot
-      double precision,parameter :: HUBDT=0.01d0
+      double precision,parameter :: HUBDT=0.1d0
 #endif
 
 ! *** For Arithmetic Value ***

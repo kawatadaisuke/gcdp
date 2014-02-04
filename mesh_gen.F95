@@ -78,22 +78,22 @@ subroutine  mesh_gen(flag)
             if(myrank.eq.0) then
             write(6,*) &
              ' Error in mesh_gen(): need at least 3 grids in neighbour proc.'
-            write(6,*) ' myrank,ip,lzoff(i-1,i)=' &
-             ,myrank,i,lzoff_mp(i-1),lzoff_mp(i)
+            write(6,*) ' myrank,ip,lzoff(i-1,i),lnz=' &
+             ,myrank,i,lzoff_mp(i-1),lzoff_mp(i),lnz_m
             endif
-            call MPI_ABORT(MPI_COMM_WORLD,ierr)
-            stop
+!            call MPI_ABORT(MPI_COMM_WORLD,ierr)
+!            stop
           endif
           if(i.ne.nprocs-1.and.lzoff_mp(i)+lnz_mp(i)+2 &
             .gt.lzoff_mp(i+1)+lnz_mp(i+1)-1) then
             if(myrank.eq.0) then
             write(6,*) &
              ' Error in mesh_gen(): need at least 3 grids in neighbour proc.'
-            write(6,*) ' myrank,ip,lzoff(i,i+1)=' &
-              ,myrank,i,lzoff_mp(i),lzoff_mp(i+1)
+            write(6,*) ' myrank,ip,lzoff(i,i+1),lnz=' &
+              ,myrank,i,lzoff_mp(i),lzoff_mp(i+1),lnz_m
             endif
-            call MPI_ABORT(MPI_COMM_WORLD,ierr)
-            stop
+!            call MPI_ABORT(MPI_COMM_WORLD,ierr)
+!            stop
           endif
 ! proc i and procs-1 are not checked, but should be ok.
         enddo

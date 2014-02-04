@@ -62,7 +62,7 @@
 ! #define CENTRE0
 !
 ! *** fixed softening for DM
-! #define FIXEDDMEPS
+#define FIXEDDMEPS
 !
 ! *** DM softening limit to SI_eps*(m_dm**1/3) (default: limit)
 #define DMEPSLIM_G
@@ -141,10 +141,10 @@
 ! #undef Q97INTDT
 ! otherwise Katz et al. (1996): TREESPH integrator
 !
-!#define ADTESTSIM
+#define ADTESTSIM
 ! #undef DM
-#undef GAS
-! #undef COSM
+! #undef GAS
+#undef COSM
 !
 ! *** isolated galaxy
 ! #define MAXR
@@ -152,19 +152,19 @@
 ! #define CENTRE0
 !
 ! #undef COSM
-! #undef MULTI_LEV
+#undef MULTI_LEV
 ! #undef DM
 ! #undef GAS
-! *** adiabati! ***
-! #undef COOL
-! #undef STAR
-! #undef SF
-! #undef METAL
-! #undef SF_EFD
-! #undef SF_ZFD
-! #undef METALDIFF
-! #undef UTHLIM_JM
-! #undef UTHLIM_POLY
+! *** adiabatic! ***
+#undef COOL
+#undef STAR
+#undef SF
+#undef METAL
+#undef SF_EFD
+#undef SF_ZFD
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
 
 ! *** for test simulation ****
 ! *** no individual timestep
