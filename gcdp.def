@@ -74,7 +74,8 @@
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
-#define QPTREEF
+! should be off for TREEPM, because tree force truncation is only for monopole
+! #define QPTREEF
 ! #undef QPTREEF
 !
 ! *** turn on FAST (Saitoh & Makino 2010)

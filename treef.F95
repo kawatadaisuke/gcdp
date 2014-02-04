@@ -45,6 +45,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       double precision x2ij,y2ij,z2ij,x3ij,y3ij,z3ij
       double precision ir5,ir7,ir4
       double precision dpijr
+#ifdef TREEPM
+      double precision ftrun
+#endif
 #endif
 ! *** potential and correction adaptive softening ***
       double precision pot,dhc
@@ -79,6 +82,14 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
        ,lpnd(:),deltapnd(:),mpnd(:),cxpnd(:),cypnd(:),czpnd(:) &
        ,trbuf(:)
       double precision,allocatable :: tdvs(:),tdvr(:)
+#ifdef TREEPM 
+      double precision crit
+      double precision erfcc
+      external erfcc
+
+! the distance from the corner of square to the centre, assuming 3D
+      crit=dsqrt(3.0d0)*0.5d0
+#endif
 
 ! *** Basic Value ***
       theta2 = THETA*THETA
@@ -279,7 +290,31 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
           endif
           endif
+#ifdef TREEPM
+          if(flago(pn).eq.0) then
+! distance from particle to the closest possible particle within the node
+            rij=dsqrt(xij*xij+yij*yij+zij*zij)
+            if(rij-crit*l_tr(nd).gt.SI_rshtpm) then
+! no force calculation, goto next node
+              node(pn)=next_tr(nd)		              
+! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
+! 1, 2, 3 are used for the case of going down to a daughter
+              flago(pn)=-1
+            else if(rij+crit*l_tr(nd).gt.SI_rshtpm) then
+! the node may include particles which is outside SI_rshtpm
+! go to daughter
+             flago(pn)=1
+            endif
+          endif
+#endif
+        else if(np_tr(nd).eq.1.and.iproc.eq.0) then
+! skip own particle
+          if(pn_nfp(pn).eq.pn_tr(nd)) then
+            flago(pn)=-1
+            node(pn)=next_tr(nd)		              
+          endif
         endif
+
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_tr(nd)
 #ifdef BCX_PERIOD   
@@ -386,6 +421,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           if(iproc.eq.0.or.nd.gt.nodese_tr) then
             pnj = pn_tr(nd)
             rij=dsqrt(r2p(i))
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir2=1.0d0/r2p(i)
             ir3=ir2/rij
 ! *** dphi/dr(hi) and dwi ***
@@ -440,13 +478,22 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             endif
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
+#ifdef TREEPM
+            pot=m_p(pnj)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=m_p(pnj)*G*0.5d0*(dphiir+dphijr)
+#endif
             dhc=m_p(pnj)*G*0.5d0*((tdvr(pn+npj*5)/tdvr(pn+npj*4))*dwi &
              +(zetah_p(pnj)/omgh_p(pnj))*dwj)
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-xijp(i)*(pot+dhc)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-yijp(i)*(pot+dhc)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-zijp(i)*(pot+dhc)
           endif
+#ifdef TREEPM
+          endif
+#endif
 ! * update node *
           node(pn)=next_tr(nd)
         else if(flago(pn).eq.3) then
@@ -454,6 +501,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             ir2=1.0d0/r2p(i)
             r2=r2p(i)
             rij=dsqrt(r2)       
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir1=1.0d0/rij
             ir3=ir2*ir1
 ! *** use softening of particle i
@@ -543,8 +593,16 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             x3ij=xij*x2ij
             y3ij=yij*y2ij
             z3ij=zij*z2ij
+#ifdef TREEPM
+            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#endif
 ! *** ax ***
+#ifdef TREEPM
+            tdvr(pn+npj*6)=tdvr(pn+npj*6)-ftrun*(xij*pot &
+#else
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xij*pot &
+#endif
 ! dipole
              -mx_tr(nd)*((ir1-x2ij*ir3)*dp_ij+x2ij*ir2*d2p_ij) &
              -my_tr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
@@ -568,7 +626,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_tr(nd)*(3.0d0*xij*yij*zij*ir5*dp_ij &
              +3.0d0*xij*yij*zij*ir4*d2p_ij+xij*yij*zij*ir3*d3p_ij))
 ! *** ay ***
+#ifdef TREEPM
+            tdvr(pn+npj*7)=tdvr(pn+npj*7)-ftrun*(yij*pot &
+#else
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yij*pot &
+#endif
 ! dipole
              -mx_tr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
              -my_tr(nd)*((ir1-y2ij*ir3)*dp_ij+y2ij*ir2*d2p_ij) & 
@@ -592,7 +654,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_tr(nd)*((-zij*ir3+3.0d0*y2ij*zij*ir5)*dp_ij &
              +(zij*ir2-3.0d0*y2ij*zij*ir4)*d2p_ij+y2ij*zij*ir3*d3p_ij)
 ! *** az ***
+#ifdef TREEPM
+            tdvr(pn+npj*8)=tdvr(pn+npj*8)-ftrun*(zij*pot &
+#else
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zij*pot &
+#endif
 ! dipole
              -mx_tr(nd)*(-xij*zij*ir3*dp_ij+xij*zij*ir2*d2p_ij) &
              -my_tr(nd)*(-yij*zij*ir3*dp_ij+yij*zij*ir2*d2p_ij) &
@@ -616,12 +682,21 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_tr(nd)*((-yij*ir3+3.0d0*z2ij*yij*ir5)*dp_ij &
              +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij) 
 #else
+#ifdef TREEPM
+            pot=mass_tr(nd)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=mass_tr(nd)*G*0.5d0*(dphiir+dphijr)
+#endif
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xijp(i)*pot)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yijp(i)*pot)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zijp(i)*pot)
 #endif
           endif
+#ifdef TREEPM
+          endif
+#endif
 ! *** update node
           node(pn)=next_tr(nd)
         endif
@@ -778,6 +853,23 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
           endif
           endif
+#ifdef TREEPM
+          if(flago(pn).eq.0) then
+! distance from particle to the closest possible particle within the node
+            rij=dsqrt(xij*xij+yij*yij+zij*zij)
+            if(rij-crit*l_dmtr(nd).gt.SI_rshtpm) then
+! no force calculation, goto next node
+              node(pn)=next_dmtr(nd)		              
+! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
+! 1, 2, 3 are used for the case of going down to a daughter
+              flago(pn)=-1
+            else if(rij+crit*l_dmtr(nd).gt.SI_rshtpm) then
+! the node may include particles which is outside SI_rshtpm
+! go to daughter
+             flago(pn)=1
+            endif
+          endif
+#endif
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_dmtr(nd)
@@ -884,6 +976,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           if(iproc.eq.0.or.nd.gt.nodese_dmtr) then
             pnj = pn_dmtr(nd)
             rij=dsqrt(r2p(i))
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir2=1.0d0/r2p(i)
             ir3=ir2/rij
 ! *** dphi/dr(hi) and dwi ***
@@ -938,20 +1033,32 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             endif
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
+#ifdef TREEPM
+            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr)
+#endif
             dhc=m_dm(pnj)*0.5d0*G*((tdvr(pn+npj*5)/tdvr(pn+npj*4))*dwi &
              +(zetah_dm(pnj)/omgh_dm(pnj))*dwj)
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-xijp(i)*(pot+dhc)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-yijp(i)*(pot+dhc)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-zijp(i)*(pot+dhc)
-! * update node *
           endif
+#ifdef TREEPM
+          endif
+#endif
+! * update node *
           node(pn)=next_dmtr(nd)
         else if(flago(pn).eq.3) then
           if(iproc.eq.0.or.nd.gt.nodese_dmtr) then
             ir2=1.0d0/r2p(i)
             r2=r2p(i)
             rij=dsqrt(r2)       
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir1=1.0d0/rij
             ir3=ir2*ir1
 ! *** use softening of particle i
@@ -1041,8 +1148,16 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             x3ij=xij*x2ij
             y3ij=yij*y2ij
             z3ij=zij*z2ij
+#ifdef TREEPM
+            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#endif
 ! *** ax ***
+#ifdef TREEPM
+            tdvr(pn+npj*6)=tdvr(pn+npj*6)-ftrun*(xij*pot &
+#else
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xij*pot &
+#endif
 ! dipole
              -mx_dmtr(nd)*((ir1-x2ij*ir3)*dp_ij+x2ij*ir2*d2p_ij) &
              -my_dmtr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
@@ -1066,7 +1181,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_dmtr(nd)*(3.0d0*xij*yij*zij*ir5*dp_ij &
              +3.0d0*xij*yij*zij*ir4*d2p_ij+xij*yij*zij*ir3*d3p_ij))
 ! *** ay ***
+#ifdef TREEPM
+            tdvr(pn+npj*7)=tdvr(pn+npj*7)-ftrun*(yij*pot &
+#else
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yij*pot &
+#endif
 ! dipole
              -mx_dmtr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
              -my_dmtr(nd)*((ir1-y2ij*ir3)*dp_ij+y2ij*ir2*d2p_ij) &
@@ -1090,7 +1209,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_dmtr(nd)*((-zij*ir3+3.0d0*y2ij*zij*ir5)*dp_ij &
              +(zij*ir2-3.0d0*y2ij*zij*ir4)*d2p_ij+y2ij*zij*ir3*d3p_ij)
 ! *** az ***
+#ifdef TREEPM
+            tdvr(pn+npj*8)=tdvr(pn+npj*8)-ftrun*(zij*pot &
+#else
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zij*pot &
+#endif
 ! dipole
              -mx_dmtr(nd)*(-xij*zij*ir3*dp_ij+xij*zij*ir2*d2p_ij) &
              -my_dmtr(nd)*(-yij*zij*ir3*dp_ij+yij*zij*ir2*d2p_ij) &
@@ -1114,12 +1237,21 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +myz_dmtr(nd)*((-yij*ir3+3.0d0*z2ij*yij*ir5)*dp_ij &
              +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij)
 #else
+#ifdef TREEPM
+            pot=mass_dmtr(nd)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=mass_dmtr(nd)*G*0.5d0*(dphiir+dphijr)
+#endif
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xijp(i)*pot)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yijp(i)*pot)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zijp(i)*pot)
 #endif
           endif
+#ifdef TREEPM
+          endif
+#endif
 ! * update node *
           node(pn)=next_dmtr(nd)
         endif
@@ -1278,6 +1410,23 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
           endif
           endif
+#ifdef TREEPM
+          if(flago(pn).eq.0) then
+! distance from particle to the closest possible particle within the node
+            rij=dsqrt(xij*xij+yij*yij+zij*zij)
+            if(rij-crit*l_ldmtr(nd).gt.SI_rshtpm) then
+! no force calculation, goto next node
+              node(pn)=next_ldmtr(nd)		              
+! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
+! 1, 2, 3 are used for the case of going down to a daughter
+              flago(pn)=-1
+            else if(rij+crit*l_ldmtr(nd).gt.SI_rshtpm) then
+! the node may include particles which is outside SI_rshtpm
+! go to daughter
+             flago(pn)=1
+            endif
+          endif
+#endif
         endif
         if(flago(pn).eq.0) then
           xij=tdvr(pn)-cmx_ldmtr(nd)
@@ -1385,6 +1534,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           if(iproc.eq.0.or.nd.gt.nodese_ldmtr) then
             pnj = pn_ldmtr(nd)
             rij=dsqrt(r2p(i))
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir2=1.0d0/r2p(i)
             ir3=ir2/rij
 ! *** dphi/dr(hi) and dwi ***
@@ -1439,13 +1591,22 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             endif
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
+#ifdef TREEPM
+            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=m_dm(pnj)*0.5d0*(dphiir+dphijr)
+#endif
             dhc=m_dm(pnj)*0.5d0*((tdvr(pn+npj*5)/tdvr(pn+npj*4))*dwi &
              +(zetah_dm(pnj)/omgh_dm(pnj))*dwj)
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-xijp(i)*(pot+dhc)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-yijp(i)*(pot+dhc)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-zijp(i)*(pot+dhc)
           endif
+#ifdef TREEPM
+          endif
+#endif
 ! * update node *
           node(pn)=next_ldmtr(nd)
         else if(flago(pn).eq.3) then
@@ -1453,6 +1614,9 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             ir2=1.0d0/r2p(i)
             r2=r2p(i)
             rij=dsqrt(r2)
+#ifdef TREEPM
+            if(rij.lt.SI_rshtpm) then
+#endif
             ir1=1.0d0/rij
             ir3=ir2*ir1
 ! *** use softening of particle i
@@ -1542,8 +1706,16 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             x3ij=xij*x2ij
             y3ij=yij*y2ij
             z3ij=zij*z2ij
+#ifdef TREEPM
+            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#endif
 ! *** ax ***
+#ifdef TREEPM
+            tdvr(pn+npj*6)=tdvr(pn+npj*6)-ftrun*(xij*pot &
+#else
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xij*pot &
+#endif
 ! dipole
             -mx_ldmtr(nd)*((ir1-x2ij*ir3)*dp_ij+x2ij*ir2*d2p_ij) &
             -my_ldmtr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
@@ -1567,7 +1739,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             +myz_ldmtr(nd)*(3.0d0*xij*yij*zij*ir5*dp_ij &
             +3.0d0*xij*yij*zij*ir4*d2p_ij+xij*yij*zij*ir3*d3p_ij))
 ! *** ay ***
+#ifdef TREEPM
+            tdvr(pn+npj*7)=tdvr(pn+npj*7)-ftrun*(yij*pot &
+#else
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yij*pot &
+#endif
 ! dipole
              -mx_ldmtr(nd)*(-xij*yij*ir3*dp_ij+xij*yij*ir2*d2p_ij) &
              -my_ldmtr(nd)*((ir1-y2ij*ir3)*dp_ij+y2ij*ir2*d2p_ij) &
@@ -1591,7 +1767,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             +myz_ldmtr(nd)*((-zij*ir3+3.0d0*y2ij*zij*ir5)*dp_ij &
             +(zij*ir2-3.0d0*y2ij*zij*ir4)*d2p_ij+y2ij*zij*ir3*d3p_ij)
 ! *** az ***
+#ifdef TREEPM
+            tdvr(pn+npj*8)=tdvr(pn+npj*8)-ftrun*(zij*pot &
+#else
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zij*pot &
+#endif
 ! dipole
             -mx_ldmtr(nd)*(-xij*zij*ir3*dp_ij+xij*zij*ir2*d2p_ij) &
             -my_ldmtr(nd)*(-yij*zij*ir3*dp_ij+yij*zij*ir2*d2p_ij) &
@@ -1615,12 +1795,21 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             +myz_ldmtr(nd)*((-yij*ir3+3.0d0*z2ij*yij*ir5)*dp_ij &
             +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij)
 #else
+#ifdef TREEPM
+            pot=mass_ldmtr(nd)*0.5d0*G*(dphiir+dphijr) &
+              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
+              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+#else
             pot=mass_ldmtr(nd)*G*0.5d0*(dphiir+dphijr)
+#endif
             tdvr(pn+npj*6)=tdvr(pn+npj*6)-(xijp(i)*pot)
             tdvr(pn+npj*7)=tdvr(pn+npj*7)-(yijp(i)*pot)
             tdvr(pn+npj*8)=tdvr(pn+npj*8)-(zijp(i)*pot)
 #endif
           endif
+#ifdef TREEPM
+          endif
+#endif
 ! * update node *
           node(pn)=next_ldmtr(nd)
         endif
