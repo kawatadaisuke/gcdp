@@ -12,7 +12,7 @@ INIOBJ = set_ini.o
 CONTOBJ = cont.o
 DEFFILE = gcdp.def gcdp_const.F95 common.F95
 ###  for MPICH 
-OPTIONS=-g -mcmodel=medium
+OPTIONS=-O3 -mcmodel=medium
 ### kepler 
 # MPI_DIR=/cluster/mpich2_3.0
 ### MAC

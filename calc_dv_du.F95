@@ -1394,13 +1394,15 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       do i=0,nbp-1
 ! div B
 #ifdef DIVSYM
-         tdmhd(listb(i)+npj*6)=tdmhd(listb(i)+npj*6)+(mdwip(i) &
+         tdmhd(listb(i)+npj*6)=tdmhd(listb(i)+npj*6)+(((mdwip(i) &
               *tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
-              *(((tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj)*yijp(i) &
+              *((tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj)*yijp(i) &
               +tdmhd(listb(i)+npj*2)*zijp(i))/(tdvr(listb(i)+npj*11) &
-              *tdvr(listb(i)+npj*8)**2))+((bx_p(nblistb(i))*xijp(i) &
+              *tdvr(listb(i)+npj*8)**2))) &
+              +((mdwjp(i)*tdvr(listb(i)+npj*11) &
+              *tdvr(listb(i)+npj*8)**2)*((bx_p(nblistb(i))*xijp(i) &
               +by_p(nblistb(i))*yijp(i)+bz_p(nblistb(i))*zijp(i)) &
-              /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2)))
+              /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2))))
 #else
          tdmhd(listb(i)+npj*6)=tdmhd(listb(i)+npj*6)+mdwip(i) &
               *((bx_p(nblistb(i))-tdmhd(listb(i)))*xijp(i) &
