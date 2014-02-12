@@ -65,7 +65,7 @@
 #define FIXEDDMEPS
 !
 ! *** DM softening limit to SI_eps*(m_dm**1/3) (default: limit)
-#define DMEPSLIM_G
+! #define DMEPSLIM_G
 !
 ! *** move particles azimuthally at randam
 ! see fraction in update.F
@@ -128,7 +128,7 @@
 !
 ! *** TreePM
 #define TREEPM
-! #define PMONLY
+#define PMONLY
 #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
 #define FFTW3_ESTIMATE

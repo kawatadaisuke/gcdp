@@ -535,6 +535,8 @@ subroutine updatesl(ng,nag,ns,nas,ndm)
 #if defined(GEPSLIM_G) || defined(DMEPSLIM_G)
       use gcdp_system
 #endif
+      use gcdp_const
+
       implicit none
 
       integer,intent(in) :: ng,ns,ndm,nag,nas

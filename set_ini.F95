@@ -1372,7 +1372,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #endif
 #ifdef STAR
-! *** set star's softening
+! *** set softening for stars
       do i=ng,ng+ns-1
         pn=list_ap(i)
         h_p(pn)=SI_eps*(m_p(pn)**THIRD)

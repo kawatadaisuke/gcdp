@@ -68,9 +68,8 @@ subroutine  mesh_setrho(np,ndm)
 
       do ic=0,nmat-1
 
-#if defined(GAS) || defined(STAR)
-! assign baryon mass
         if(ic.eq.0) then 
+#if defined(GAS) || defined(STAR)
 ! allocate x,y,z,m data temporary
           allocate(xtp(0:np))
           allocate(ytp(0:np))
@@ -105,10 +104,8 @@ subroutine  mesh_setrho(np,ndm)
             mtp(i)=m_dm(i)     
           enddo
           ntp=ndm
-#if defined(GAS) || defined(STAR)
+#endif
         endif   
-#endif
-#endif
 
 #ifdef FFTW3_MPI
 ! set which particle send to which proc
@@ -505,8 +502,8 @@ subroutine  mesh_setrho(np,ndm)
       enddo
       close(60)
 
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      stop      
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      stop      
 
 end subroutine
 #endif

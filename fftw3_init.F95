@@ -84,6 +84,6 @@ subroutine  fftw3_init()
 #endif
 
 end subroutine
-#endif FFTW3
+#endif
 #endif
 

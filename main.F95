@@ -394,7 +394,7 @@ program gcdp
         endif
 #ifdef WTIME
         if(myrank.eq.0) then
-          write(6,*) ' initial ddec time for DM, baryon=',WTM_ddecb,WTM_ddecdm
+          write(6,*) ' initial ddec time for baryon,DM=',WTM_ddecb,WTM_ddecdm
         endif
         dtiddec=WTM_ddecb+WTM_ddecdm
 #endif
@@ -560,7 +560,7 @@ program gcdp
 ! calculate potential
         call mesh_fftf()
 ! assign force to particles
-        call mesh_setfp(nag,nas,nadm)
+        call mesh_setfp(ng,nag,nas,nadm)
 
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -572,27 +572,51 @@ program gcdp
 #endif
 
 
+#ifdef DM
 ! test output
-!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-!      open(60,file=fileo,status='unknown')
-!      do i=0,nadm-1
-!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-!        write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-!        else
-!         write(60,'(11(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
-!        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),nnb_dm(i)
-!        endif
-!      enddo
-!      close(60)
-!      goto 9999
+      write(fileo,'(a4,i3.3)') 'fdmp',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nadm-1
+        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
+        write(60,'(13(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i)
+        else
+         write(60,'(13(1pE13.5),I8)') x_dm(i),y_dm(i),z_dm(i) &
+        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+         ,dvx_dm(i),dvy_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i)
+        endif
+      enddo
+      close(60)
+#endif
+#if defined(GAS) || defined(STAR)
+      write(fileo,'(a3,i3.3)') 'fbp',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,nag-1
+        if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
+        write(60,'(13(1pE13.5),I8)') x_p(i),y_p(i),z_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i)) &
+         /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i),rho_p(i),h_p(i),nnb_p(i)
+        else
+         write(60,'(13(1pE13.5),I8)') x_p(i),y_p(i),z_p(i) &
+        ,dvx_p(i),dvy_p(i),dvz_p(i) &
+         ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
+         ,-(dvx_p(i)*x_p(i)+dvy_p(i)*y_p(i)+dvz_p(i)*z_p(i)) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i),rho_p(i),h_p(i),nnb_p(i)
+        endif
+      enddo
+      close(60)
+#endif
+
+      goto 9999
 
 #endif
 
@@ -1139,7 +1163,7 @@ program gcdp
 ! calculate potential
         call mesh_fftf()
 ! assign force to particles
-        call mesh_setfp(nag,nas,nadm)
+        call mesh_setfp(ng,nag,nas,nadm)
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       ectime=MPI_WTIME()
