@@ -128,7 +128,7 @@
 !
 ! *** TreePM
 #define TREEPM
-#define PMONLY
+! #define PMONLY
 #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
 #define FFTW3_ESTIMATE

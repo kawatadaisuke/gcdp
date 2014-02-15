@@ -263,8 +263,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** get the max level among the processors ***
           call MPI_ALLREDUCE(level,maxlevel,1,MPI_INTEGER &
              ,MPI_MAX,MPI_COMM_WORLD,ierr)
-
-
+          maxlevel = maxlevel+level_mergin
 
         endif
         if(level.lt.maxlevel) then

@@ -705,10 +705,10 @@ subroutine treebuild(np)
 !      write(fileo,'(a4,i3.3,a1,i3.3)') 'tree',myrank
 !      open(60,file=fileo,status='unknown')
 !      do i=0,num_tr-1
-!        write(60,'(7I10,19(1pE13.5))') i,np_tr(i),pn_tr(i) &
+!        write(60,'(7I10,9(1pE13.5))') i,np_tr(i),pn_tr(i) &
 !        ,next_tr(i),daughter_tr(i),pare_tr(i),proc_tr(i),l_tr(i) &
 !        ,cx_tr(i),cy_tr(i),cz_tr(i),hm_tr(i) &
-!        ,mass_tr(i),cmx_tr(i),cmy_tr(i),cmz_tr(i) &
+!        ,mass_tr(i),cmx_tr(i),cmy_tr(i),cmz_tr(i) 
 !        ,mx_tr(i),my_tr(i),mz_tr(i) &
 !        ,mxx_tr(i),myy_tr(i),mzz_tr(i) &
 !        ,mxy_tr(i),myz_tr(i),mzx_tr(i),delta_tr(i)

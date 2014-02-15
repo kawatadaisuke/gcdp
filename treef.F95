@@ -482,6 +482,11 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             pot=m_p(pnj)*0.5d0*G*(dphiir+dphijr) &
               *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
               *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+
+!            if(pn.eq.1845) then
+!              write(6,*) x_p(pn),y_p(pn),z_p(pn),pnj,pot,dphiir,dphijr,erfcc(rij/(2.0d0*SI_rstpm)),(rij/(SI_rstpm*dsqrt(M_PI))) &
+!    ,dexp(-r2p(i)/(4.0d0*(SI_rstpm**2)))
+!            endif
 #else
             pot=m_p(pnj)*G*0.5d0*(dphiir+dphijr)
 #endif

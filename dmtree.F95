@@ -47,7 +47,6 @@ subroutine dmtreebuild(np)
       integer,allocatable :: clist(:),slist(:),s_sc(:),lvlist(:),paretrcm(:)
 ! *** for Paeno-Hilbert ordering ***
       integer,allocatable :: ixp(:),iyp(:),izp(:)
-      integer,allocatable :: infp(:),cpnfp(:),spnfp(:)
       integer,allocatable :: pn_nfp(:),nd_nfp(:),c_nfp(:),label_nfp(:),snfp(:)
       integer,allocatable :: list(:),talist(:),nalist(:),node(:)
       integer,allocatable :: np_sc(:),pare_tr(:),nd_sc(:),pare_sc(:),c_sc(:) &
@@ -130,7 +129,7 @@ subroutine dmtreebuild(np)
       numsc=8
       stsc=numdmtr
       l_sc=l_dmtr(numtr0)*0.5d0
-
+a
       allocate(np_sc(0:numsc))
       allocate(pare_sc(0:numsc))
       allocate(c_sc(0:numsc))
@@ -192,8 +191,8 @@ subroutine dmtreebuild(np)
         else
           izp(i)=1
         endif 
+        call phcurve(snfp(i),c_nfp(i),ixp(i),iyp(i),izp(i),level)
       enddo
-      call phcurven(0,numnfp-1,snfp,c_nfp,ixp,iyp,izp,level)
 
       deallocate(ixp)
       deallocate(iyp)
@@ -315,42 +314,20 @@ subroutine dmtreebuild(np)
       deallocate(nd_sc)
 
 ! *** rebuild not finished particle list ***
-
-      allocate(infp(0:numnfp))
-      allocate(spnfp(0:numnfp))
-      allocate(cpnfp(0:numnfp))
-
       numtmp = 0
       do i=0,numnfp-1
-        spnfp(i)=snfp(i)
-        cpnfp(i)=c_nfp(i)
         if(label_nfp(i).eq.0) then
 ! *** need further refinement
           pn_nfp(numtmp)=pn_nfp(i)
           nd_nfp(numtmp)=nd_nfp(i)
-          infp(numtmp)=i
+! *** update c and s
+          snfp(numtmp)=snfp(i)
+          c_nfp(numtmp)=c_nfp(i)
+          label_nfp(numtmp)=0
           numtmp=numtmp+1
         endif
       enddo
       numnfp=numtmp
-! *** update c, s and label
-
-      deallocate(snfp)
-      deallocate(c_nfp)
-      deallocate(label_nfp)
-      allocate(snfp(0:numnfp))
-      allocate(c_nfp(0:numnfp))
-      allocate(label_nfp(0:numnfp))
-
-      do i=0,numnfp-1
-        snfp(i)=spnfp(infp(i))
-        c_nfp(i)=cpnfp(infp(i))
-        label_nfp(i)=0
-      enddo
-
-      deallocate(spnfp)
-      deallocate(cpnfp)
-      deallocate(infp)
 
 ! *** stsc is starting node at this level
 ! *** numtmp is the number of new node
@@ -708,6 +685,21 @@ subroutine dmtreebuild(np)
       enddo		
 
       num_dmtr=numdmtr
+
+!      write(fileo,'(a6,i3.3,a1,i3.3)') 'dmtree',myrank
+!      open(60,file=fileo,status='unknown')
+! l_dmtr and cx_dmtr for np_dmtr is different from tree.F, but same as gtree.F
+! because of the neighbour search
+!      do i=0,num_dmtr-1
+!        write(60,'(7I10,9(1pE13.5))') i,np_dmtr(i),pn_dmtr(i) &
+!        ,next_dmtr(i),daughter_dmtr(i),proc_dmtr(i),proc_dmtr(i),l_dmtr(i) &
+!        ,cx_dmtr(i),cy_dmtr(i),cz_dmtr(i),hm_dmtr(i) &
+!        ,mass_dmtr(i),cmx_dmtr(i),cmy_dmtr(i),cmz_dmtr(i) 
+!        ,mx_dmtr(i),my_dmtr(i),mz_dmtr(i) &
+!        ,mxx_dmtr(i),myy_dmtr(i),mzz_dmtr(i) &
+!        ,mxy_dmtr(i),myz_dmtr(i),mzx_dmtr(i),delta_dmtr(i)
+!      enddo
+!      close(60)
 
       deallocate(list)
       deallocate(pare_tr)	

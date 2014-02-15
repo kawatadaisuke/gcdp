@@ -464,9 +464,9 @@ subroutine  mesh_setfp(ng,nag,nas,nadm)
 #else
             pni=pnitp(pn)
 #endif
-            dvx_p(pni)=dvx_p(pni)+fxp_m(i)
-            dvy_p(pni)=dvy_p(pni)+fyp_m(i)
-            dvz_p(pni)=dvz_p(pni)+fzp_m(i)
+            ax_p(pni)=ax_p(pni)+fxp_m(i)
+            ay_p(pni)=ay_p(pni)+fyp_m(i)
+            az_p(pni)=az_p(pni)+fzp_m(i)
           enddo
 #ifdef DM
         else if(ic.eq.1) then
