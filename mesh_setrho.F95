@@ -482,25 +482,25 @@ subroutine  mesh_setrho(np,ndm)
 
 
 ! test output
-      write(fileo,'(a7,i3.3)') 'meshrho',myrank
-      open(60,file=fileo,status='unknown')
+!      write(fileo,'(a7,i3.3)') 'meshrho',myrank
+!      open(60,file=fileo,status='unknown')
 
-#ifdef FFTW3_MPI
-      do k=0,lnz_m-1
-#else
-      do k=0,nz_m-1
-#endif
-        do j=0,ny_m-1
-          do i=0,nx_m-1
-#ifdef FFTW3_MPI
-            write(60,'(3I10,(1pE13.5))') i,j,k+lzoff_m,rho_m(i,j,k)
-#else
-            write(60,'(3I10,(1pE13.5))') i,j,k,rho_m(i,j,k)
-#endif
-          enddo
-        enddo
-      enddo
-      close(60)
+!#ifdef FFTW3_MPI
+!      do k=0,lnz_m-1
+!#else
+!      do k=0,nz_m-1
+!#endif
+!        do j=0,ny_m-1
+!          do i=0,nx_m-1
+!#ifdef FFTW3_MPI
+!            write(60,'(3I10,(1pE13.5))') i,j,k+lzoff_m,rho_m(i,j,k)
+!#else
+!            write(60,'(3I10,(1pE13.5))') i,j,k,rho_m(i,j,k)
+!#endif
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
 
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !      stop      

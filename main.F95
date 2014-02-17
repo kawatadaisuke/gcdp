@@ -88,7 +88,7 @@ program gcdp
 
 ! *** print version ***
       if(myrank.eq.0) then
-        write(6,*) ' GCD+ ver. f03.0 15/01/14'
+        write(6,*) ' GCD+ ver. f03.0 14/02/14'
         print *, "Process ",myrank, " of ", nprocs, " is alive"
       endif
       if(nprocs.gt.NCPU) then

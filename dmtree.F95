@@ -129,7 +129,7 @@ subroutine dmtreebuild(np)
       numsc=8
       stsc=numdmtr
       l_sc=l_dmtr(numtr0)*0.5d0
-a
+
       allocate(np_sc(0:numsc))
       allocate(pare_sc(0:numsc))
       allocate(c_sc(0:numsc))

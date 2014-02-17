@@ -62,10 +62,10 @@
 ! #define CENTRE0
 !
 ! *** fixed softening for DM
-#define FIXEDDMEPS
+! #define FIXEDDMEPS
 !
 ! *** DM softening limit to SI_eps*(m_dm**1/3) (default: limit)
-! #define DMEPSLIM_G
+#define DMEPSLIM_G
 !
 ! *** move particles azimuthally at randam
 ! see fraction in update.F
