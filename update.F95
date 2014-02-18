@@ -210,8 +210,8 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i) &
           +(SI_a**2)*az_p(pn)*int1oag(i)
 ! update H, a and t
+        ascg_p(pn)=SI_a
         tcg_p(pn)=TM_tot
-        hub_p(pn)=SI_hub
         asc_p(pn)=SI_a
         tc_p(pn)=TM_tot
 #else
@@ -230,7 +230,6 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         vny_p(pn)=vy_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
         vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
 ! update H, a and t
-        hub_p(pn)=SI_hub
         asc_p(pn)=SI_a
         tc_p(pn)=TM_tot
 #else
@@ -278,7 +277,6 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
 !          write(6,*) xc_dm(pn)/SI_a,yc_dm(pn)/SI_a,zc_dm(pn)/SI_a,vnx_dm(pn)-SI_hub*xc_dm(pn)
 !        endif
 ! update H, a and t
-        hub_dm(pn)=SI_hub
         asc_dm(pn)=SI_a
         tc_dm(pn)=TM_tot
 #else
@@ -324,8 +322,8 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         vny_p(pn)=vy_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
         vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
 ! update H, a and t
+        ascg_p(pn)=SI_a
         tcg_p(pn)=TM_tot
-        hub_p(pn)=SI_hub
         asc_p(pn)=SI_a
         tc_p(pn)=TM_tot
 #else

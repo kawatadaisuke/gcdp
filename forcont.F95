@@ -80,7 +80,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       nivaldm=2
       ndvaldm=9
 #if defined(COSM) && defined(BOXSIM)
-      nddmcon=15
+      nddmcon=14
 #else
       nddmcon=12
 #endif
@@ -675,15 +675,15 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #if defined(COSM) && defined(BOXSIM)
           else if(iv.eq.25) then
             do i=0,npj-1 
-              tdvs(i)=hub_p(i)
+              tdvs(i)=asc_p(i)
             enddo
           else if(iv.eq.26) then
             do i=0,npj-1 
-              tdvs(i)=asc_p(i)
+              tdvs(i)=tc_p(i)
             enddo
           else if(iv.eq.27) then
             do i=0,npj-1 
-              tdvs(i)=tc_p(i)
+              tdvs(i)=ascg_p(i)
             enddo
           else if(iv.eq.28) then
             do i=0,npj-1 
@@ -944,13 +944,9 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #if defined(COSM) && defined(BOXSIM)
           else if(iv.eq.12) then
             do i=0,npj-1 
-              tdvs(i)=hub_dm(i)
-            enddo
-          else if(iv.eq.13) then
-            do i=0,npj-1 
               tdvs(i)=asc_dm(i)
             enddo
-          else if(iv.eq.14) then
+          else if(iv.eq.13) then
             do i=0,npj-1 
               tdvs(i)=tc_dm(i)
             enddo

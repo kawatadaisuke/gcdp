@@ -107,9 +107,9 @@ module gcdp_baryon
 
 #if defined(COSM) && defined(BOXSIM)
 ! Hubbble parameter, scale factor, and cosmic time
-       double precision,allocatable :: hub_p(:),asc_p(:),tc_p(:)
+       double precision,allocatable :: asc_p(:),tc_p(:)
 ! for gravity timestep
-       double precision,allocatable :: tcg_p(:)
+       double precision,allocatable :: ascg_p(:),tcg_p(:)
 #endif
 
 end module gcdp_baryon
@@ -180,7 +180,7 @@ module gcdp_dm
       integer,allocatable :: flagt_dm(:)
 #if defined(COSM) && defined(BOXSIM)
 ! Hubbble parameter, scale factor, and cosmic time
-       double precision,allocatable :: hub_dm(:),asc_dm(:),tc_dm(:)
+       double precision,allocatable :: asc_dm(:),tc_dm(:)
 #endif
 
 end module gcdp_dm

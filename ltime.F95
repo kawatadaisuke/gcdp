@@ -858,15 +858,40 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
       do i=0,nag-1
         dt_p(list_ap(i))=vdt_p(list_ap(i))
       enddo
+
+#if defined(COSM) && defined(BOXSIM)
+      allocate(t0g(0:nagravg))
+      allocate(t1g(0:nagravg))
+      allocate(int1oag(0:nagravg))
+! set time range for each particle
+      do i=0,nagravg-1
+        pn=talist(i)
+! n+1/2 time used in initial kick
+        t0g(i)=tcg_p(pn)+0.5d0*dtg_p(pn)
+! actual n+1/2 time used, after adjusting accumulated individual timestep
+        t1g(i)=TM_tot+TM_dt-0.5d0*(TM_lt+TM_dt-ltg_p(pn))
+      enddo
+! integrate(1/a) from n+1/2 to n+1 for each particle
+      call integrate1oa(nagravg,t0g,t1g,int1oag)
+#endif
+
       do i=0,nagravg-1
         pn=list_ap(i)
         dtc=TM_lt+TM_dt-ltg_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+! a^2 * peculiar velocity
+! a^2 vpec 
+        vnx_p(pn)=vnx_p(pn)+(ascg_p(pn)**2)*ax_p(pn)*int1oag(i)
+        vny_p(pn)=vny_p(pn)+(ascg_p(pn)**2)*ay_p(pn)*int1oag(i)
+        vnz_p(pn)=vnz_p(pn)+(ascg_p(pn)**2)*az_p(pn)*int1oag(i)
+#else
         dtu=0.5d0*(dtc-dtg_p(pn))
 ! *** correction for velocity due to the difference between
 !  initial and final dt***
         vnx_p(pn)=vnx_p(pn)+ax_p(pn)*dtu
         vny_p(pn)=vny_p(pn)+ay_p(pn)*dtu
         vnz_p(pn)=vnz_p(pn)+az_p(pn)*dtu
+#endif
         dtg_p(pn)=dtc
       enddo
 

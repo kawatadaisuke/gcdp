@@ -690,16 +690,16 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 #ifdef COO
           tdvs(npj+npsp(ip)*12)=ram_p(list(i))
 #if defined(COSM) && defined(BOXSIM)
-          tdvs(npj+npsp(ip)*13)=hub_p(list(i))
-          tdvs(npj+npsp(ip)*14)=asc_p(list(i))
-          tdvs(npj+npsp(ip)*15)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*13)=asc_p(list(i))
+          tdvs(npj+npsp(ip)*14)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*15)=ascg_p(list(i))
           tdvs(npj+npsp(ip)*16)=tcg_p(list(i))
 #endif
 #else
 #if defined(COSM) && defined(BOXSIM)
-          tdvs(npj+npsp(ip)*12)=hub_p(list(i))
-          tdvs(npj+npsp(ip)*13)=asc_p(list(i))
-          tdvs(npj+npsp(ip)*14)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*12)=asc_p(list(i))
+          tdvs(npj+npsp(ip)*13)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*14)=ascg_p(list(i))
           tdvs(npj+npsp(ip)*15)=tcg_p(list(i))
 #endif
 #endif
@@ -748,16 +748,16 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 #ifdef COOL
           ram_p(ord(npj))=tdvr(i+nprp(ip)*12)
 #if defined(COSM) && defined(BOXSIM)
-          hub_p(ord(npj))=tdvr(i+nprp(ip)*13)
-          asc_p(ord(npj))=tdvr(i+nprp(ip)*14)
-          tc_p(ord(npj))=tdvr(i+nprp(ip)*15)
+          asc_p(ord(npj))=tdvr(i+nprp(ip)*13)
+          tc_p(ord(npj))=tdvr(i+nprp(ip)*14)
+          ascg_p(ord(npj))=tdvr(i+nprp(ip)*15)
           tcg_p(ord(npj))=tdvr(i+nprp(ip)*16)
 #endif
 #else
 #if defined(COSM) && defined(BOXSIM)
-          hub_p(ord(npj))=tdvr(i+nprp(ip)*12)
-          asc_p(ord(npj))=tdvr(i+nprp(ip)*13)
-          tc_p(ord(npj))=tdvr(i+nprp(ip)*14)
+          asc_p(ord(npj))=tdvr(i+nprp(ip)*12)
+          tc_p(ord(npj))=tdvr(i+nprp(ip)*13)
+          ascg_p(ord(npj))=tdvr(i+nprp(ip)*14)
           tcg_p(ord(npj))=tdvr(i+nprp(ip)*15)
 #endif
 #endif

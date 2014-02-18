@@ -130,9 +130,9 @@ subroutine allocate_baryon_all(np)
 #endif
 #endif
 #if defined(COSM) && defined(BOXSIM)
-      allocate(hub_p(0:np))
       allocate(asc_p(0:np))
       allocate(tc_p(0:np))
+      allocate(ascg_p(0:np))
       allocate(tcg_p(0:np))
 #endif
 
@@ -283,9 +283,9 @@ subroutine reallocate_baryon_d2(np)
       deallocate(ram_p)
 #endif
 #if defined(COSM) && defined(BOXSIM)
-      deallocate(hub_p)      
       deallocate(asc_p)      
       deallocate(tc_p)      
+      deallocate(ascg_p)      
       deallocate(tcg_p)      
 #endif
 
@@ -306,9 +306,9 @@ subroutine reallocate_baryon_d2(np)
       allocate(ram_p(0:np))
 #endif
 #if defined(COSM) && defined(BOXSIM)
-      allocate(hub_p(0:np))      
       allocate(asc_p(0:np))      
       allocate(tc_p(0:np))      
+      allocate(ascg_p(0:np))      
       allocate(tcg_p(0:np))      
 #endif
 
@@ -506,7 +506,6 @@ subroutine allocate_dm_all(ndm)
       allocate(list_adm(0:ndm))
       allocate(flagt_dm(0:ndm)) 
 #if defined(COSM) && defined(BOXSIM)
-      allocate(hub_dm(0:ndm))
       allocate(asc_dm(0:ndm))
       allocate(tc_dm(0:ndm))
 #endif
@@ -624,7 +623,6 @@ subroutine reallocate_dm_d3(ndm)
       deallocate(rho_dm)
       deallocate(div_v_dm)
 #if defined(COSM) && defined(BOXSIM)
-      deallocate(hub_dm)
       deallocate(asc_dm)
       deallocate(tc_dm)
 #endif
@@ -636,7 +634,6 @@ subroutine reallocate_dm_d3(ndm)
       allocate(rho_dm(0:ndm))
       allocate(div_v_dm(0:ndm))
 #if defined(COSM) && defined(BOXSIM)
-      allocate(hub_dm(0:ndm))
       allocate(asc_dm(0:ndm))
       allocate(tc_dm(0:ndm))
 #endif

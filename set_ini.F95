@@ -431,7 +431,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         y_dm(i)=y_dm(i)*(SI_a*10.0d0)
         z_dm(i)=z_dm(i)*(SI_a*10.0d0)
 #ifdef BOXSIM
-        hub_dm(i)=SI_hub
         asc_dm(i)=SI_a
         tc_dm(i)=TM_tot
 #endif
@@ -516,9 +515,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         vnx_p(i)=(SI_a)*vnx_p(i)/VUKMS
         vny_p(i)=(SI_a)*vny_p(i)/VUKMS
         vnz_p(i)=(SI_a)*vnz_p(i)/VUKMS
-        hub_p(i)=SI_hub
         asc_p(i)=SI_a
         tc_p(i)=TM_tot
+        ascg_p(i)=SI_a
         tcg_p(i)=TM_tot
 #else
         vnx_p(i)=hubi*xc_p(i)+vnx_p(i)/VUKMS
