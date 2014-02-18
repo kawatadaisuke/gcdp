@@ -471,10 +471,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** for DM Particles ***
       do i=0,ndm-1      
 #ifdef BOXSIM
-! v = a^2 vpec
-        vnx_dm(i)=(SI_a**2)*tx(i)/VUKMS
-        vny_dm(i)=(SI_a**2)*ty(i)/VUKMS
-        vnz_dm(i)=(SI_a**2)*tz(i)/VUKMS
+! v = a^2 vpec, tx = a x vpec
+        vnx_dm(i)=(SI_a)*tx(i)/VUKMS
+        vny_dm(i)=(SI_a)*ty(i)/VUKMS
+        vnz_dm(i)=(SI_a)*tz(i)/VUKMS
 #else
         vnx_dm(i)=hubi*x_dm(i)+tx(i)/VUKMS
         vny_dm(i)=hubi*y_dm(i)+ty(i)/VUKMS
@@ -513,9 +513,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         zc_p(i)=zc_p(i)*(SI_a*10.0d0)
 ! *** velocities ***
 #ifdef BOXSIM
-        vnx_p(i)=(SI_a**2)*vnx_p(i)/VUKMS
-        vny_p(i)=(SI_a**2)*vny_p(i)/VUKMS
-        vnz_p(i)=(SI_a**2)*vnz_p(i)/VUKMS
+        vnx_p(i)=(SI_a)*vnx_p(i)/VUKMS
+        vny_p(i)=(SI_a)*vny_p(i)/VUKMS
+        vnz_p(i)=(SI_a)*vnz_p(i)/VUKMS
         hub_p(i)=SI_hub
         asc_p(i)=SI_a
         tc_p(i)=TM_tot
