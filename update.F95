@@ -203,11 +203,11 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         pn=list_ap(i)
 #if defined(COSM) && defined(BOXSIM)
 !  physical velocity
-        vnx_p(pn)=vnx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i) &
+        vnx_p(pn)=vx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i) &
           +(SI_a**2)*ax_p(pn)*int1oag(i)
-        vny_p(pn)=vny_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i) &
+        vny_p(pn)=vy_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i) &
           +(SI_a**2)*ay_p(pn)*int1oag(i)
-        vnz_p(pn)=vnz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i) &
+        vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i) &
           +(SI_a**2)*az_p(pn)*int1oag(i)
 ! update H, a and t
         tcg_p(pn)=TM_tot
@@ -226,9 +226,9 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         pn=list_ap(i)
 #if defined(COSM) && defined(BOXSIM)
 !  physical velocity
-        vnx_p(pn)=vnx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i)
-        vny_p(pn)=vny_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
-        vnz_p(pn)=vnz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
+        vnx_p(pn)=vx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i)
+        vny_p(pn)=vy_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
+        vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
 ! update H, a and t
         hub_p(pn)=SI_hub
         asc_p(pn)=SI_a
@@ -270,9 +270,9 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         pn=list_adm(i)         
 #if defined(COSM) && defined(BOXSIM)
 ! x  physical velocity
-        vnx_dm(pn)=vnx_dm(pn)+(SI_a**2)*dvx_dm(pn)*int1oa(i)
-        vny_dm(pn)=vny_dm(pn)+(SI_a**2)*dvy_dm(pn)*int1oa(i)
-        vnz_dm(pn)=vnz_dm(pn)+(SI_a**2)*dvz_dm(pn)*int1oa(i)
+        vnx_dm(pn)=vx_dm(pn)+(SI_a**2)*dvx_dm(pn)*int1oa(i)
+        vny_dm(pn)=vy_dm(pn)+(SI_a**2)*dvy_dm(pn)*int1oa(i)
+        vnz_dm(pn)=vz_dm(pn)+(SI_a**2)*dvz_dm(pn)*int1oa(i)
 
 !        if(id_dm(pn).eq.0) then
 !          write(6,*) xc_dm(pn)/SI_a,yc_dm(pn)/SI_a,zc_dm(pn)/SI_a,vnx_dm(pn)-SI_hub*xc_dm(pn)
@@ -320,9 +320,9 @@ subroutine updatevn(ng,nag,nadm,nas,nagravg)
         pn=list_ap(i+ng)         
 #if defined(COSM) && defined(BOXSIM)
 !  physical velocity
-        vnx_p(pn)=vnx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i)
-        vny_p(pn)=vny_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
-        vnz_p(pn)=vnz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
+        vnx_p(pn)=vx_p(pn)+(SI_a**2)*dvx_p(pn)*int1oa(i)
+        vny_p(pn)=vy_p(pn)+(SI_a**2)*dvy_p(pn)*int1oa(i)
+        vnz_p(pn)=vz_p(pn)+(SI_a**2)*dvz_p(pn)*int1oa(i)
 ! update H, a and t
         tcg_p(pn)=TM_tot
         hub_p(pn)=SI_hub
@@ -397,7 +397,7 @@ subroutine updatev_pos(np,ndm)
         t1(i)=TM_tot+TM_dt
       enddo
 ! integrate(1/a^2) from n to n+1 for each particle
-      call integrate1oa2(ndm,t0,t1,int1oa2)
+      call integrate1oa2(np,t0,t1,int1oa2)
 #endif
 
       do i=0,np-1

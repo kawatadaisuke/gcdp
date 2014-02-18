@@ -743,6 +743,12 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
 #endif
       enddo
 
+#if defined(COSM) && defined(BOXSIM)
+      deallocate(t0g)
+      deallocate(t1g)
+      deallocate(int1oag)
+#endif
+
       na=0
       nagravg=0
       nanp=0

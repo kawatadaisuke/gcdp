@@ -123,8 +123,8 @@ module gcdp_const
 ! *** ETAH for DM, which requires bigger than SPH particles ***
 #ifdef GAS
 ! *** for the case of ETAH=2.4
-!      double precision,parameter :: ETAHDM=4.0d0
-      double precision,parameter :: ETAHDM=2.4d0
+      double precision,parameter :: ETAHDM=4.0d0
+!      double precision,parameter :: ETAHDM=2.4d0
 #else
       double precision,parameter :: ETAHDM=2.4d0
 #endif

@@ -599,24 +599,26 @@ program gcdp
       open(60,file=fileo,status='unknown')
       do i=0,nag-1
         if(x_p(i)**2+y_p(i)**2+z_p(i)**2.gt.0.0d0) then
-        write(60,'(13(1pE13.5),2I8)') x_p(i),y_p(i),z_p(i) &
+        write(60,'(16(1pE13.5),2I8)') x_p(i),y_p(i),z_p(i) &
          ,ax_p(i),ay_p(i),az_p(i) &
          ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
          ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
          /dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
-         ,omgh_p(i),zetah_p(i),az_p(i),rho_p(i),h_p(i),nnb_p(i),i
+         ,omgh_p(i),zetah_p(i),p_p(i),rho_p(i),h_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i),nnb_p(i),i
         else
-         write(60,'(13(1pE13.5),2I8)') x_p(i),y_p(i),z_p(i) &
+         write(60,'(16(1pE13.5),2I8)') x_p(i),y_p(i),z_p(i) &
         ,ax_p(i),ay_p(i),az_p(i) &
          ,dsqrt(x_p(i)**2+y_p(i)**2+z_p(i)**2) &
          ,-(ax_p(i)*x_p(i)+ay_p(i)*y_p(i)+az_p(i)*z_p(i)) &
-         ,omgh_p(i),zetah_p(i),az_p(i),rho_p(i),h_p(i),nnb_p(i),i
+         ,omgh_p(i),zetah_p(i),p_p(i),rho_p(i),h_p(i) &
+         ,dvx_p(i),dvy_p(i),dvz_p(i),nnb_p(i),i
         endif
       enddo
       close(60)
 #endif
-
-      goto 9999
+!
+!      goto 9999
 
 #endif
 
