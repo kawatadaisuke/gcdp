@@ -653,9 +653,17 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! *** since pv30.5 individual time step applied for thermal energy update
 ! *** which requires to update the followings ***
 #ifdef COOL
+#if defined(COSM) && defined(BOXSIM)
+      nval=17
+#else
       nval=13
+#endif
+#else
+#if defined(COSM) && defined(BOXSIM)
+      nval=16
 #else
       nval=12
+#endif
 #endif
 
       allocate(tdvr(0:np*nval))
@@ -679,8 +687,21 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           tdvs(npj+npsp(ip)*9)=ax_p(list(i))
           tdvs(npj+npsp(ip)*10)=ay_p(list(i))
           tdvs(npj+npsp(ip)*11)=az_p(list(i))
-#ifdef COOL
+#ifdef COO
           tdvs(npj+npsp(ip)*12)=ram_p(list(i))
+#if defined(COSM) && defined(BOXSIM)
+          tdvs(npj+npsp(ip)*13)=hub_p(list(i))
+          tdvs(npj+npsp(ip)*14)=asc_p(list(i))
+          tdvs(npj+npsp(ip)*15)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*16)=tcg_p(list(i))
+#endif
+#else
+#if defined(COSM) && defined(BOXSIM)
+          tdvs(npj+npsp(ip)*12)=hub_p(list(i))
+          tdvs(npj+npsp(ip)*13)=asc_p(list(i))
+          tdvs(npj+npsp(ip)*14)=tc_p(list(i))
+          tdvs(npj+npsp(ip)*15)=tcg_p(list(i))
+#endif
 #endif
           npj=npj+1
         enddo
@@ -726,6 +747,19 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           az_p(ord(npj))=tdvr(i+nprp(ip)*11)
 #ifdef COOL
           ram_p(ord(npj))=tdvr(i+nprp(ip)*12)
+#if defined(COSM) && defined(BOXSIM)
+          hub_p(ord(npj))=tdvr(i+nprp(ip)*13)
+          asc_p(ord(npj))=tdvr(i+nprp(ip)*14)
+          tc_p(ord(npj))=tdvr(i+nprp(ip)*15)
+          tcg_p(ord(npj))=tdvr(i+nprp(ip)*16)
+#endif
+#else
+#if defined(COSM) && defined(BOXSIM)
+          hub_p(ord(npj))=tdvr(i+nprp(ip)*12)
+          asc_p(ord(npj))=tdvr(i+nprp(ip)*13)
+          tc_p(ord(npj))=tdvr(i+nprp(ip)*14)
+          tcg_p(ord(npj))=tdvr(i+nprp(ip)*15)
+#endif
 #endif
           npj=npj+1
         enddo
@@ -1165,12 +1199,18 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           x_p(pn)=xc_p(pn)
           y_p(pn)=yc_p(pn)
           z_p(pn)=zc_p(pn)
-          vvnx_p(pn)=vnx_p(pn)
           vx_p(pn)=vnx_p(pn)
-          vvny_p(pn)=vny_p(pn)
           vy_p(pn)=vny_p(pn)
-          vvnz_p(pn)=vnz_p(pn)
           vz_p(pn) = vnz_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+          vvnx_p(i)=SI_hub*xc_p(i)+vnx_p(i)/SI_a
+          vvny_p(i)=SI_hub*yc_p(i)+vny_p(i)/SI_a
+          vvnz_p(i)=SI_hub*zc_p(i)+vnz_p(i)/SI_a
+#else
+          vvnx_p(pn)=vnx_p(pn)
+          vvny_p(pn)=vny_p(pn)
+          vvnz_p(pn)=vnz_p(pn)
+#endif
 ! need to set p for PINI
           p_p(pn)=(gam-1.0d0)*rho_p(pn)*u_p(pn)
           cs_p(pn)=dsqrt(gam*p_p(pn)/rho_p(pn))
@@ -1181,12 +1221,18 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           x_p(pn)=xc_p(pn)
           y_p(pn)=yc_p(pn)
           z_p(pn)=zc_p(pn)
-          vvnx_p(pn)=vnx_p(pn)
           vx_p(pn)=vnx_p(pn)
-          vvny_p(pn)=vny_p(pn)
           vy_p(pn)=vny_p(pn)
-          vvnz_p(pn)=vnz_p(pn)
           vz_p(pn) = vnz_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+          vvnx_p(i)=SI_hub*xc_p(i)+vnx_p(i)/SI_a
+          vvny_p(i)=SI_hub*yc_p(i)+vny_p(i)/SI_a
+          vvnz_p(i)=SI_hub*zc_p(i)+vnz_p(i)/SI_a
+#else
+          vvnx_p(pn)=vnx_p(pn)
+          vvny_p(pn)=vny_p(pn)
+          vvnz_p(pn)=vnz_p(pn)
+#endif
         enddo
 
 #ifdef FIXEDP

@@ -37,6 +37,10 @@ subroutine starf(ng,ns,nag,nas,nagravg)
        ,tivs(:),tivr(:)
 ! * for feedback *
       double precision,allocatable :: p(:)
+#if defined(COSM) && defined(BOXSIM)
+      double precision asc
+      double precision,allocatable :: int1oa(:),t0(:),t1(:)
+#endif
 
       real ran1
       external ran1
@@ -95,6 +99,41 @@ subroutine starf(ng,ns,nag,nas,nagravg)
           flagfd_p(pn)=ifd
           flagrfd_p(pn)=0
 #endif
+! *** keep the data of density and pressure, when star forms ***
+        else if(i.lt.nagravg) then
+          list(nagrav)=pn
+          nagrav=nagrav+1
+        else if(i.lt.nag) then
+          talist(na)=pn
+          na=na+1
+        else 
+          nalist(nna)=pn
+          nna=nna+1
+        endif
+      enddo
+
+
+      if(dns.gt.0) then
+#if defined(COSM) && defined(BOXSIM)
+! time at n+1/3
+        allocate(t0(0:dns))
+        allocate(t1(0:dns))
+        allocate(int1oa(0:dns))
+! assign time range 
+      do i=0,dns-1
+        pn=slist(i)
+        t0(i)=TM_tot+TM_dt-0.5d0*(TM_lt+TM_dt-(dtg_p(pn)+ltg_p(pn)))
+        t1(i)=TM_tot+TM_dt
+      enddo
+! integrate 1/a from n to n+1/2 for each particle)
+      call integrate1oa(np,t0,t1,int1oa)
+! get a at TM_tot+TM_dt
+      call afromt(TM_tot+TM_dt,asc)
+#endif
+
+! for new born particles
+      do i=0,dns-1
+          slist(dns)=pn
           ts_p(pn)=TM_tot
 ! *** fixed softening ***
           h_p(pn)=SI_eps*(m_p(pn)**THIRD)
@@ -122,29 +161,24 @@ subroutine starf(ng,ns,nag,nas,nagravg)
           dt_p(pn)=TM_lt+TM_dt-lt_p(pn)
 ! *** correction of velocity due to the change of dtg_p***
 ! *** overestimated delta t for initial kick ***
-          dtgc=0.5d0*(TM_lt+TM_dt-(dtg_p(pn)+ltg_p(pn)))
 ! *** corrected vn?_p ***
+#if defined(COSM) && defined(BOXSIM)
+! use a(TM_tot+TM_dt), although ax_p is from the last gravitational timestep
+          vnx_p(pn)=vnx_p(pn)+(asc**2)*ax_p(pn)*int1oa(i)
+          vny_p(pn)=vny_p(pn)+(asc**2)*ay_p(pn)*int1oa(i)
+          vnz_p(pn)=vnz_p(pn)+(asc**2)*az_p(pn)*int1oa(i)
+#else
+          dtgc=0.5d0*(TM_lt+TM_dt-(dtg_p(pn)+ltg_p(pn)))
           vnx_p(pn)=vnx_p(pn)+dtgc*ax_p(pn)
           vny_p(pn)=vny_p(pn)+dtgc*ay_p(pn)
           vnz_p(pn)=vnz_p(pn)+dtgc*az_p(pn)
+#endif
           dtg_p(pn)=TM_lt+TM_dt-ltg_p(pn)
           ltg_p(pn)=lt_p(pn)
           flagt_p(pn)=1
           dtr_p(pn)=TM_dt
-! *** keep the data of density and pressure, when star forms ***
-        else if(i.lt.nagravg) then
-          list(nagrav)=pn
-          nagrav=nagrav+1
-        else if(i.lt.nag) then
-          talist(na)=pn
-          na=na+1
-        else 
-          nalist(nna)=pn
-          nna=nna+1
-        endif
-      enddo
+        enddo
 
-      if(dns.gt.0) then
 ! * change list_ap() *
         ng=na+nna+nagrav
         nag=na+nagrav

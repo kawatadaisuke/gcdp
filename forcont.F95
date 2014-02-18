@@ -84,11 +84,11 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
 #else
       nddmcon=12
 #endif
-      ndbcon=24
+      ndbcon=25
       nibcon=1
       nidmcon=1
-#ifdef SF_EFD
-      ndbcon=25
+#if defined(COSM) && defined(BOXSIM)
+      ndbcon=ndbcon+4
 #endif
 
 ! *** number of output values ***
@@ -662,10 +662,32 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
               tdvs(i)=0.0d0
 #endif
             enddo
-#ifdef SF_EFD
           else if(iv.eq.24) then
+
             do i=0,npj-1 
+#ifdef SF_EFD
               tdvs(i)=Gsn_p(i)
+#else
+! dummy
+              tdvs(i)=0.0d0
+#endif
+            enddo
+#if defined(COSM) && defined(BOXSIM)
+          else if(iv.eq.25) then
+            do i=0,npj-1 
+              tdvs(i)=hub_p(i)
+            enddo
+          else if(iv.eq.26) then
+            do i=0,npj-1 
+              tdvs(i)=asc_p(i)
+            enddo
+          else if(iv.eq.27) then
+            do i=0,npj-1 
+              tdvs(i)=tc_p(i)
+            enddo
+          else if(iv.eq.28) then
+            do i=0,npj-1 
+              tdvs(i)=tcg_p(i)
             enddo
 #endif
           endif

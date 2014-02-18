@@ -102,9 +102,16 @@ module gcdp_baryon
        ,tmzMg_p(:),tmzSi_p(:),tmzFe_p(:) &
        ,tmzZ_p(:) 
 #endif
-
 #endif
-!
+! endif for STAR
+
+#if defined(COSM) && defined(BOXSIM)
+! Hubbble parameter, scale factor, and cosmic time
+       double precision,allocatable :: hub_p(:),asc_p(:),tc_p(:)
+! for gravity timestep
+       double precision,allocatable :: tcg_p(:)
+#endif
+
 end module gcdp_baryon
 
 

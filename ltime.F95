@@ -47,6 +47,10 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
 #endif
       integer,allocatable :: list(:),nalist(:),talist(:)
       double precision,allocatable :: dti(:)
+#if defined(COSM) && defined(BOXSIM)   
+      double precision,allocatable :: t0g(:),t1g(:),int1oag(:)
+#endif
+
 
       dtu=INF
       dtc=INF
@@ -695,7 +699,7 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
 #endif
 #ifdef GAS
 ! *** for Gas Particles ***
-! *** compare with hydro dt ***
+! *** compare with hydro dt, and set new dtg_p ***
       do i=0,nagravg-1
         pn=talist(i)
         ltg_p(pn)=TM_lt
@@ -708,10 +712,35 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
             dtg_p(pn)=dt_p(pn)*(2.0d0**dble(knp))
           endif
         endif
+      enddo
 ! *** initial kick ***
+#if defined(COSM) && defined(BOXSIM)
+      allocate(t0g(0:nagravg))
+      allocate(t1g(0:nagravg))
+      allocate(int1oag(0:nagravg))
+! set time range for each particle
+      do i=0,nagravg-1
+        pn=talist(i)
+        t0g(i)=TM_tot
+        t1g(i)=TM_tot+0.5d0*dtg_p(pn)
+      enddo
+! integrate(1/a) from n+1/2 to n+1 for each particle
+      call integrate1oa(nagravg,t0g,t1g,int1oag)
+#endif
+
+      do i=0,nagravg-1
+        pn=talist(i)
+#if defined(COSM) && defined(BOXSIM)
+! a^2 * peculiar velocity
+! a^2 vpec 
+        vnx_p(pn)=vnx_p(pn)+(SI_a**2)*ax_p(pn)*int1oag(i)
+        vny_p(pn)=vny_p(pn)+(SI_a**2)*ay_p(pn)*int1oag(i)
+        vnz_p(pn)=vnz_p(pn)+(SI_a**2)*az_p(pn)*int1oag(i)
+#else
         vnx_p(pn)=vnx_p(pn)+0.5d0*dtg_p(pn)*ax_p(pn)
         vny_p(pn)=vny_p(pn)+0.5d0*dtg_p(pn)*ay_p(pn)
         vnz_p(pn)=vnz_p(pn)+0.5d0*dtg_p(pn)*az_p(pn)
+#endif
       enddo
 
       na=0

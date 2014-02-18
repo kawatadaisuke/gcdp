@@ -516,9 +516,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           write(6,*) ' data read from output*cont.dat'
         endif
         flagcont=1
-        ndbcon=24
-#ifdef SF_EFD
         ndbcon=25
+#if defined(COSM) && defined(BOXSIM)
+        ndbcon=ndbcon+4
 #endif
         nibcon=1
 #if defined(COSM) && defined(BOXSIM)
@@ -1270,6 +1270,24 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                 else if(iv.eq.24) then
                   do i=0,npjr(ip)-1 
                     Gsn_p(i)=tdvr(i)
+                  enddo
+#endif
+#if defined(COSM) && defined(BOXSIM)
+                else if(iv.eq.25) then
+                  do i=0,npjr(ip)-1 
+                    hub_p(i)=tdvr(i)
+                  enddo
+                else if(iv.eq.26) then
+                  do i=0,npjr(ip)-1 
+                    asc_p(i)=tdvr(i)
+                  enddo
+                else if(iv.eq.27) then
+                  do i=0,npjr(ip)-1 
+                    tc_p(i)=tdvr(i)
+                  enddo
+                else if(iv.eq.28) then
+                  do i=0,npjr(ip)-1 
+                    tcg_p(i)=tdvr(i)
                   enddo
 #endif
                 endif

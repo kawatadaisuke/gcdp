@@ -129,6 +129,12 @@ subroutine allocate_baryon_all(np)
       allocate(zdZB_p(0:np))
 #endif
 #endif
+#if defined(COSM) && defined(BOXSIM)
+      allocate(hub_p(0:np))
+      allocate(asc_p(0:np))
+      allocate(tc_p(0:np))
+      allocate(tcg_p(0:np))
+#endif
 
 end subroutine
 
@@ -276,6 +282,12 @@ subroutine reallocate_baryon_d2(np)
 #ifdef COOL
       deallocate(ram_p)
 #endif
+#if defined(COSM) && defined(BOXSIM)
+      deallocate(hub_p)      
+      deallocate(asc_p)      
+      deallocate(tc_p)      
+      deallocate(tcg_p)      
+#endif
 
 ! allocate
       allocate(rho_p(0:np))
@@ -292,6 +304,12 @@ subroutine reallocate_baryon_d2(np)
       allocate(az_p(0:np))
 #ifdef COOL
       allocate(ram_p(0:np))
+#endif
+#if defined(COSM) && defined(BOXSIM)
+      allocate(hub_p(0:np))      
+      allocate(asc_p(0:np))      
+      allocate(tc_p(0:np))      
+      allocate(tcg_p(0:np))      
 #endif
 
 end subroutine

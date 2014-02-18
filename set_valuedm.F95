@@ -80,6 +80,10 @@ subroutine set_valuedm(ndm,nadm,flag)
         ,tivs(:),talist(:),nalist(:),sldmtrlist(:)
       double precision,allocatable :: tx(:),ty(:),tz(:),du0(:),tdvr(:) &
         ,tdvs(:),fhx(:),fx(:),hu(:),lu(:),av(:),adv(:)
+#if defined(COSM) && defined(BOXSIM)
+      double precision,allocatable :: int1oa(:),t0(:),t1(:)
+#endif
+
 
 !      write(fileo,'(a7,i3.3)') 'psetvdm',myrank
 !      open(60,file=fileo,status='unknown')
@@ -122,16 +126,55 @@ subroutine set_valuedm(ndm,nadm,flag)
       allocate(tz(0:ndm))
 
       if(flag.eq.0) then
+
+#if defined(COSM) && defined(BOXSIM)
+! time at n+1/3
+        allocate(t0(0:ndm))
+        allocate(t1(0:ndm))
+        allocate(int1oa(0:ndm))
+! assign time range 
         do i=0,ndm-1
+          t0(i)=tc_dm(i)
+          t1(i)=tc_dm(i)+vdt_dm(i)
+        enddo
+! integrate 1/a from n to n+1/2 for each particle)
+        call integrate1oa(ndm,t0,t1,int1oa)
+#endif
+
+        do i=0,ndm-1
+! velocity at this step
+#if defined(COSM) && defined(BOXSIM)
+          tx(i)=SI_hub*x_dm(pn)+(vnx_dm(i) &
+     &      +(asc_dm(i)**2)*dvx_dm(i)*int1oa(i))/SI_a
+          ty(i)=SI_hub*y_dm(pn)+(vny_dm(i) &
+     &      +(asc_dm(i)**2)*dvy_dm(i)*int1oa(i))/SI_a
+          tz(i)=SI_hub*z_dm(pn)+(vnz_dm(i) &
+     &      +(asc_dm(i)**2)*dvz_dm(i)*int1oa(i))/SI_a
+#else
           tx(i)=vnx_dm(i)+vdt_dm(i)*dvx_dm(i)
           ty(i)=vny_dm(i)+vdt_dm(i)*dvy_dm(i)
           tz(i)=vnz_dm(i)+vdt_dm(i)*dvz_dm(i)
+#endif
         enddo 
+
+#if defined(COSM) && defined(BOXSIM)
+        deallocate(t0)
+        deallocate(t1)
+        deallocate(int1oa)
+#endif
+
       else
         do i=0,ndm-1
+! physical velocity at this time step
+#if defined(COSM) && defined(BOXSIM)
+          tx(i)=SI_hub*x_dm(i)+vnx_dm(i)/SI_a
+          ty(i)=SI_hub*y_dm(i)+vny_dm(i)/SI_a
+          tz(i)=SI_hub*z_dm(i)+vnz_dm(i)/SI_a
+#else
           tx(i)=vnx_dm(i)
           ty(i)=vny_dm(i)
           tz(i)=vnz_dm(i)
+#endif
         enddo
       endif
 

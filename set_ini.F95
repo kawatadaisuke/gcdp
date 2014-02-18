@@ -470,9 +470,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** Local velocity + Hubble Flow ***
 ! *** for DM Particles ***
       do i=0,ndm-1      
+#ifdef BOXSIM
+! v = a^2 vpec
+        vnx_dm(i)=(SI_a**2)*tx(i)/VUKMS
+        vny_dm(i)=(SI_a**2)*ty(i)/VUKMS
+        vnz_dm(i)=(SI_a**2)*tz(i)/VUKMS
+#else
         vnx_dm(i)=hubi*x_dm(i)+tx(i)/VUKMS
         vny_dm(i)=hubi*y_dm(i)+ty(i)/VUKMS
         vnz_dm(i)=hubi*z_dm(i)+tz(i)/VUKMS
+#endif
       enddo
 
       deallocate(tx)
@@ -505,9 +512,19 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         yc_p(i)=yc_p(i)*(SI_a*10.0d0)
         zc_p(i)=zc_p(i)*(SI_a*10.0d0)
 ! *** velocities ***
+#ifdef BOXSIM
+        vnx_p(i)=(SI_a**2)*vnx_p(i)/VUKMS
+        vny_p(i)=(SI_a**2)*vny_p(i)/VUKMS
+        vnz_p(i)=(SI_a**2)*vnz_p(i)/VUKMS
+        hub_p(i)=SI_hub
+        asc_p(i)=SI_a
+        tc_p(i)=TM_tot
+        tcg_p(i)=TM_tot
+#else
         vnx_p(i)=hubi*xc_p(i)+vnx_p(i)/VUKMS
         vny_p(i)=hubi*yc_p(i)+vny_p(i)/VUKMS
         vnz_p(i)=hubi*zc_p(i)+vnz_p(i)/VUKMS
+#endif
       enddo
 ! *****   Set Initial Mass and Pressure
 !   and Sound Velocity  and Thermal Energy*****
@@ -1166,9 +1183,15 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         vx_p(i)=vnx_p(i)
         vy_p(i)=vny_p(i)
         vz_p(i)=vnz_p(i)
+#if defined(COSM) && defined(BOXSIM)
+        vvnx_p(i)=hubi*xc_p(i)+vnx_p(i)/SI_a
+        vvny_p(i)=hubi*yc_p(i)+vny_p(i)/SI_a
+        vvnz_p(i)=hubi*zc_p(i)+vnz_p(i)/SI_a
+#else
         vvnx_p(i)=vnx_p(i)
         vvny_p(i)=vny_p(i)
         vvnz_p(i)=vnz_p(i)
+#endif
 #ifdef SIM1D
         h_p(i)=(1.0d0+ERRH)*ETAH*((m_p(i)/rho_p(i)))
 #elif defined(SIM2D)
@@ -1215,12 +1238,19 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         x_p(i)=xc_p(i)
         y_p(i)=yc_p(i)
         z_p(i)=zc_p(i)
-        vvnx_p(i)=vnx_p(i)
         vx_p(i)=vnx_p(i)
-        vvny_p(i)=vny_p(i)
         vy_p(i)=vny_p(i)
-        vvnz_p(i)=vnz_p(i)
         vz_p(i) = vnz_p(i)
+#if defined(COSM) && defined(BOXSIM)
+        vvnx_p(i)=hubi*xc_p(i)+vnx_p(i)/SI_a
+        vvny_p(i)=hubi*yc_p(i)+vny_p(i)/SI_a
+        vvnz_p(i)=hubi*zc_p(i)+vnz_p(i)/SI_a
+#else
+        vvnx_p(i)=vnx_p(i)
+        vvny_p(i)=vny_p(i)
+        vvnz_p(i)=vnz_p(i)
+#endif
+
 #ifdef SIM1D
         h_p(i)=(1.0d0+ERRH)*ETAH*((m_p(i)/rho_p(i)))
 #elif defined(SIM2D)
