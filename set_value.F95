@@ -379,15 +379,24 @@ subroutine set_value(ng,nag,ns,flag)
               tivr(pni)=tivr(pni)+1
 ! *** velocity difference ***
               vxij=tdvr(pni+npj*3)-vvnx_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+              vxij=vxij+xij*SI_hub
+#endif
 !#ifdef SIM1D
 !              vyij=0.0d0
 !              vzij=0.0d0
 !#else
               vyij=tdvr(pni+npj*4)-vvny_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+              vyij=vyij+yij*SI_hub
+#endif
 !#ifdef SIM2D
 !              vzij=0.0d0
 !#else
               vzij=tdvr(pni+npj*5)-vvnz_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+              vzij=vzij+zij*SI_hub
+#endif
 !#endif
 !#endif
 #ifdef METALDIFF
@@ -1302,6 +1311,8 @@ subroutine set_value(ng,nag,ns,flag)
           enddo 
           nit = nit+1
 
+          write(6,*) ' nit,npj=',nit,npj
+
 ! *** initialze proc iteration
           iproc=0
 ! *** initialisation ***
@@ -1334,6 +1345,7 @@ subroutine set_value(ng,nag,ns,flag)
         endif
       enddo
 #endif
+
 
 ! deallocate
       deallocate(idisp)

@@ -129,12 +129,10 @@ subroutine updatev_vn(ng)
         pn=list_ap(i)          
 #if defined(COSM) && defined(BOXSIM)
 ! vvnx_p physical velocity, vnx_p a**2 vpec
-        vvnx_p(pn)=SI_hub*x_p(pn)+(vnx_p(pn) &
-          +(asc_p(pn)**2)*dvx_p(i)*int1oa(i))/SI_a
-        vvny_p(pn)=SI_hub*y_p(pn)+(vny_p(pn) &
-          +(asc_p(pn)**2)*dvy_p(i)*int1oa(i))/SI_a
-        vvnz_p(pn)=SI_hub*z_p(pn)+(vnz_p(pn) &
-          +(asc_p(pn)**2)*dvz_p(i)*int1oa(i))/SI_a
+! vvnx_p a*vpec
+        vvnx_p(pn)=(vnx_p(pn)+(asc_p(pn)**2)*dvx_p(i)*int1oa(i))/SI_a
+        vvny_p(pn)=(vny_p(pn)+(asc_p(pn)**2)*dvy_p(i)*int1oa(i))/SI_a
+        vvnz_p(pn)=(vnz_p(pn)+(asc_p(pn)**2)*dvz_p(i)*int1oa(i))/SI_a
 #else
         vvnx_p(pn)=vnx_p(pn)+(vdt_p(pn)*dvx_p(pn))
         vvny_p(pn)=vny_p(pn)+(vdt_p(pn)*dvy_p(pn))

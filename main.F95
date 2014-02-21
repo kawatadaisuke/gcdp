@@ -1089,6 +1089,7 @@ program gcdp
 
       call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt,nadmt,nast &
        ,nagravgt,flagv,flagu,0)
+
 ! *************************************
 !  Update Internal Energy  First!
 ! ************************************

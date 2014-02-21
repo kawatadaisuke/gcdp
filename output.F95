@@ -109,6 +109,24 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       nisupdm=1
 #endif
 
+#if defined(COSM) && defined(BOXSIM)
+! convert vnx_ to physical values
+#if defined(GAS) || defined(STAR)
+      do i=0,np-1
+        vnx_p(i)=SI_hub*xc_p(i)+vnx_p(i)/SI_a
+        vny_p(i)=SI_hub*yc_p(i)+vny_p(i)/SI_a
+        vnz_p(i)=SI_hub*zc_p(i)+vnz_p(i)/SI_a
+      enddo
+#endif
+#ifdef DM
+      do i=0,ndm-1
+        vnx_dm(i)=SI_hub*xc_dm(i)+vnx_dm(i)/SI_a
+        vny_dm(i)=SI_hub*yc_dm(i)+vny_dm(i)/SI_a
+        vnz_dm(i)=SI_hub*zc_dm(i)+vnz_dm(i)/SI_a
+      enddo
+#endif
+#endif
+
 ! *** for DM ***
       nivaldm=2
       ndvaldm=9
@@ -1260,6 +1278,25 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
           SI_flagout = 0
         endif
       endif
+
+#if defined(COSM) && defined(BOXSIM)
+! convert vnx_ back to a^2 vpec unit
+#if defined(GAS) || defined(STAR)
+      do i=0,np-1
+        vnx_p(i)=(vnx_p(i)-SI_hub*xc_p(i))*SI_a
+        vny_p(i)=(vny_p(i)-SI_hub*yc_p(i))*SI_a
+        vnz_p(i)=(vnz_p(i)-SI_hub*zc_p(i))*SI_a
+      enddo
+#endif
+#ifdef DM
+      do i=0,ndm-1
+        vnx_dm(i)=(vnx_dm(i)-SI_hub*xc_dm(i))*SI_a
+        vny_dm(i)=(vny_dm(i)-SI_hub*yc_dm(i))*SI_a
+        vnz_dm(i)=(vnz_dm(i)-SI_hub*zc_dm(i))*SI_a
+      enddo
+#endif
+#endif
+
 
 end subroutine
 

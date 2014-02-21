@@ -865,7 +865,7 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
       allocate(int1oag(0:nagravg))
 ! set time range for each particle
       do i=0,nagravg-1
-        pn=talist(i)
+        pn=list_ap(i)
 ! n+1/2 time used in initial kick
         t0g(i)=tcg_p(pn)+0.5d0*dtg_p(pn)
 ! actual n+1/2 time used, after adjusting accumulated individual timestep

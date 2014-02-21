@@ -1203,9 +1203,9 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           vy_p(pn)=vny_p(pn)
           vz_p(pn) = vnz_p(pn)
 #if defined(COSM) && defined(BOXSIM)
-          vvnx_p(i)=SI_hub*xc_p(i)+vnx_p(i)/SI_a
-          vvny_p(i)=SI_hub*yc_p(i)+vny_p(i)/SI_a
-          vvnz_p(i)=SI_hub*zc_p(i)+vnz_p(i)/SI_a
+          vvnx_p(i)=vnx_p(i)/SI_a
+          vvny_p(i)=vny_p(i)/SI_a
+          vvnz_p(i)=vnz_p(i)/SI_a
 #else
           vvnx_p(pn)=vnx_p(pn)
           vvny_p(pn)=vny_p(pn)

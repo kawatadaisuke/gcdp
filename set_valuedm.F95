@@ -144,12 +144,10 @@ subroutine set_valuedm(ndm,nadm,flag)
         do i=0,ndm-1
 ! velocity at this step
 #if defined(COSM) && defined(BOXSIM)
-          tx(i)=SI_hub*x_dm(pn)+(vnx_dm(i) &
-     &      +(asc_dm(i)**2)*dvx_dm(i)*int1oa(i))/SI_a
-          ty(i)=SI_hub*y_dm(pn)+(vny_dm(i) &
-     &      +(asc_dm(i)**2)*dvy_dm(i)*int1oa(i))/SI_a
-          tz(i)=SI_hub*z_dm(pn)+(vnz_dm(i) &
-     &      +(asc_dm(i)**2)*dvz_dm(i)*int1oa(i))/SI_a
+! store a*vpec only, add hubble flow for vxij
+          tx(i)=(vnx_dm(i)+(asc_dm(i)**2)*dvx_dm(i)*int1oa(i))/SI_a
+          ty(i)=(vny_dm(i)+(asc_dm(i)**2)*dvy_dm(i)*int1oa(i))/SI_a
+          tz(i)=(vnz_dm(i)+(asc_dm(i)**2)*dvz_dm(i)*int1oa(i))/SI_a
 #else
           tx(i)=vnx_dm(i)+vdt_dm(i)*dvx_dm(i)
           ty(i)=vny_dm(i)+vdt_dm(i)*dvy_dm(i)
@@ -413,6 +411,11 @@ subroutine set_valuedm(ndm,nadm,flag)
               vxij=tdvr(pni+npj*3)-tx(pn)
               vyij=tdvr(pni+npj*4)-ty(pn)
               vzij=tdvr(pni+npj*5)-tz(pn)
+#if defined(COSM) && defined(BOXSIM)
+              vxij=vxij+SI_hub*xij
+              vyij=vyij+SI_hub*yij
+              vzij=vzij+SI_hub*zij
+#endif
 ! * div(v) *
               vr=(vxij*xij+vyij*yij+vzij*zij)
               tdvr(pni+npj*9)=tdvr(pni+npj*9)+m_dm(pn)*dwr*vr
@@ -616,6 +619,11 @@ subroutine set_valuedm(ndm,nadm,flag)
               vxij=tdvr(pni+npj*3)-tx(pn)
               vyij=tdvr(pni+npj*4)-ty(pn)
               vzij=tdvr(pni+npj*5)-tz(pn)
+#if defined(COSM) && defined(BOXSIM)
+              vxij=vxij+SI_hub*xij
+              vyij=vyij+SI_hub*yij
+              vzij=vzij+SI_hub*zij
+#endif
 ! * div(v) *
               vr=(vxij*xij+vyij*yij+vzij*zij)
               tdvr(pni+npj*9)=tdvr(pni+npj*9)+m_dm(pn)*dwr*vr

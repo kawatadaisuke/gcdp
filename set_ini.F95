@@ -1183,9 +1183,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         vy_p(i)=vny_p(i)
         vz_p(i)=vnz_p(i)
 #if defined(COSM) && defined(BOXSIM)
-        vvnx_p(i)=hubi*xc_p(i)+vnx_p(i)/SI_a
-        vvny_p(i)=hubi*yc_p(i)+vny_p(i)/SI_a
-        vvnz_p(i)=hubi*zc_p(i)+vnz_p(i)/SI_a
+        vvnx_p(i)=vnx_p(i)/SI_a
+        vvny_p(i)=vny_p(i)/SI_a
+        vvnz_p(i)=vnz_p(i)/SI_a
 #else
         vvnx_p(i)=vnx_p(i)
         vvny_p(i)=vny_p(i)
@@ -1241,9 +1241,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         vy_p(i)=vny_p(i)
         vz_p(i) = vnz_p(i)
 #if defined(COSM) && defined(BOXSIM)
-        vvnx_p(i)=hubi*xc_p(i)+vnx_p(i)/SI_a
-        vvny_p(i)=hubi*yc_p(i)+vny_p(i)/SI_a
-        vvnz_p(i)=hubi*zc_p(i)+vnz_p(i)/SI_a
+        vvnx_p(i)=vnx_p(i)/SI_a
+        vvny_p(i)=vny_p(i)/SI_a
+        vvnz_p(i)=vnz_p(i)/SI_a
 #else
         vvnx_p(i)=vnx_p(i)
         vvny_p(i)=vny_p(i)

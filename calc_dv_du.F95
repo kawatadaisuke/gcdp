@@ -998,15 +998,24 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           mdwjc(i)=0.0d0
         endif
         vxij=tdvr(pni+npj*3)-vvnx_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+        vxij=vxij+xijp(i)*SI_hub
+#endif
 !#ifdef SIM1D
 !        vyij=0.0d0
 !        vzij=0.0d0
 !#else
         vyij=tdvr(pni+npj*4)-vvny_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+        vyij=vyij+yijp(i)*SI_hub
+#endif
 !#ifdef SIM2D
 !        vzij=0.0d0
 !#else
         vzij=tdvr(pni+npj*5)-vvnz_p(pn)
+#if defined(COSM) && defined(BOXSIM)
+        vzij=vzij+zijp(i)*SI_hub
+#endif
 !#endif
 !#endif
 ! *** store the data only for particles who have neighbour
