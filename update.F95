@@ -496,7 +496,7 @@ end subroutine
 subroutine updatealpvu(ng)
       use gcdp_const
       use gcdp_baryon
-#if defined(MHD) && defined(TIMEDIS) && defined (PM05)
+#ifdef MHD
       use gcdp_mhd
 #endif
       implicit none
@@ -549,7 +549,8 @@ subroutine updatealpvu(ng)
           alpu_p(pn)=0.0d0
         endif
 
-#if defined(MHD) && defined(TIMEDIS) && defined(PM05)
+#ifdef MHD
+#if defined(TIMEDIS) && defined(PM05)
         dalpb_tau=-(alpb_p(pn)-ALPB_MIN)/tau
         sab=arotb_p(pn)/dsqrt(rho_p(pn))
         if(dabs(divb_p(pn))/dsqrt(rho_p(pn)).gt.sav) then
@@ -562,6 +563,10 @@ subroutine updatealpvu(ng)
         else if(alpb_p(pn).gt.ALPB_MAX) then
            alpb_p(pn)=ALPB_MAX
         endif
+#endif
+#ifndef TIMEDIS
+        alpb_p(pn)=ALPHA_CONST
+#endif
 #endif
 
 #if defined(SF_EFD) || defined(SF_ZFD)
