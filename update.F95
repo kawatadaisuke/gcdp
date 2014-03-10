@@ -872,6 +872,7 @@ subroutine updatealpvu(ng)
            alpb_p(pn)=ALPB_MIN
         else if(alpb_p(pn).gt.ALPB_MAX) then
            alpb_p(pn)=ALPB_MAX
+
         endif
 #endif
 

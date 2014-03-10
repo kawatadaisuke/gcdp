@@ -14,7 +14,7 @@ subroutine setkernel()
       integer i,j
       double precision f,cv,s
 
-      ds_tb=1.0d0/dble(NKTAB+1)
+      ds_tb=1.0d0/dble(NKTAB)
 
 ! *** W: SPH kernel ***
 ! *** for constant ***
@@ -25,6 +25,7 @@ subroutine setkernel()
 #else
       cv=8.0d0/M_PI
 #endif
+
       do i=0,NKTAB
         s_tb(i)=ds_tb*dble(i)
         s=s_tb(i)
@@ -37,6 +38,7 @@ subroutine setkernel()
         endif
         w_tb(i)=cv*f
       enddo
+
 ! *** dW(s)/ds/s: SPH kernel ***
       do i=0,NKTAB
         s=s_tb(i)

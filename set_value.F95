@@ -1310,9 +1310,6 @@ subroutine set_value(ng,nag,ns,flag)
             tdvr(i)=0.0d0
           enddo 
           nit = nit+1
-
-          write(6,*) ' nit,npj=',nit,npj
-
 ! *** initialze proc iteration
           iproc=0
 ! *** initialisation ***
