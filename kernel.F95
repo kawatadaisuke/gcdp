@@ -14,7 +14,7 @@ subroutine setkernel()
       integer i,j
       double precision f,cv,s
 
-      ds_tb=1.0d0/dble(NKTAB+1)
+      ds_tb=1.0d0/dble(NKTAB)
 
 ! *** W: SPH kernel ***
 ! *** for constant ***
