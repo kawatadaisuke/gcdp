@@ -869,13 +869,13 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
                 hsi=tdvr(pni+npj*6)
                 ihsi=1.0d0/hsi
                 si=r*ihsi
-                is=int(si/ds_tb)
+                is=int(si*dnktab)
                 if(is.lt.0) then
                   is=0
                 else if(is.ge.NKTAB) then
                   is=NKTAB-1
                 endif
-                mwi=w_tb(is)+(w_tb(is+1)-w_tb(is))*(si-s_tb(is))/ds_tb
+                mwi=w_tb(is)+(w_tb(is+1)-w_tb(is))*(si-s_tb(is))*dnktab
 ! *** only 3D ***
                 mwi=m_p(pn)*mwi*(ihsi**3)
 ! *** store u for new feebdack particles ***
@@ -944,7 +944,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         ihsj=1.0d0/hsj
         sj=rijp(i)*ihsj
         if(si.lt.1.0d0) then
-          is=int(si/ds_tb)
+          is=int(si*dnktab)
           if(is.lt.0) then
             is=0
           else if(is.ge.NKTAB) then
@@ -952,10 +952,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           endif
 ! * calculate m_j dw_i/dr/r *
           mdwi=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-           *(si-s_tb(is))/ds_tb
+           *(si-s_tb(is))*dnktab
 ! * calculate m_j dw_i/dr *
           mdwic(i)=dwdsc_tb(is)+(dwdsc_tb(is+1)-dwdsc_tb(is)) &
-           *(si-s_tb(is))/ds_tb
+           *(si-s_tb(is))*dnktab
           mdwic(i)=mdwic(i)/rijp(i)
 #ifdef SIM1D
           mdwi=m_p(pn)*mdwi*(ihsi**3)
@@ -973,15 +973,15 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         endif
 ! * calculate m_j dw_j/dr/r *
         if(sj.lt.1.0d0) then
-          is=int(sj/ds_tb)
+          is=int(sj*dnktab)
           if(is.lt.0) then
             is=0
           else if(is.ge.NKTAB) then
             is=NKTAB-1
           endif
-          mdwj=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is))*(sj-s_tb(is))/ds_tb
+          mdwj=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is))*(sj-s_tb(is))*dnktab
           mdwjc(i)=dwdsc_tb(is)+(dwdsc_tb(is+1)-dwdsc_tb(is)) &
-           *(sj-s_tb(is))/ds_tb
+           *(sj-s_tb(is))*dnktab
           mdwjc(i)=mdwjc(i)/rijp(i)
 #ifdef SIM1D
           mdwj=m_p(pn)*mdwj*(ihsj**3)

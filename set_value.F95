@@ -327,13 +327,13 @@ subroutine set_value(ng,nag,ns,flag)
           if(s.lt.1.0d0) then
 ! * satisfy the criterion for neigbour particles *
 ! * calculate density if flag!=1 *
-            is=int(s/ds_tb)
+            is=int(s*dnktab)
             if(is.lt.0) then
               is=0
             else if(is.ge.NKTAB) then
               is=NKTAB-1
             endif
-            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))/ds_tb
+            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))*dnktab
 #ifdef SIM1D
             wij=wij*(ihsi)
 #elif defined(SIM2D)
@@ -345,7 +345,7 @@ subroutine set_value(ng,nag,ns,flag)
             tdvr(pni+npj*7)=tdvr(pni+npj*7)+m_p(pn)*wij
 ! *** calculation of omega ***
             dwr=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-             *(s-s_tb(is))/ds_tb
+             *(s-s_tb(is))*dnktab
 ! *** dW/ds/r/h
 #ifdef SIM1D
             dwr=dwr*(ihsi**3)
@@ -369,7 +369,7 @@ subroutine set_value(ng,nag,ns,flag)
 ! *** calculate zetah_p ***
 ! *** dphi/dh ***
             dphih=dphidh_tb(is)+(dphidh_tb(is+1)-dphidh_tb(is)) &
-              *(s-s_tb(is))/ds_tb
+              *(s-s_tb(is))*dnktab
             dphih=dphih*(ihsi**2)
 ! *** for zetah_p ***
             tdvr(pni+npj*13)=tdvr(pni+npj*13)+m_p(pn)*dphih

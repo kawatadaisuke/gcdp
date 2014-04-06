@@ -410,7 +410,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsi=tdvr(pn+npj*3)
             si=rij/hsi
             if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -418,11 +418,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-                *(si-s_tb(is))/ds_tb
+                *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 ! dw/dr/r
               dwi=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dwi=dwi/(hsi**5)
             else
               dphiir=ir3
@@ -432,7 +432,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=h_p(pnj)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -440,11 +440,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 ! dw/dr/r
               dwj=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dwj=dwj/(hsj**5)
             else
               dphijr=ir3
@@ -501,7 +501,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             rij=dsqrt(r2)
             si=rij/hsi
             if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -509,16 +509,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hi)
               d2phii=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d2phii=d2phii/(hsi**3)
 ! d3phi/dr3(hi)
               d3phii=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d3phii=d3phii/(hsi**4)
 #endif
             else
@@ -535,7 +535,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=hm_tr(nd)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -543,16 +543,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hj)
               d2phij=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d2phij=d2phij/(hsj**3)
 ! d3phi/dr3(hj)
               d3phij=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d3phij=d3phij/(hsj**4)
 #endif
             else
@@ -986,7 +986,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsi=tdvr(pn+npj*3)
             si=rij/hsi
             if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -994,11 +994,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 ! dw/dr/r
               dwi=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dwi=dwi/(hsi**5)
             else
               dphiir=ir3
@@ -1008,7 +1008,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=h_dm(pnj)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1016,11 +1016,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 ! dw/dr/r
               dwj=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dwj=dwj/(hsj**5)
             else
               dphijr=ir3
@@ -1067,7 +1067,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsi=tdvr(pn+npj*3)
             si=rij/hsi
             if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1075,16 +1075,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hi)
               d2phii=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d2phii=d2phii/(hsi**3)
 ! d3phi/dr3(hi)
               d3phii=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d3phii=d3phii/(hsi**4)
 #endif
             else
@@ -1100,7 +1100,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=hm_dmtr(nd)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1108,16 +1108,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hj)
               d2phij=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d2phij=d2phij/(hsj**3)
 ! d3phi/dr3(hj)
               d3phij=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d3phij=d3phij/(hsj**4)
 #endif
             else
@@ -1551,7 +1551,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsi=tdvr(pn+npj*3)
             si=rij/hsi
             if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1559,11 +1559,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 ! dw/dr/r
               dwi=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dwi=dwi/(hsi**5)
             else
               dphiir=ir3
@@ -1573,7 +1573,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=h_dm(pnj)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1581,11 +1581,11 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 ! dw/dr/r
               dwj=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dwj=dwj/(hsj**5)
             else
               dphijr=ir3
@@ -1632,7 +1632,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
              hsi=tdvr(pn+npj*3)
              si=rij/hsi
              if(si.lt.1.0d0) then
-              is=int(si/ds_tb)
+              is=int(si*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1640,16 +1640,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphiir=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               dphiir=dphiir/(hsi**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hi)
               d2phii=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d2phii=d2phii/(hsi**3)
 ! d3phi/dr3(hi)
               d3phii=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(si-s_tb(is))/ds_tb
+               *(si-s_tb(is))*dnktab
               d3phii=d3phii/(hsi**4)
 #endif
             else
@@ -1665,7 +1665,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
             hsj=hm_ldmtr(nd)
             sj=rij/hsj
             if(sj.lt.1.0d0) then
-              is=int(sj/ds_tb)
+              is=int(sj*dnktab)
               if(is.lt.0) then
                 is=0
               else if(is.ge.NKTAB) then
@@ -1673,16 +1673,16 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
               endif
 ! dphi/dr/r
               dphijr=dphidr_r_tb(is)+(dphidr_r_tb(is+1)-dphidr_r_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               dphijr=dphijr/(hsj**3)
 #ifdef QPTREEF
 ! d2phi/dr2(hj)
               d2phij=d2phidr2_tb(is)+(d2phidr2_tb(is+1)-d2phidr2_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d2phij=d2phij/(hsj**3)
 ! d3phi/dr3(hj)
               d3phij=d3phidr3_tb(is)+(d3phidr3_tb(is+1)-d3phidr3_tb(is)) &
-               *(sj-s_tb(is))/ds_tb
+               *(sj-s_tb(is))*dnktab
               d3phij=d3phij/(hsj**4)
 #endif
             else

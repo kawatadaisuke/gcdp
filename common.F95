@@ -463,7 +463,7 @@ module gcdp_kernel
       use gcdp_const
       implicit none
 ! *** kernel look up table ****
-      double precision ds_tb
+      double precision dnktab
       double precision s_tb(0:NKTAB),w_tb(0:NKTAB),dwds_s_tb(0:NKTAB) &
        ,dwdsc_tb(0:NKTAB)
 #ifdef SGRAV

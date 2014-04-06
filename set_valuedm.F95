@@ -375,20 +375,20 @@ subroutine set_valuedm(ndm,nadm,flag)
           s = r*ihsi
           if(s.le.1.0d0) then
 ! * satisfy the criterion for neigbour particles *
-            is=int(s/ds_tb)
+            is=int(s*dnktab)
             if(is.lt.0) then
               is=0
             else if(is.ge.NKTAB) then
               is=NKTAB-1
             endif
-            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))/ds_tb
+            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))*dnktab
 ! *** only 3D ***
             wij=wij*(ihsi**3)
 ! *** update density rho ***
             tdvr(pni+npj*7)=tdvr(pni+npj*7)+m_dm(pn)*wij
 ! *** dW/ds/r/h calculation of omega ***
             dwr=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-             *(s-s_tb(is))/ds_tb
+             *(s-s_tb(is))*dnktab
             dwr=dwr*(ihsi**5)
 ! *** calculating omgh_dm ***
 ! *** dW/dh ***
@@ -399,7 +399,7 @@ subroutine set_valuedm(ndm,nadm,flag)
 ! *** calculate zetah_dm ***
 ! *** dphi/dh ***
             dphih=dphidh_tb(is)+(dphidh_tb(is+1)-dphidh_tb(is)) &
-             *(s-s_tb(is))/ds_tb
+             *(s-s_tb(is))*dnktab
             dphih=dphih*(ihsi**2)
 ! *** for zetah_dm ***
             tdvr(pni+npj*10)=tdvr(pni+npj*10)+m_dm(pn)*dphih
@@ -583,20 +583,20 @@ subroutine set_valuedm(ndm,nadm,flag)
           s = r*ihsi
           if(s.le.1.0d0) then
 ! * satisfy the criterion for neigbour particles *
-            is=int(s/ds_tb)
+            is=int(s*dnktab)
             if(is.lt.0) then
               is=0
             else if(is.ge.NKTAB) then
               is=NKTAB-1
             endif
-            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))/ds_tb
+            wij=w_tb(is)+(w_tb(is+1)-w_tb(is))*(s-s_tb(is))*dnktab
 ! *** only 3D ***
             wij=wij*(ihsi**3)
 ! *** update density rho ***
             tdvr(pni+npj*7)=tdvr(pni+npj*7)+m_dm(pn)*wij
 ! *** dW/ds/r/h calculation of omega ***
             dwr=dwds_s_tb(is)+(dwds_s_tb(is+1)-dwds_s_tb(is)) &
-             *(s-s_tb(is))/ds_tb
+             *(s-s_tb(is))*dnktab
             dwr=dwr*(ihsi**5)
 ! *** calculating omgh_dm ***
 ! *** dW/dh ***
@@ -607,7 +607,7 @@ subroutine set_valuedm(ndm,nadm,flag)
 ! *** calculate zetah_dm ***
 ! *** dphi/dh ***
             dphih=dphidh_tb(is)+(dphidh_tb(is+1)-dphidh_tb(is)) &
-             *(s-s_tb(is))/ds_tb
+             *(s-s_tb(is))*dnktab
             dphih=dphih*(ihsi**2)
 ! *** for zetah_dm ***
             tdvr(pni+npj*10)=tdvr(pni+npj*10)+m_dm(pn)*dphih
@@ -1511,7 +1511,7 @@ subroutine set_valuedm(ndm,nadm,flag)
             write(6,*) myrank &
              ,' Warning: iteration does not work in set_valuedm',nlist,flagnb,flag
           endif
-          write(fileo,'(a5,i3.3)') 'error',myrank
+          write(fileo,'(a7,i3.3)') 'errordm',myrank
           open(60,file=fileo,status='unknown')
           do i=0,nlist-1
             pn=pn_nfp(i)

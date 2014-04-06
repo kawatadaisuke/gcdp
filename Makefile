@@ -61,6 +61,18 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # CPP=cpp
 # FFLAGS= -O3 -ipo -xHost -lfftw3 -lfftw3_mpi -lfftw3
 #
+### leicester
+# module load fftw3/gcc/64/3.3.1
+# module load gcc/4.8.2
+#FFTW_INC=/cm/shared/apps/fftw/gcc/64/3.3.1/include
+#FFTW_LIB=/cm/shared/apps/fftw/gcc/64/3.3.1/lib
+#MPI_DIR=/cm/shared/apps/ics/impi/4.1.1.036//intel64/bin
+#FORT=${MPI_DIR}/mpifc
+#CPP=cpp
+#OPTIONS=-O3 -mcmodel=medium
+#FFLAGS = ${OPTIONS} -I${FFTW_INC}
+#LIBS= ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+#
 ### iridis
 # module load openmpi/1.3.3/intel
 # module load fftw/3.3.1/intel/double

@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! *************************************
 !    main.f for GCD+ ver.f03.0
-!  24  Jan. 2013    written by D.KAWATA
+!  10 Marn. 2014    written by D.KAWATA
 ! *************************************
 !70*******************************************************************
 
@@ -75,7 +75,7 @@ program gcdp
 
       Parameter (MARGIN=1800.0d0)
       integer OUTSTEP
-      parameter (OUTSTEP=10)
+      parameter (OUTSTEP=10000)
 
 ! ***** MPI Initialization *****
       call MPI_INIT(ierr)
@@ -88,7 +88,7 @@ program gcdp
 
 ! *** print version ***
       if(myrank.eq.0) then
-        write(6,*) ' GCD+ ver. f03.0 14/02/14'
+        write(6,*) ' GCD+ ver. f03.0 10/03/14'
         print *, "Process ",myrank, " of ", nprocs, " is alive"
       endif
       if(nprocs.gt.NCPU) then
