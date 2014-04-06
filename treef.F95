@@ -45,9 +45,6 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       double precision x2ij,y2ij,z2ij,x3ij,y3ij,z3ij
       double precision ir5,ir7,ir4
       double precision dpijr
-#ifdef TREEPM
-      double precision ftrun
-#endif
 #endif
 ! *** potential and correction adaptive softening ***
       double precision pot,dhc
@@ -84,9 +81,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
       double precision,allocatable :: tdvs(:),tdvr(:)
 #ifdef TREEPM 
       double precision crit
-      double precision erfcc
-      external erfcc
-
+      double precision ftrun
 ! the distance from the corner of square to the centre, assuming 3D
       crit=dsqrt(3.0d0)*0.5d0
 #endif
@@ -479,17 +474,18 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
 #ifdef TREEPM
-            pot=m_p(pnj)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
 
-!            if(pn.eq.344) then
-!              write(6,*) 'b',x_p(pn),y_p(pn),z_p(pn),pnj,pot,dphiir,dphijr &
-!    ,erfcc(rij/(2.0d0*SI_rstpm)),(rij/(SI_rstpm*dsqrt(M_PI))) &
-!    ,dexp(-r2p(i)/(4.0d0*(SI_rstpm**2)))
-!              write(6,*) 'b',x_p(pnj),y_p(pnj),z_p(pnj),pnj,pot,dphiir &
-! ,rij,h_p(pn),tdvr(pn+npj*3),pn
-!            endif
+            pot=m_p(pnj)*0.5d0*G*(dphiir+dphijr)*ftrun
+
 #else
             pot=m_p(pnj)*G*0.5d0*(dphiir+dphijr)
 #endif
@@ -602,8 +598,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             y3ij=yij*y2ij
             z3ij=zij*z2ij
 #ifdef TREEPM
-            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
 #endif
 ! *** ax ***
 #ifdef TREEPM
@@ -691,9 +694,17 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij) 
 #else
 #ifdef TREEPM
-            pot=mass_tr(nd)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
+
+            pot=mass_tr(nd)*0.5d0*G*(dphiir+dphijr)*ftrun
 #else
             pot=mass_tr(nd)*G*0.5d0*(dphiir+dphijr)
 #endif
@@ -1042,9 +1053,17 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
 #ifdef TREEPM
-            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
+
+            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr)*ftrun
 #else
             pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr)
 #endif
@@ -1157,8 +1176,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             y3ij=yij*y2ij
             z3ij=zij*z2ij
 #ifdef TREEPM
-            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
 #endif
 ! *** ax ***
 #ifdef TREEPM
@@ -1246,9 +1272,17 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
              +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij)
 #else
 #ifdef TREEPM
-            pot=mass_dmtr(nd)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
+
+            pot=mass_dmtr(nd)*0.5d0*G*(dphiir+dphijr)*ftrun
 #else
             pot=mass_dmtr(nd)*G*0.5d0*(dphiir+dphijr)
 #endif
@@ -1600,9 +1634,17 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 ! *** force calculation ***
 ! *** dvx_p,dvy_p,dvz_p ***
 #ifdef TREEPM
-            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
+
+            pot=m_dm(pnj)*0.5d0*G*(dphiir+dphijr)*ftrun
 #else
             pot=m_dm(pnj)*0.5d0*(dphiir+dphijr)
 #endif
@@ -1715,8 +1757,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             y3ij=yij*y2ij
             z3ij=zij*z2ij
 #ifdef TREEPM
-            ftrun=(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
 #endif
 ! *** ax ***
 #ifdef TREEPM
@@ -1804,9 +1853,17 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
             +(yij*ir2-3.0d0*z2ij*yij*ir4)*d2p_ij+z2ij*yij*ir3*d3p_ij)
 #else
 #ifdef TREEPM
-            pot=mass_ldmtr(nd)*0.5d0*G*(dphiir+dphijr) &
-              *(erfcc(rij/(2.0d0*SI_rstpm))+(rij/(SI_rstpm*dsqrt(M_PI))) &
-              *dexp(-r2p(i)/(4.0d0*(SI_rstpm**2))))
+            si=rij/SI_rshtpm
+            is=int(si*dnftpmtab)
+            if(is.lt.0) then
+              is=0
+            else if(is.ge.NFTPMTAB) then
+              is=NFTPMTAB-1
+            endif
+            ftrun=fshtpm_tb(is)+(fshtpm_tb(is+1)-fshtpm_tb(is)) &
+               *(si-rstpm_tb(is))*dnftpmtab
+
+            pot=mass_ldmtr(nd)*0.5d0*G*(dphiir+dphijr)*ftrun
 #else
             pot=mass_ldmtr(nd)*G*0.5d0*(dphiir+dphijr)
 #endif

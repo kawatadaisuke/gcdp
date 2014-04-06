@@ -471,7 +471,7 @@ module gcdp_kernel
       double precision d2phidr2_tb(0:NKTAB),d3phidr3_tb(0:NKTAB)
 #ifdef TREEPM
       double precision dnftpmtab
-      double precision fshtpm_tb(0:NFTPMTAB)
+      double precision fshtpm_tb(0:NFTPMTAB),rstpm_tb(0:NFTPMTAB)
 #endif
 #endif
 end module gcdp_kernel

@@ -163,22 +163,23 @@ subroutine  mesh_gen(flag)
 
 ! generate short force truncation factor table
       dnftpmtab=dble(NFTPMTAB)
-      if(myrank.eq.0) then
-        open(60,file='fshfac.dat',status='unknown')
-      endif
+!      if(myrank.eq.0) then
+!        open(60,file='fshfac.dat',status='unknown')
+!      endif
       do i=0,NFTPMTAB
+        rstpm_tb(i)=dble(i)/dnftpmtab
         rrsh=(dble(i)/dnftpmtab)*SI_rshtpm
         fshtpm_tb(i)=erfcc(rrsh/(2.0d0*SI_rstpm)) &
            +(rrsh/(SI_rstpm*dsqrt(M_PI))) &
            *dexp(-(rrsh**2)/(4.0d0*(SI_rstpm**2)))
-        if(myrank.eq.0.and.i.ne.0) then
-          write(60,'(3(1pE13.5))') rrsh/SI_rshtpm,fshtpm_tb(i) &
-           ,(fshtpm_tb(i)-fshtpm_tb(i-1))/fshtpm_tb(i)
-        endif
+!        if(myrank.eq.0.and.i.ne.0) then
+!          write(60,'(3(1pE13.5))') rrsh/SI_rshtpm,fshtpm_tb(i) &
+!           ,(fshtpm_tb(i)-fshtpm_tb(i-1))/fshtpm_tb(i)
+!        endif
       enddo
-      if(myrank.eq.0) then
-        close(60)  
-      endif
+!      if(myrank.eq.0) then
+!        close(60)  
+!      endif
 
 ! mesh points 1d
       do i=0,nx_m-1
