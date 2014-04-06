@@ -11,6 +11,7 @@ subroutine  mesh_gen(flag)
       use gcdp_const
       use gcdp_system
       use gcdp_pm
+      use gcdp_kernel
 #ifdef FFTW3_MPI
       use fftw3
 #endif
@@ -22,11 +23,14 @@ subroutine  mesh_gen(flag)
 
       integer i,j,k
       double precision yp,zp
+      double precision rrsh
 !      character filen*60
 #ifdef FFTW3_MPI
       integer ierr
       integer,allocatable :: tivs(:),tivr(:)
 #endif
+      double precision erfcc
+      external erfcc
 
 ! allocate memory space
       if(flag.eq.0) then
@@ -155,6 +159,25 @@ subroutine  mesh_gen(flag)
           write(6,*) ' rs for TreePM=',SI_rstpm
           write(6,*) '  rcut=',SI_rshtpm
         endif
+      endif
+
+! generate short force truncation factor table
+      dnftpmtab=dble(NFTPMTAB)
+      if(myrank.eq.0) then
+        open(60,file='fshfac.dat',status='unknown')
+      endif
+      do i=0,NFTPMTAB
+        rrsh=(dble(i)/dnftpmtab)*SI_rshtpm
+        fshtpm_tb(i)=erfcc(rrsh/(2.0d0*SI_rstpm)) &
+           +(rrsh/(SI_rstpm*dsqrt(M_PI))) &
+           *dexp(-(rrsh**2)/(4.0d0*(SI_rstpm**2)))
+        if(myrank.eq.0.and.i.ne.0) then
+          write(60,'(3(1pE13.5))') rrsh/SI_rshtpm,fshtpm_tb(i) &
+           ,(fshtpm_tb(i)-fshtpm_tb(i-1))/fshtpm_tb(i)
+        endif
+      enddo
+      if(myrank.eq.0) then
+        close(60)  
       endif
 
 ! mesh points 1d

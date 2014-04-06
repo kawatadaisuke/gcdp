@@ -63,12 +63,14 @@ module gcdp_const
 ! factor for neighbour search for short range force
       double precision,parameter :: FRSHTPM=4.5d0
 !      double precision,parameter :: FRSHTPM=6.0d0
+! short force truncation function table
+      integer,parameter :: NFTPMTAB=100000
 #endif
 
 ! *** for at Table ***
       integer,parameter :: NATTABLE=50000
 ! *** for kernel tables ***
-      integer,parameter :: NKTAB=10000
+      integer,parameter :: NKTAB=100000
 
 ! *****   For system value   *****
 ! *** DT limit ***

@@ -132,12 +132,16 @@ subroutine setkernel()
 ! *** for test
 !      if(myrank.eq.0) then
 !        open(60,file='kernel.dat',status='unknown')
-!        do i=0,NKTAB 
+!        do i=1,NKTAB-1
 !          s=s_tb(i)
-!          write(60,160) s_tb(i),w_tb(i),dwds_s_tb(i),dphidr_r_tb(i) &
-!           ,dphidh_tb(i),d2phidr2_tb(i),d3phidr3_tb(i)
+!          write(60,160) s_tb(i),w_tb(i),(w_tb(i)-w_tb(i-1))/w_tb(i) &
+!           ,dwds_s_tb(i),(dwds_s_tb(i)-dwds_s_tb(i-1))/dwds_s_tb(i) &
+!           ,dphidr_r_tb(i),(dphidr_r_tb(i)-dphidr_r_tb(i-1))/dphidr_r_tb(i) &
+!           ,dphidh_tb(i),(dphidh_tb(i)-dphidh_tb(i-1))/dphidh_tb(i) &
+!           ,d2phidr2_tb(i),(d2phidr2_tb(i)-d2phidr2_tb(i-1))/d2phidr2_tb(i) &
+!           ,d3phidr3_tb(i),(d3phidr3_tb(i)-d3phidr3_tb(i-1))/d3phidr3_tb(i)
 !        enddo
-!  160   format(7(1pE13.5))
+!  160   format(13(1pE13.5))
 !      endif
 
 end subroutine
