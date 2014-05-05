@@ -142,10 +142,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** need a better accuracy, changed since pv30.4 ***
         read(50,'(a5,1pE25.17)') tchar,OF_odt
 #ifdef COSM
-        read(50,'(a19,3(1pE25.17))') tchar,SI_eps0,dtmp(0),SI_epsa
+        read(50,'(a14,2(1pE25.17))') tchar,SI_eps0,SI_epsa
         SI_eps=SI_eps0
 #else
-        read(50,'(a13,2(1pE25.17))') tchar,SI_eps,dtmp(0)
+        read(50,'(a8,1pE25.17)') tchar,SI_eps
 #endif
 #ifdef BOXSIM
         do i=1,100
@@ -1657,9 +1657,22 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       if(flagcont.eq.2) then
 #if defined(GAS) || defined(STAR)
         do i=0,np-1
+#if defined(COSM) && defined(BOXSIM)
+          asc_p(i)=SI_a
+          tc_p(i)=TM_tot
+          ascg_p(i)=SI_a
+          tcg_p(i)=TM_tot
+          vnx_p(i)=SI_a*(vnx_p(i)-SI_hub*xc_p(i))
+          vny_p(i)=SI_a*(vny_p(i)-SI_hub*yc_p(i))
+          vnz_p(i)=SI_a*(vnz_p(i)-SI_hub*zc_p(i))
+          vvnx_p(i)=vnx_p(i)/SI_a
+          vvny_p(i)=vny_p(i)/SI_a
+          vvnz_p(i)=vnz_p(i)/SI_a
+#else
           vvnx_p(i)=vnx_p(i)
           vvny_p(i)=vny_p(i)
           vvnz_p(i)=vnz_p(i)
+#endif
           x_p(i)=xc_p(i)
           y_p(i)=yc_p(i)
           z_p(i)=zc_p(i)
@@ -1678,6 +1691,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #ifdef DM
         do i=0,ndm-1
+#if defined(COSM) && defined(BOXSIM)
+          asc_dm(i)=SI_a
+          tc_dm(i)=TM_tot
+          vnx_dm(i)=SI_a*(vnx_dm(i)-SI_hub*xc_dm(i))
+          vny_dm(i)=SI_a*(vny_dm(i)-SI_hub*yc_dm(i))
+          vnz_dm(i)=SI_a*(vnz_dm(i)-SI_hub*zc_dm(i))
+#endif
           x_dm(i)=xc_dm(i)
           y_dm(i)=yc_dm(i)
           z_dm(i)=zc_dm(i)

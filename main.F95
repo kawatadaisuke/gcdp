@@ -75,7 +75,7 @@ program gcdp
 
       Parameter (MARGIN=1800.0d0)
       integer OUTSTEP
-      parameter (OUTSTEP=10000)
+      parameter (OUTSTEP=10)
 
 ! ***** MPI Initialization *****
       call MPI_INIT(ierr)

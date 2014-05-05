@@ -1549,7 +1549,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 !        write(60,'(a5,1pE13.5)') 'OFdt=',OF_odt
 ! since pv30.4
         write(60,'(a5,1pE25.17)') 'OFdt=',OF_odt
-#ifdef COS
+#ifdef COSM
 !                                      1234567890123456789012345678901234
         write(60,'(a14,2(1pE25.17))') ' SI_eps0,epsa=' &
          ,SI_eps0,SI_epsa

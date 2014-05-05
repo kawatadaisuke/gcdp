@@ -2433,8 +2433,9 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 
               if(cproc(ip).ne.npproc(ip)) then
                 write(6,*) ' Error in dmtreef():npproc,cproc' &
-                 ,',myrank,idiv,ndiv,ip,flagtr=' &
-                 ,npproc(ip),cproc(ip),myrank,idivcom,ndivcom,ip,flagtr
+                 ,',myrank,idiv,ndiv,npmax,ip,flagtr=' &
+                 ,npproc(ip),cproc(ip),myrank,idivcom,ndivcom &
+                 ,npprocmax,ip,flagtr
                 stop
               endif
 
