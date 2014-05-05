@@ -62,16 +62,21 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # FFLAGS= -O3 -ipo -xHost -lfftw3 -lfftw3_mpi -lfftw3
 #
 ### leicester
-# module load fftw3/gcc/64/3.3.1
-# module load gcc/4.8.2
-#FFTW_INC=/cm/shared/apps/fftw/gcc/64/3.3.1/include
-#FFTW_LIB=/cm/shared/apps/fftw/gcc/64/3.3.1/lib
+#
+# module load intel/compilers/14.0.1
+# module load intel/impi/4.1.1
+#
+#OPTIONS=-xAVX -O3 -mcmodel=medium -assume buffered_io -ipo
+#OPTIONS=-xAVX -O3 -mcmodel=medium -assume buffered_io
+#FFTW_INC=/cm/shared/apps/fftw/intel/3.3.4/include
+#FFTW_LIB=/cm/shared/apps/fftw/intel/3.3.4/lib
 #MPI_DIR=/cm/shared/apps/ics/impi/4.1.1.036//intel64/bin
-#FORT=${MPI_DIR}/mpifc
+#FORT=mpiifort
 #CPP=cpp
+#LDFLAGS=-Wl,-R,/cm/shared/apps/ics/composer_xe_2013_sp1.1.106/compiler/lib/intel64
 #OPTIONS=-O3 -mcmodel=medium
 #FFLAGS = ${OPTIONS} -I${FFTW_INC}
-#LIBS= ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+#LIBS= ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3 ${LDFLAGS} 
 #
 ### iridis
 # module load openmpi/1.3.3/intel

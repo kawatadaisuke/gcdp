@@ -2348,6 +2348,22 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
                   endif
                   endif
                   endif
+
+#ifdef TREEPM
+                  if(flagp.eq.0) then
+ ! distance from particle to the closest possible particle within the node
+                    rij=dsqrt(xij*xij+yij*yij+zij*zij)
+                    if(rij-crit*lpnd(nd).gt.SI_rshtpm) then
+! no force calculation, goto next node
+                      flagp=-1
+                    else if(rij+crit*lpnd(nd).gt.SI_rshtpm) then
+! the node may include particles which is outside SI_rshtpm
+! go to daughter
+                       flagp=1
+                    endif
+                  endif
+#endif
+
                   if(flagp.eq.0) then
                     xij=x_p(pn)-xpnd(nd)
 #ifdef BCX_PERIOD   
