@@ -494,7 +494,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
 ! *** for integer values ***
 #if defined(SF_EFD) || defined(SF_ZFD)
-      nval=4
+      nval=5
 #else
       nval=3
 #endif
@@ -513,6 +513,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           tivs(npj+npsp(ip)*2)=id_p(list(i))
 #if defined(SF_EFD) || defined(SF_ZFD)
           tivs(npj+npsp(ip)*3)=flagfd_p(list(i))
+          tivs(npj+npsp(ip)*4)=flagrfd_p(list(i))
 #endif
           npj=npj+1
         enddo
@@ -549,6 +550,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           id_p(ord(npj))=tivr(i+nprp(ip)*2)
 #if defined(SF_EFD) || defined(SF_ZFD)
           flagfd_p(ord(npj))=tivr(i+nprp(ip)*3)
+          flagrfd_p(ord(npj))=tivr(i+nprp(ip)*4)
 #endif
           npj=npj+1
         enddo

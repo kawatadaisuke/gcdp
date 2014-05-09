@@ -120,20 +120,20 @@ subroutine starf(ng,ns,nag,nas,nagravg)
         allocate(t1(0:dns))
         allocate(int1oa(0:dns))
 ! assign time range 
-      do i=0,dns-1
-        pn=slist(i)
-        t0(i)=TM_tot+TM_dt-0.5d0*(TM_lt+TM_dt-(dtg_p(pn)+ltg_p(pn)))
-        t1(i)=TM_tot+TM_dt
-      enddo
+        do i=0,dns-1
+          pn=slist(i)
+          t0(i)=TM_tot+TM_dt-0.5d0*(TM_lt+TM_dt-(dtg_p(pn)+ltg_p(pn)))
+          t1(i)=TM_tot+TM_dt
+        enddo
 ! integrate 1/a from n to n+1/2 for each particle)
-      call integrate1oa(np,t0,t1,int1oa)
+        call integrate1oa(np,t0,t1,int1oa)
 ! get a at TM_tot+TM_dt
-      call afromt(TM_tot+TM_dt,asc)
+        call afromt(TM_tot+TM_dt,asc)
 #endif
 
 ! for new born particles
-      do i=0,dns-1
-          slist(dns)=pn
+        do i=0,dns-1
+          pn=slist(i)
           ts_p(pn)=TM_tot
 ! *** fixed softening ***
           h_p(pn)=SI_eps*(m_p(pn)**THIRD)

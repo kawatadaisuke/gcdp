@@ -594,6 +594,43 @@ subroutine lctime(np,ng,ndm,ns,nag,nadm,nas,lstep,nagravg,flagdtg)
           ttmp=lt_p(i)+dt_p(i)
           if(ttmp.lt.TM_dt) then
             TM_dt = ttmp
+#ifdef COSM
+            if(SI_flagrad.le.-NITEOR.or.SI_flagrad.gt.-1) then
+#endif
+            if(TM_dt.le.TM_lt+DTLIMIT) then
+              write(6,*) ' Error in localtime(): tlim=',tlim
+              write(6,*) '  lt_p,dt_p,TM_lt,TM_sdt',lt_p(i),dt_p(i) &
+               ,TM_lt,TM_sdt
+              write(6,*) '  dvx,h',dvx_p(i),dvy_p(i),dvz_p(i),h_p(i)
+              write(6,*) ' rho,nnb=',rho_p(i),nnb_p(i)
+              dtcr1=CCFL*hvsigdt_p(pn)
+              write(6,*) ' dtcr1,hvsigdt_p=',dtcr1,hvsigdt_p(i)
+              adv=dvx_p(i)*dvx_p(i)+dvy_p(i)*dvy_p(i)+dvz_p(i)*dvz_p(i)
+              adv=dsqrt(adv)
+              if(adv.ne.0.0d0) then
+                dtcr2=CGRAV*dsqrt(h_p(i)*0.5d0/adv)
+              endif
+              write(6,*) ' dtcr2=',dtcr2
+              write(6,*) ' flagt,dtr,dtmnb',flagt_p(i),dtr_p(i),dtmnb_p(i) 
+              write(6,*) ' sdt-tlim,/dtmnb=',TM_sdt-tlim &
+               ,(TM_sdt-tlim)/dtmnb_p(i)
+              write(6,*) ' x,flagc=',x_p(i),y_p(i),z_p(i),flagc_p(i)
+#if defined(SF_EFD) || defined(SF_ZFD)
+              write(6,*) ' flagfd,rfd=',flagfd_p(i),flagrfd_p(i)
+#endif
+              do j=0,np
+                if(i.eq.list_ap(j)) then
+                  goto 91
+                endif
+              enddo
+   91         write(6,*) myrank,' id=',i,id_p(i),' in list_ap,nag',j,nag,ng,nas
+              call MPI_ABORT(MPI_COMM_WORLD,ierr)
+              stop
+            endif
+#ifdef COSM
+            endif
+#endif
+
           endif
         enddo
 
