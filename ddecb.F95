@@ -689,7 +689,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           tdvs(npj+npsp(ip)*9)=ax_p(list(i))
           tdvs(npj+npsp(ip)*10)=ay_p(list(i))
           tdvs(npj+npsp(ip)*11)=az_p(list(i))
-#ifdef COO
+#ifdef COOL
           tdvs(npj+npsp(ip)*12)=ram_p(list(i))
 #if defined(COSM) && defined(BOXSIM)
           tdvs(npj+npsp(ip)*13)=asc_p(list(i))
