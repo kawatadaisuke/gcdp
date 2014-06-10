@@ -110,8 +110,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       double precision nstime,estime,stime(4)
 #endif
 #ifdef METALDIFF
-      integer nvalzd,czdi
-      double precision,allocatable :: kij(:),av(:),tdzd(:)
+      integer nvalzd
+      double precision,allocatable :: kij(:),av(:),tdzd(:),czdi
 #endif
 #ifdef MEXT
       integer ir
@@ -2607,6 +2607,24 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       endif
 #endif
       deallocate(listb)
+
+!      write(fileo,'(a5,i3.3)') 'calvu',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pni=list_ap(i)
+!        write(60,'(22(1pE13.5),2I10)') x_p(pni),y_p(pni),z_p(pni) &
+!        ,ndu_p(pni),dvx_p(pni),dvy_p(pni) &
+!        ,dvz_p(pni),div_v_p(pni),arot_v_p(pni) &
+!        ,d2u_p(pni),p_p(pni),u_p(pni) &
+!        ,ax_p(pni),ay_p(pni),az_p(pni) &
+!        ,rho_p(pni),omgh_p(pni) &
+!        ,hvsigdt_p(pni),alpv_p(pni) &
+!        ,zdA_p(pni),zdZB_p(pni),vsig_p(pni) &
+!        ,id_p(pni),nnb_p(pni)
+!      enddo
+!      close(60)
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!      stop
 
 ! end of GAS
 #endif      
