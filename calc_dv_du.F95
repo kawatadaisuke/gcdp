@@ -111,7 +111,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
 #ifdef METALDIFF
       integer nvalzd
-      double precision,allocatable :: kij(:),av(:),tdzd(:),czdi
+      double precision czdi
+      double precision,allocatable :: kij(:),av(:),tdzd(:)
 #endif
 #ifdef MEXT
       integer ir

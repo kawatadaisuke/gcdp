@@ -1343,6 +1343,25 @@ subroutine set_value(ng,nag,ns,flag)
       enddo
 #endif
 
+!      write(fileo,'(a5,i3.3)') 'setvp',myrank
+!      open(60,file=fileo,status='unknown')
+!      write(*,*) ' myrank,ng=',myrank,ng
+!      do i=0,ng-1
+!        pni=list_ap(i)
+!        write(60,'(17(1pE13.5),4I10)') x_p(pni),y_p(pni),z_p(pni) &
+!         ,rho_p(pni),h_p(pni),div_v_p(pni),arot_v_p(pni) &
+!         ,tx(pni),ty(pni),tz(pni) &
+!         ,vx_p(pni),vy_p(pni),vz_p(pni),omgh_p(pni) &
+!#ifdef METALDIFF
+!         ,vsig_p(pni),dvy_p(pni),dvz_p(pni) &
+!#else
+!         ,dvx_p(pni),dvy_p(pni),dvz_p(pni) &
+!#endif
+!!        ,id_p(pni),nnb_p(pni),flagfd_p(pni),flagc_p(pni)
+!         ,id_p(pni),nnb_p(pni),pni,flagc_p(pni)
+!      enddo
+!      close(60)
+!      stop
 
 ! deallocate
       deallocate(idisp)
@@ -1372,19 +1391,6 @@ subroutine set_value(ng,nag,ns,flag)
         deallocate(node)
       endif
 
-!      write(fileo,'(a5,i3.3)') 'setvp',myrank
-!      open(60,file=fileo,status='unknown')
-!      write(*,*) ' myrank,ng=',myrank,ng
-!      do i=0,ng-1
-!        pni=list_ap(i)
-!        write(60,'(14(1pE13.5),4I10)') x_p(pni),y_p(pni),z_p(pni) &
-!         ,rho_p(pni),h_p(pni),div_v_p(pni),arot_v_p(pni) &
-!         ,vx_p(pni),vy_p(pni),vz_p(pni),omgh_p(pni) &
-!         ,dvx_p(pni),dvy_p(pni),dvz_p(pni) &
-!!        ,id_p(pni),nnb_p(pni),flagfd_p(pni),flagc_p(pni)
-!         ,id_p(pni),nnb_p(pni),pni,flagc_p(pni)
-!      enddo
-!      close(60)
 
 end subroutine
 #endif
