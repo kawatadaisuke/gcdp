@@ -85,8 +85,6 @@ subroutine  mesh_setrho(np,ndm)
           ntp=np
 #ifdef DM
         else if(ic.eq.1) then
-#else
-        endif
 #endif
 #endif
 
