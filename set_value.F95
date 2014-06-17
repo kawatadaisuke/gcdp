@@ -204,7 +204,7 @@ subroutine set_value(ng,nag,ns,flag)
       ncompt=0
 ! *** iproc=0: in proc, iproc=1: tree walk for particles in the other node ***
       iproc=0 
-      maxntw=ng*3+nprocs*MAXNODESEND
+      maxntw=num_gtr*10
 
    70 if(np_gtr(0).eq.0) then
         goto 99
@@ -237,9 +237,9 @@ subroutine set_value(ng,nag,ns,flag)
 
       if(ntw.gt.maxntw) then
         write(6,*) ' Error set_value(): ntw>',maxntw
-        write(6,*) ' myrank,iproc,npj,nlist,numgtr,nit=' &
-         ,myrank,iproc,npj,nlist,num_gtr,nit
-        if(myrank.eq.0) then
+        write(6,*) ' myrank,iproc,npj,nlist,numgtr,ntw=' &
+         ,myrank,iproc,npj,nlist,num_gtr,ntw
+!        if(myrank.eq.0) then
         write(fileo,'(a5,i3.3,i8.8)') 'errsv',myrank,ntw
         open(60,file=fileo,status='unknown')
         do i=0,nlist-1
@@ -256,10 +256,10 @@ subroutine set_value(ng,nag,ns,flag)
            ,cx_gtr(i),cy_gtr(i),cz_gtr(i),hm_gtr(i)
         enddo
         close(60)
-        endif
-        if(ntw.gt.maxntw+10) then
+!        endif
+!        if(ntw.gt.maxntw+10) then
           stop
-        endif
+!        endif
       endif
 
       do i=0,nlist-1

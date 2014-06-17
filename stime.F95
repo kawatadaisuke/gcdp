@@ -367,7 +367,7 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
 
 ! *** define time steps ***
       TM_k=int(dlog(dtmax/dtmin)/dlog(2.0d0))
-      if(step.le.5) then
+      if(step.le.2) then
         TM_k=0
 ! #ifdef MULTI_LEV
       else if(TM_k.gt.8) then

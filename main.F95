@@ -562,7 +562,7 @@ program gcdp
 ! calculate potential
         call mesh_fftf()
 ! assign force to particles
-!        call mesh_setfp(ng,nag,nas,nadm)
+        call mesh_setfp(ng,nag,nas,nadm)
 
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -1176,6 +1176,7 @@ program gcdp
 #endif
 #endif
 
+!      if(myrank.eq.13) then
 !      write(fileo,'(a4,i3.3,i4.4)') 'test',myrank,totstep
 !      open(60,file=fileo,status='unknown')
 !      do i=0,ndm-1
@@ -1184,6 +1185,7 @@ program gcdp
 !         ,vnx_dm(i),vnx_dm(i),vnx_dm(i) &
 !         ,xc_dm(i),yc_dm(i),zc_dm(i)
 !      enddo
+!      endif
 
 ! *************************
 !  Update Velocity V(n+1)

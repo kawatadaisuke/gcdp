@@ -23,7 +23,7 @@ subroutine  mesh_fftf()
       integer jp2,jp1,jm1,jm2
       integer kp2,kp1,km1,km2,kp
       double precision kx,ky,kz,kabs2
-      double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz
+      double precision l2nx,l2ny,l2nz,kxl2nx,kyl2ny,kzl2nz,dnt_m
 ! *** for test file *** 
       character fileo*60
       integer ierr
@@ -253,19 +253,14 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
+      dnt_m=dble(nx_m)*dble(ny_m)*dble(nz_m)
       do kfftw=1,lnz_fftw
         do jfftw=1,ny_fftw
           do ifftw=1,nx_fftw
 ! normalised (has to be done)
 ! first 3 and last 3 arrays will be imported from the other cores -1+3=+2
             pot_m(ifftw-1,jfftw-1,kfftw+2)= &
-              rsd_fftw(ifftw,jfftw,kfftw)/dble(nt_m)
-#else
-      do k=1,nz_m
-        do j=1,ny_m
-          do i=1,nx_m
-! normalised (has to be done)
-            pot_m(i-1,j-1,k-1)=rsd_fftw(i,j,k)/dble(nt_m)
+              rsd_fftw(ifftw,jfftw,kfftw)/dnt_m
 
 #endif
           enddo

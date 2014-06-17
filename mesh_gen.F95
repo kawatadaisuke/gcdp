@@ -136,7 +136,7 @@ subroutine  mesh_gen(flag)
       if(flag.eq.0) then
         if(myrank.eq.0) then
           write(6,*) ' Mesh info'
-          write(6,*) '   nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
+          write(6,*) '   nx_m,ny_m,nz_m,lnz_m=',nx_m,ny_m,nz_m,lnz_m
           write(6,*) '   dx,dy,dz=',dx_m,dy_m,dz_m
           write(6,*) '   x0,y0,z0=',x0_m,y0_m,z0_m
         endif
