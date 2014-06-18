@@ -297,7 +297,18 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           pdbz_p(np)=0.0d0
           divb_p(np)=0.0d0
           arotb_p(np)=0.0d0
+          agradb_p(np)=0.0d0
+#ifdef TIMEDIS
           alpb_p(np)=ALPB_MIN
+#else
+          alpb_p(np)=ALPHA_CONST
+#endif
+#ifdef DCLEAN
+          psi_p(np)=0.0d0
+          ppsi_p(np)=0.0d0
+          dpsi_p(np)=0.0d0
+          pdpsi_p(np)=0.0d0
+#endif
 #endif
 
           id_p(np)=i
@@ -890,7 +901,17 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             pdbz_p(ngi)=0.0d0
             divb_p(ngi)=0.0d0
             arotb_p(ngi)=0.0d0
+#ifdef TIMEDIS
             alpb_p(ngi)=ALPB_MIN
+#else
+            alpb_p(ngi)=ALPHA_CONST
+#endif
+#ifdef DCLEAN
+            psi_p(ngi)=0.0d0
+            ppsi_p(ngi)=0.0d0
+            dpsi_p(ngi)=0.0d0
+            pdpsi_p(ngi)=0.0d0
+#endif
             ngi=ngi+1
          else
             read(51)

@@ -913,9 +913,7 @@ subroutine allocate_mhd(np)
         deallocate(pdbz_p)
         deallocate(divb_p)
         deallocate(arotb_p)
-        deallocate(rotbx_p)
-        deallocate(rotby_p)
-        deallocate(rotbz_p)
+        deallocate(agradb_p)
         deallocate(alpb_p)
         deallocate(valfi_p)
         deallocate(pb_p)
@@ -924,6 +922,13 @@ subroutine allocate_mhd(np)
         deallocate(chi_p)
         deallocate(lognh_p)
         deallocate(logne_p)
+#endif
+#ifdef DCLEAN
+        deallocate(psi_p)
+        deallocate(dpsi_p)
+        deallocate(ppsi_p)
+        deallocate(pdpsi_p)
+        deallocate(maxvmhd_p)
 #endif
       endif
 
@@ -941,9 +946,7 @@ subroutine allocate_mhd(np)
       allocate(pdbz_p(0:np))
       allocate(divb_p(0:np))
       allocate(arotb_p(0:np))
-      allocate(rotbx_p(0:np))
-      allocate(rotby_p(0:np))
-      allocate(rotbz_p(0:np))
+      allocate(agradb_p(0:np))
       allocate(alpb_p(0:np))
       allocate(valfi_p(0:np))
       allocate(pb_p(0:np))
@@ -952,6 +955,13 @@ subroutine allocate_mhd(np)
       allocate(chi_p(0:np))
       allocate(lognh_p(0:np))
       allocate(logne_p(0:np))
+#endif
+#ifdef DCLEAN
+      allocate(psi_p(0:np))
+      allocate(dpsi_p(0:np))
+      allocate(ppsi_p(0:np))
+      allocate(pdpsi_p(0:np))
+      allocate(maxvmhd_p(0:np))
 #endif
 
 end subroutine

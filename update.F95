@@ -806,7 +806,7 @@ end subroutine
 subroutine updatealpvu(ng)
       use gcdp_const
       use gcdp_baryon
-#if defined(MHD) && defined(TIMEDIS)
+#ifdef MHD
       use gcdp_mhd
 #endif
       implicit none
@@ -814,7 +814,7 @@ subroutine updatealpvu(ng)
       integer,intent(in) :: ng
       double precision tau,sav,dalpv_tau,dalpu_tau,sau
       integer i,pn
-#if defined(MHD) && defined(TIMEDIS)
+#if defined(MHD) && defined(TIMEDIS) && defined (PM05)
       double precision dalpb_tau,sab
 #endif
 
@@ -859,7 +859,8 @@ subroutine updatealpvu(ng)
           alpu_p(pn)=0.0d0
         endif
 
-#if defined(MHD) && defined(TIMEDIS)
+#ifdef MHD
+#if defined(TIMEDIS) && defined(PM05)
         dalpb_tau=-(alpb_p(pn)-ALPB_MIN)/tau
         sab=arotb_p(pn)/dsqrt(rho_p(pn))
         if(dabs(divb_p(pn))/dsqrt(rho_p(pn)).gt.sav) then
@@ -874,6 +875,10 @@ subroutine updatealpvu(ng)
 
         endif
 #endif
+#ifndef TIMEDIS
+        alpb_p(pn)=ALPHA_CONST
+#endif
+#endif
 
 #if defined(SF_EFD) || defined(SF_ZFD)
         endif
@@ -887,19 +892,36 @@ end subroutine
 
 #ifdef MHD
 ! *** B predictor ***
-subroutine updatevb(ng)
+subroutine updatevb(ng,nag)
+      use gcdp_const
       use gcdp_baryon
       use gcdp_mhd
 
       implicit none
 
-      integer ng,i,pn
+      integer ng,i,pn,nag
+      double precision,parameter :: iota=1.0e-3
 
+#if defined(TIMEDIS) && defined(TP12)
+      do i=0,nag-1
+         pn=list_ap(i)
+         alpb_p(pn)=(0.5d0*h_p(pn)*dabs(agradb_p(pn))) &
+              /(dsqrt(bx_p(pn)**2+by_p(pn)**2+bz_p(pn)**2)+iota)
+         if(alpb_p(pn).gt.ALPB_MAX) then
+            alpb_p(pn)=ALPB_MAX
+         elseif(alpb_p(pn).lt.ALPB_MIN) then
+            alpb_p(pn)=ALPB_MIN
+         endif
+      enddo
+#endif
       do i=0,ng-1
          pn=list_ap(i)
          bx_p(pn)=pbx_p(pn)+dbx_p(pn)*vdt_p(pn)
          by_p(pn)=pby_p(pn)+dby_p(pn)*vdt_p(pn)
          bz_p(pn)=pbz_p(pn)+dbz_p(pn)*vdt_p(pn)
+#ifdef DCLEAN
+         psi_p(pn)=ppsi_p(pn)+dpsi_p(pn)*vdt_p(pn)
+#endif
       enddo
 
       return
@@ -922,6 +944,10 @@ subroutine updatebn(nag)
          pbx_p(pn)=bx_p(pn)
          pby_p(pn)=by_p(pn)
          pbz_p(pn)=bz_p(pn)
+#ifdef DCLEAN
+         psi_p(pn)=ppsi_p(pn)+0.5d0*(dpsi_p(pn)+pdpsi_p(pn))*dt_p(pn)
+         ppsi_p(pn)=psi_p(pn)
+#endif
       enddo
 
       return

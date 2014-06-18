@@ -233,10 +233,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
         if(Ini_flagcop.eq.0) then
           if(TM_kn.eq.TM_k.and.SI_flagout.ne.0) then
-            OF_todt=OF_todt+OF_odt
-            SI_flagout = 0
-          end if
-        else
+             OF_todt=OF_todt+OF_odt
+             SI_flagout = 0
+          endif
+       else
           SI_flagout=0
           TM_dt=0.0d0
           TM_sdt=0.0d0
@@ -508,7 +508,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       ndbmet=0
 #endif
 #ifdef MHD
-      ndbmhd=9
+      ndbmhd=10
+#ifdef DCLEAN
+      ndbmhd=ndbmhd+1
+#endif
 #endif
 
       if(Ini_flagcop.eq.0) then
@@ -847,9 +850,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         if(myrank.lt.SI_nof) then
           close(53)
         endif
-
 ! *** Read MHD values ***
-#ifdef MHD       
+#ifdef MHD 
+        call allocate_mhd(npjr(myrank))
+      
         if(myrank.lt.SI_nof) then
           if(Ini_flagcop.eq.0) then
             write(fileo,'(a17,i4.4,a4)') 'output/data/pbmhd',myrank,'.dat'
@@ -878,6 +882,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                ,rrank,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
               call MPI_WAIT(ireqr(ip),istatus,ierr)
             endif
+
             if(ip.eq.myrank) then
               if(iv.eq.0)  then
                 do i=0,npjr(ip)-1
@@ -901,20 +906,30 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                 enddo
               else if (iv.eq.5) then
                 do i=0,npjr(ip)-1
-                  alpb_p(i)=tdvr(i)
+                  agradb_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.6) then
                 do i=0,npjr(ip)-1
-                  valfi_p(i)=tdvr(i)
+                  alpb_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.7) then
                 do i=0,npjr(ip)-1
-                  pb_p(i)=tdvr(i)
+                  valfi_p(i)=tdvr(i)
                 enddo
               else if (iv.eq.8) then
                 do i=0,npjr(ip)-1
+                  pb_p(i)=tdvr(i)
+                enddo
+              else if (iv.eq.9) then
+                do i=0,npjr(ip)-1
                   divberr_p(i)=tdvr(i)
                 enddo
+#ifdef DCLEAN
+              else if (iv.eq.10) then
+                do i=0,npjr(ip)-1
+                  psi_p(i)=tdvr(i)
+                enddo
+#endif
               endif
             endif
 
@@ -922,6 +937,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
           enddo
         enddo
+        if(myrank.lt.SI_nof) then
+          close(58)
+        endif
 #endif
 
 #ifdef STAR
@@ -1733,6 +1751,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           pdbx_p(i)=0.0d0
           pdby_p(i)=0.0d0
           pdbz_p(i)=0.0d0
+#ifdef DCLEAN
+          ppsi_p(i)=psi_p(i)
+          dpsi_p(i)=0.0d0
+          pdpsi_p(i)=0.0d0
+#endif
         enddo
 #endif
 

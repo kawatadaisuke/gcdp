@@ -16,7 +16,6 @@ subroutine setkernel()
 
       dnktab=dble(NKTAB)
       ds_tb=1.0d0/dnktab
-      
 
 ! *** W: SPH kernel ***
 ! *** for constant ***

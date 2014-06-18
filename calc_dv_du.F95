@@ -9,7 +9,7 @@
 ! ************************************
 
 subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
- ,nadmt,nast,nagravgt,flagv,flagu,flags)
+     ,nadmt,nast,nagravgt,flagv,flagu,flags,flagb)
       use gcdp_const
       use gcdp_system
 #if defined(GAS) || defined(STAR)
@@ -34,8 +34,8 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: np,ng,ndm,nag,nadm,nas,nagravg,nagt,nadmt,nast &
-       ,nagravgt,flagv,flagu,flags
+      integer,intent(in) :: np,ng,ndm,nag,nadm,nas,nagravg,nagt &
+           ,nadmt,nast,nagravgt,flagv,flagu,flags,flagb
       integer i,j,is
       integer nd
       integer npj,srank,rrank,ip,nval,nival,isend,irecv,isend0
@@ -126,13 +126,20 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 #ifdef MHD
       integer nvalmhd,snmhdval
-      double precision,allocatable :: tdmhd(:)
+      double precision,allocatable :: tdmhd(:),tdbat(:),tdpsi(:)
       double precision,allocatable :: mdwip(:),mdwjp(:)
       double precision,allocatable :: vxijp(:),vyijp(:),vzijp(:)
       double precision,allocatable :: b2ip(:),b2jp(:)
       double precision,allocatable :: vmhdi(:),vmhdj(:),alpb(:)
-      double precision,allocatable :: rotbxp(:),rotbyp(:),rotbzp(:)
       double precision,allocatable :: dbdiss(:)
+#ifdef PM05
+      double precision,allocatable :: rotbxp(:),rotbyp(:),rotbzp(:)
+#endif
+#ifdef TP12
+      double precision,allocatable :: dbxdxp(:),dbxdyp(:),dbxdzp(:)
+      double precision,allocatable :: dbydxp(:),dbydyp(:),dbydzp(:)
+      double precision,allocatable :: dbzdxp(:),dbzdyp(:),dbzdzp(:)
+#endif
 #ifdef DIVBCOR
       double precision beta
 #endif
@@ -143,8 +150,15 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       double precision,allocatable :: bbdpxp(:),bbdpyp(:),bbdpzp(:) &
        ,bbdrhoxp(:),bbdrhoyp(:),bbdrhozp(:)
 #endif
+#ifdef DCLEAN
+      double precision,parameter :: sigma=1.0d0
+      double precision,allocatable :: dpsixp(:),dpsiyp(:),dpsizp(:)
+#ifdef DLIM
+      double precision,parameter :: clim=0.5d0
+      double precision norm,dpsimag,dbmag
+#endif      
 #endif
-
+#endif
 
 !      write(fileo,'(a6,i3.3)') 'pcalvu',myrank
 !      open(60,file=fileo,status='unknown')
@@ -192,7 +206,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 #ifdef MHD
 #ifdef DIVBCOR
-          beta=0.5d0
+          beta=1.0d0
 #endif
 #endif
 
@@ -549,12 +563,28 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             pdbx_p(pn)=dbx_p(pn)
             pdby_p(pn)=dby_p(pn)
             pdbz_p(pn)=dbz_p(pn)
+#ifdef DCLEAN
+            pdpsi_p(pn)=dpsi_p(pn)
+#endif
          enddo
       endif           
 
+#ifdef PM05
       allocate(rotbxp(0:np))
       allocate(rotbyp(0:np))
       allocate(rotbzp(0:np))
+#endif
+#ifdef TP12
+      allocate(dbxdxp(0:np))
+      allocate(dbxdyp(0:np))
+      allocate(dbxdzp(0:np))
+      allocate(dbydxp(0:np))
+      allocate(dbydyp(0:np))
+      allocate(dbydzp(0:np))
+      allocate(dbzdxp(0:np))
+      allocate(dbzdyp(0:np))
+      allocate(dbzdzp(0:np))
+#endif
 #ifdef BBAT
       allocate(bbdpxp(0:np))
       allocate(bbdpyp(0:np))
@@ -563,6 +593,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       allocate(bbdrhoyp(0:np))
       allocate(bbdrhozp(0:np))
 #endif
+#ifdef DCLEAN
+      allocate(dpsixp(0:np))
+      allocate(dpsiyp(0:np))
+      allocate(dpsizp(0:np))
+#endif
 
       do i=0,nag-1
          pn=list_ap(i)
@@ -570,9 +605,22 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
          dby_p(pn)=0.0d0
          dbz_p(pn)=0.0d0
          divb_p(pn)=0.0d0
+#ifdef PM05
          rotbxp(pn)=0.0d0
          rotbyp(pn)=0.0d0
          rotbzp(pn)=0.0d0
+#endif
+#ifdef TP12
+         dbxdxp(pn)=0.0d0
+         dbxdyp(pn)=0.0d0
+         dbxdzp(pn)=0.0d0
+         dbydxp(pn)=0.0d0
+         dbydyp(pn)=0.0d0
+         dbydzp(pn)=0.0d0
+         dbzdxp(pn)=0.0d0
+         dbzdyp(pn)=0.0d0
+         dbzdzp(pn)=0.0d0
+#endif
 #ifdef BBAT
          bbdpxp(pn)=0.0d0
          bbdpyp(pn)=0.0d0
@@ -580,6 +628,12 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
          bbdrhoxp(pn)=0.0d0
          bbdrhoyp(pn)=0.0d0
          bbdrhozp(pn)=0.0d0
+#endif
+#ifdef DCLEAN
+         maxvmhd_p(pn)=0.0d0
+         dpsixp(pn)=0.0d0
+         dpsiyp(pn)=0.0d0
+         dpsizp(pn)=0.0d0
 #endif
       enddo
 #endif
@@ -656,38 +710,71 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
       enddo
 
 #ifdef MHD
-#ifdef BBAT
-      nvalmhd=17
-#else
+      nvalmhd=8
+#ifdef PM05
       nvalmhd=11
+#elif defined(TP12)
+      nvalmhd=17
 #endif
 
 ! alocate for npj particles
       allocate(tdmhd(0:npj*nvalmhd))
-
+#ifdef BBAT
+      allocate(tdbat(0:npj*6))
+#endif
+#ifdef DCLEAN
+      allocate(tdpsi(0:npj*5))
+#endif
       do i=0,npj-1
          pni=list_ap(i)
          tdmhd(i)=bx_p(pni)
          tdmhd(i+npj)=by_p(pni)
          tdmhd(i+npj*2)=bz_p(pni)
-         tdmhd(i+npj*10)=alpb_p(pni)
          tdmhd(i+npj*3)=0.0d0
          tdmhd(i+npj*4)=0.0d0
          tdmhd(i+npj*5)=0.0d0
          tdmhd(i+npj*6)=0.0d0
-         tdmhd(i+npj*7)=0.0d0
+         tdmhd(i+npj*7)=alpb_p(pni)
+      enddo
+#ifdef PM05
+      do i=0,npj-1
          tdmhd(i+npj*8)=0.0d0
          tdmhd(i+npj*9)=0.0d0
+         tdmhd(i+npj*10)=0.0d0
       enddo
+#endif
+#ifdef TP12
+      do i=0,npj-1
+         tdmhd(i+npj*8)=0.0d0
+         tdmhd(i+npj*9)=0.0d0
+         tdmhd(i+npj*10)=0.0d0
+         tdmhd(i+npj*11)=0.0d0
+         tdmhd(i+npj*12)=0.0d0
+         tdmhd(i+npj*13)=0.0d0
+         tdmhd(i+npj*14)=0.0d0
+         tdmhd(i+npj*15)=0.0d0
+         tdmhd(i+npj*16)=0.0d0
+      enddo
+#endif
 #ifdef BBAT
       do i=0,npj-1
          pni=list_ap(i)
-         tdmhd(i+npj*11)=bbdpxp(pni)
-         tdmhd(i+npj*12)=bbdpyp(pni)
-         tdmhd(i+npj*13)=bbdpzp(pni)
-         tdmhd(i+npj*14)=bbdrhoxp(pni)
-         tdmhd(i+npj*15)=bbdrhoyp(pni)
-         tdmhd(i+npj*16)=bbdrhozp(pni)
+         tdbat(i)=bbdpxp(pni)
+         tdbat(i+npj)=bbdpyp(pni)
+         tdbat(i+npj*2)=bbdpzp(pni)
+         tdbat(i+npj*3)=bbdrhoxp(pni)
+         tdbat(i+npj*4)=bbdrhoyp(pni)
+         tdbat(i+npj*5)=bbdrhozp(pni)
+      enddo
+#endif
+#ifdef DCLEAN
+      do i=0,npj-1
+         pni=list_ap(i)
+         tdpsi(i)=psi_p(pni)
+         tdpsi(i+npj)=maxvmhd_p(pni)
+         tdpsi(i+npj*2)=0.0d0
+         tdpsi(i+npj*3)=0.0d0
+         tdpsi(i+npj*4)=0.0d0
       enddo
 #endif
 #endif
@@ -1130,7 +1217,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! A.C. for positive v_x_r
 ! Price & Monaghan (2005)
 #ifdef MHD
-           vsigav(i)=0.5d0*(vmhdi(i)+vmhdj(i)-V_BETA*v_x_r(i))
+          vsigav(i)=0.5d0*(vmhdi(i)+vmhdj(i)-V_BETA*v_x_r(i))
 #else
           vsigav(i)=(tdvr(listb(i)+npj*7)+cs_p(nblistb(i)) &
            -V_BETA*v_x_r(i))*0.5d0
@@ -1138,6 +1225,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           if(vsigav(i).lt.0.0d0) then
             vsigav(i)=0.0d0
           endif
+#ifdef DCLEAN
+          if(vsigav(i).gt.tdpsi(listb(i)+npj)) then
+             tdpsi(listb(i)+npj)=vsigav(i)
+          endif
+#endif
 #ifdef NOAC
           alpuij=0.0d0
           dudissu(i)=0.0d0
@@ -1171,13 +1263,12 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
       do i=0,nbp-1
 #ifdef TIMEDIS
-         alpb(i)=0.5d0*(tdmhd(listb(i)+npj*10)+alpb_p(nblistb(i)))
+         alpb(i)=0.5d0*(tdmhd(listb(i)+npj*7)+alpb_p(nblistb(i)))
 #else
          alpb(i)=ALPHA_CONST
 #endif
       enddo
 #endif
-
       if(flagu.ne.1) then
 !DEC$ IVDEP
         do i=0,nbp-1
@@ -1188,7 +1279,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
            -(0.25d0*alpb(i))*(rijp(i)*mdwij(i)*vsigav(i) &
            *((tdmhd(listb(i))-bx_p(nblistb(i)))**2 &
            +(tdmhd(listb(i)+npj)-by_p(nblistb(i)))**2 &
-           +(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))**2))/(rhoij(i)**2) 
+           +(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))**2))/(rhoij(i)**2)
 #else
           tdvr(listb(i)+npj*14)=tdvr(listb(i)+npj*14) &
            -(rijp(i)*mdwij(i)/rhoij(i))*(dudissv(i)-dudissu(i))
@@ -1206,8 +1297,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 ! Magnetic Dissipation Dolag
       do i=0,nbp-1
-        dbdiss(i)=(tdvr(listb(i)+npj*8)*tdvr(listb(i) &
-         +npj*11))*((tdvr(listb(i)+npj*8)*alpb(i)))*(rijp(i) &
+        dbdiss(i)=((tdvr(listb(i)+npj*8)*alpb(i)))*(rijp(i) &
          *mdwij(i))*vsigav(i)/(rhoij(i)**2)
 
 ! not used         
@@ -1224,40 +1314,86 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! d(Bx)/dt
         tdmhd(listb(i)+npj*3)=tdmhd(listb(i)+npj*3) &
 ! Dolag version
-         -mdwip(i)*(vxijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
-         *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))-tdmhd(listb(i)) &
-         *(xijp(i)*vxijp(i)+yijp(i)*vyijp(i)+zijp(i)*vzijp(i))) &
-         +dbdiss(i)*(tdmhd(listb(i))-bx_p(nblistb(i))) 
+         -(mdwip(i)*(vxijp(i)*(tdmhd(listb(i))*xijp(i) &
+         +tdmhd(listb(i)+npj)*yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
+         -tdmhd(listb(i))*(xijp(i)*vxijp(i)+yijp(i)*vyijp(i)+zijp(i) &
+         *vzijp(i)))) &
+         /(tdvr(listb(i)+npj*8)*tdvr(listb(i)+npj*11)) & 
+         +dbdiss(i)*(tdmhd(listb(i))-bx_p(nblistb(i)))
 ! Rosswog version
 !        -mdwip(i)*(vxijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
 !        *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))) &
 !        +dbdiss(i)*(tdmhd(listb(i))-bx_p(nblistb(i)))
+! Cleaning calcultaion X
+#ifdef DCLEAN
+#ifdef DIVSYM
+        tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2)-(mdwip(i) &
+             *(tdpsi(listb(i))-psi_p(nblistb(i)))*xijp(i) &
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
+#else
+        tdpsi(listb(i)+npj*2)=tdpsi(listb(i)+npj*2) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *xijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*xijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
+#endif
+#endif
 
 ! d(By)/dt
-         tdmhd(listb(i)+npj*4)=tdmhd(listb(i)+npj*4) &
+        tdmhd(listb(i)+npj*4)=tdmhd(listb(i)+npj*4) &
 ! Dolag version
-          -mdwip(i)*(vyijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
-          *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
+          -(mdwip(i)*(vyijp(i)*(tdmhd(listb(i))*xijp(i) &
+          +tdmhd(listb(i)+npj)*yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
           -tdmhd(listb(i)+npj)*(xijp(i)*vxijp(i)+yijp(i)*vyijp(i) &
-          +zijp(i)*vzijp(i)))+dbdiss(i) &
-          *(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
+          +zijp(i)*vzijp(i)))) &
+          /(tdvr(listb(i)+npj*8)*tdvr(listb(i)+npj*11)) &
+          +dbdiss(i)*(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
 ! Rosswog version
 !         -mdwip(i)*(vyijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj)
 !         *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)))
 !         +dbdiss(i)*(tdmhd(listb(i)+npj)-by_p(nblistb(i)))
+! Cleaning calcultaion Y
+#ifdef DCLEAN
+#ifdef DIVSYM
+        tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3)-(mdwip(i) &
+             *(tdpsi(listb(i))-psi_p(nblistb(i)))*yijp(i) &
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
+#else
+        tdpsi(listb(i)+npj*3)=tdpsi(listb(i)+npj*3) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *yijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*yijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
+#endif
+#endif
            
 ! d(Bz)/dt
-         tdmhd(listb(i)+npj*5)=tdmhd(listb(i)+npj*5) &
+        tdmhd(listb(i)+npj*5)=tdmhd(listb(i)+npj*5) &
 ! Dolag version
-          -mdwip(i)*(vzijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
-          *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
-          -tdmhd(listb(i)+npj*2)*(xijp(i)*vxijp(i)+yijp(i) &
-          *vyijp(i)+zijp(i)*vzijp(i)))+dbdiss(i) &
-          *(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
+          -(mdwip(i)*(vzijp(i)*(tdmhd(listb(i))*xijp(i) &
+          +tdmhd(listb(i)+npj)*yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i)) &
+          -tdmhd(listb(i)+npj*2)*(xijp(i)*vxijp(i)+yijp(i)*vyijp(i) &
+          +zijp(i)*vzijp(i)))) &
+          /(tdvr(listb(i)+npj*8)*tdvr(listb(i)+npj*11)) &
+          +dbdiss(i)*(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
 ! Rosswog version
 !          -mdwip(i)*(vzijp(i)*(tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj) &
 !          *yijp(i)+tdmhd(listb(i)+npj*2)*zijp(i))) &
 !          +dbdiss(i)*(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))
+! Cleaning calcultaion Z
+#ifdef DCLEAN
+#ifdef DIVSYM
+        tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4)-(mdwip(i) &
+             *(tdpsi(listb(i))-psi_p(nblistb(i)))*zijp(i) &
+             /(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)))
+#else
+        tdpsi(listb(i)+npj*4)=tdpsi(listb(i)+npj*4) &
+             -tdvr(listb(i)+npj*8)*((mdwip(i)*tdpsi(listb(i)) &
+             *zijp(i))/(tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+             +(mdwjp(i)*psi_p(nblistb(i))*zijp(i))/(omgh_p(nblistb(i)) &
+             *rho_p(nblistb(i))**2))
+#endif
+#endif
       enddo
 
       deallocate(vxijp)
@@ -1270,25 +1406,77 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
       do i=0,nbp-1
 ! div B
+#ifdef DIVSYM
+         tdmhd(listb(i)+npj*6)=tdmhd(listb(i)+npj*6)+(((mdwip(i) &
+              *tdvr(listb(i)+npj*11)*tdvr(listb(i)+npj*8)**2) &
+              *((tdmhd(listb(i))*xijp(i)+tdmhd(listb(i)+npj)*yijp(i) &
+              +tdmhd(listb(i)+npj*2)*zijp(i))/(tdvr(listb(i)+npj*11) &
+              *tdvr(listb(i)+npj*8)**2))) &
+              +((mdwjp(i)*tdvr(listb(i)+npj*11) &
+              *tdvr(listb(i)+npj*8)**2)*((bx_p(nblistb(i))*xijp(i) &
+              +by_p(nblistb(i))*yijp(i)+bz_p(nblistb(i))*zijp(i)) &
+              /(omgh_p(nblistb(i))*rho_p(nblistb(i))**2))))
+#else
          tdmhd(listb(i)+npj*6)=tdmhd(listb(i)+npj*6)+mdwip(i) &
-          *(bx_p(nblistb(i))*xijp(i)+by_p(nblistb(i))*yijp(i) &
-          +bz_p(nblistb(i))*zijp(i))
+              *((bx_p(nblistb(i))-tdmhd(listb(i)))*xijp(i) &
+              +(by_p(nblistb(i))-tdmhd(listb(i)+npj))*yijp(i) &
+              +(bz_p(nblistb(i))-tdmhd(listb(i)+npj*2))*zijp(i))
+#endif
+      enddo
+ 
+      if(flagb.eq.1) then
+         do i=0,nbp-1
+#ifdef PM05
 ! rot B
-         tdmhd(listb(i)+npj*7)=tdmhd(listb(i)+npj*7)-mdwip(i) &
-          *(bz_p(nblistb(i))*yijp(i)-by_p(nblistb(i))*zijp(i))
-         
-         tdmhd(listb(i)+npj*8)=tdmhd(listb(i)+npj*8)-mdwip(i) &
-          *(bx_p(nblistb(i))*zijp(i)-bz_p(nblistb(i))*xijp(i))
-         
-         tdmhd(listb(i)+npj*9)=tdmhd(listb(i)+npj*9)-mdwip(i) &
-          *(by_p(nblistb(i))*xijp(i)-bx_p(nblistb(i))*yijp(i))
-         
-
+            tdmhd(listb(i)+npj*8)=tdmhd(listb(i)+npj*8)-mdwip(i) &
+                 *((tdmhd(listb(i)+npj)-by_p(nblistb(i)))*zijp(i) &
+                 -(tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))*yijp(i))
+            
+            tdmhd(listb(i)+npj*9)=tdmhd(listb(i)+npj*9)-mdwip(i) &
+                 *((tdmhd(listb(i)+npj*2)-bz_p(nblistb(i)))*xijp(i) &
+                 -(tdmhd(listb(i))-bx_p(nblistb(i)))*zijp(i))
+            
+            tdmhd(listb(i)+npj*10)=tdmhd(listb(i)+npj*10)-mdwip(i) &
+                 *((tdmhd(listb(i)+npj)-bx_p(nblistb(i)))*yijp(i) &
+                 -(tdmhd(listb(i)+npj)-by_p(nblistb(i)))*xijp(i))
+#endif
+#ifdef TP12
+! dBx/dx
+            tdmhd(listb(i)+npj*8)=tdmhd(listb(i)+npj*8)+mdwip(i) &
+                 *(bx_p(nblistb(i))-tdmhd(listb(i)))*xijp(i)
+! dBx/dy
+            tdmhd(listb(i)+npj*9)=tdmhd(listb(i)+npj*9)+mdwip(i) &
+                 *(bx_p(nblistb(i))-tdmhd(listb(i)))*yijp(i)
+! dBx/dz
+            tdmhd(listb(i)+npj*10)=tdmhd(listb(i)+npj*10)+mdwip(i) &
+                 *(bx_p(nblistb(i))-tdmhd(listb(i)))*zijp(i)
+! dBy/dx
+            tdmhd(listb(i)+npj*11)=tdmhd(listb(i)+npj*11)+mdwip(i) &
+                 *(by_p(nblistb(i))-tdmhd(listb(i)+npj))*xijp(i)
+! dBy/dy
+            tdmhd(listb(i)+npj*12)=tdmhd(listb(i)+npj*12)+mdwip(i) &
+                 *(by_p(nblistb(i))-tdmhd(listb(i)+npj))*yijp(i)
+! dBy/dz
+            tdmhd(listb(i)+npj*13)=tdmhd(listb(i)+npj*13)+mdwip(i) &
+                 *(by_p(nblistb(i))-tdmhd(listb(i)+npj))*zijp(i)
+! dBz/dx
+            tdmhd(listb(i)+npj*14)=tdmhd(listb(i)+npj*14)+mdwip(i) &
+                 *(bz_p(nblistb(i))-tdmhd(listb(i)+npj*2))*xijp(i)
+! dBz/dy
+            tdmhd(listb(i)+npj*15)=tdmhd(listb(i)+npj*15)+mdwip(i) &
+                 *(bz_p(nblistb(i))-tdmhd(listb(i)+npj*2))*yijp(i)
+! dBz/dz
+            tdmhd(listb(i)+npj*16)=tdmhd(listb(i)+npj*16)+mdwip(i) &
+                 *(bz_p(nblistb(i))-tdmhd(listb(i)+npj*2))*zijp(i)
+#endif
+         enddo
+      endif
+      do i=0,nbp-1
 ! 0.5*Bi^2, 0.5*Bj^2           
          b2ip(i)=0.5d0*(tdmhd(listb(i))**2+tdmhd(listb(i)+npj)**2 &
-          +tdmhd(listb(i)+npj*2)**2)
+              +tdmhd(listb(i)+npj*2)**2)
          b2jp(i)=0.5d0*(bx_p(nblistb(i))**2 &
-          +by_p(nblistb(i))**2+bz_p(nblistb(i))**2)
+              +by_p(nblistb(i))**2+bz_p(nblistb(i))**2)
       enddo
 
 #ifdef BBAT
@@ -1297,14 +1485,13 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
          dpj=(tx(i)*mdwic(i)/tdvr(listb(i)+npj*11))+p_p(nblistb(i)) &
           *mdwjc(i)/(omgh_p(nblistb(i))*(rho_p(nblistb(i))**2))
 
-         tdmhd(i+npj*11)=tdmhd(i+npj*11)+(xijp(i)*dpj)
-         tdmhd(i+npj*12)=tdmhd(i+npj*11)+(yijp(i)*dpj)
-         tdmhd(i+npj*13)=tdmhd(i+npj*11)+(zijp(i)*dpj)
-
+         tdbat(i)=tdbat(i)+(xijp(i)*dpj)
+         tdbat(i+npj)=tdbat(i+npj)+(yijp(i)*dpj)
+         tdbat(i+npj*2)=tdbat(i+npj*2)+(zijp(i)*dpj)
 ! *** Calculation of gradRHO for Battery
-         tdmhd(i+npj*14)=tdmhd(i+npj*14)+(xijp(i)*mdwip(i))
-         tdmhd(i+npj*15)=tdmhd(i+npj*15)+(yijp(i)*mdwip(i))
-         tdmhd(i+npj*16)=tdmhd(i+npj*16)+(zijp(i)*mdwip(i))
+         tdbat(i+npj*3)=tdbat(i+npj*3)+(xijp(i)*mdwip(i))
+         tdbat(i+npj*4)=tdbat(i+npj*4)+(yijp(i)*mdwip(i))
+         tdbat(i+npj*5)=tdbat(i+npj*5)+(zijp(i)*mdwip(i))
 
       enddo
 #endif
@@ -1693,12 +1880,14 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         deallocate(tdvs)
 
 #endif
-
+! Transfer MHD variables
 #ifdef MHD
         isend=0
-        snval=7
-#ifdef BBAT
-        snval=13
+        snval=5
+#ifdef PM05
+        snval=8
+#elif defined(TP12)
+        snval=14
 #endif
 
         allocate(tdvs(0:npjs*snval))
@@ -1716,18 +1905,22 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
            tdvs(snval*i+2)=tdmhd(i+npjs*5)
            tdvs(snval*i+3)=tdmhd(i+npjs*6)
            tdvs(snval*i+4)=tdmhd(i+npjs*7)
+#ifdef PM05
            tdvs(snval*i+5)=tdmhd(i+npjs*8)
            tdvs(snval*i+6)=tdmhd(i+npjs*9)
-#ifdef BBAT
-           tdvs(snval*i+7)=tdmhd(i+npjs*11)
-           tdvs(snval*i+8)=tdmhd(i+npjs*12)
-           tdvs(snval*i+9)=tdmhd(i+npjs*13)
-           tdvs(snval*i+10)=tdmhd(i+npjs*14)
-           tdvs(snval*i+11)=tdmhd(i+npjs*15)
-           tdvs(snval*i+12)=tdmhd(i+npjs*16)
+           tdvs(snval*i+7)=tdmhd(i+npjs*10)
+#elif defined(TP12)
+           tdvs(snval*i+5)=tdmhd(i+npjs*8)
+           tdvs(snval*i+6)=tdmhd(i+npjs*9)
+           tdvs(snval*i+7)=tdmhd(i+npjs*10)
+           tdvs(snval*i+8)=tdmhd(i+npjs*11)
+           tdvs(snval*i+9)=tdmhd(i+npjs*12)
+           tdvs(snval*i+10)=tdmhd(i+npjs*13)
+           tdvs(snval*i+11)=tdmhd(i+npjs*14)
+           tdvs(snval*i+12)=tdmhd(i+npjs*15)
+           tdvs(snval*i+13)=tdmhd(i+npjs*16)
 #endif
-
-        enddo
+       enddo
 ! *** sending and reveiving the data ***
         irecv=0
 ! *** ncompi: number of particles originally sent from iproc=0
@@ -1749,16 +1942,123 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             tdmhd(irecv+npj*5)=trbuf(snval*i+2)
             tdmhd(irecv+npj*6)=trbuf(snval*i+3)
             tdmhd(irecv+npj*7)=trbuf(snval*i+4)
+#ifdef PM05
             tdmhd(irecv+npj*8)=trbuf(snval*i+5)
             tdmhd(irecv+npj*9)=trbuf(snval*i+6)
-#ifdef BBAT
-            tdmhd(irecv+npj*11)=trbuf(snval*i+7)
-            tdmhd(irecv+npj*12)=trbuf(snval*i+8)
-            tdmhd(irecv+npj*13)=trbuf(snval*i+9)
-            tdmhd(irecv+npj*14)=trbuf(snval*i+10)
-            tdmhd(irecv+npj*15)=trbuf(snval*i+11)
-            tdmhd(irecv+npj*16)=trbuf(snval*i+12)
+            tdmhd(irecv+npj*10)=trbuf(snval*i+7)
+#elif defined(TP12)
+            tdmhd(irecv+npj*8)=trbuf(snval*i+5)
+            tdmhd(irecv+npj*9)=trbuf(snval*i+6)
+            tdmhd(irecv+npj*10)=trbuf(snval*i+7)
+            tdmhd(irecv+npj*11)=trbuf(snval*i+8)
+            tdmhd(irecv+npj*12)=trbuf(snval*i+9)
+            tdmhd(irecv+npj*13)=trbuf(snval*i+10)
+            tdmhd(irecv+npj*14)=trbuf(snval*i+11)
+            tdmhd(irecv+npj*15)=trbuf(snval*i+12)
+            tdmhd(irecv+npj*16)=trbuf(snval*i+13)
 #endif
+           irecv=irecv+1
+          enddo
+
+          deallocate(trbuf)
+
+        enddo
+
+        deallocate(tdvs)
+
+! Transfer Cleaning variables
+#ifdef DCLEAN
+        isend=0
+        snval=4
+        
+        allocate(tdvs(0:npjs*snval))
+        
+! *** setting the number of particles to send
+        do i=0,nprocs-1
+           idisp(i)=isend 
+           jjlen(i)=tivs(i)*snval
+           isend=isend+jjlen(i)          
+        enddo
+! *** setting the sending back data ***
+        do i=0,npjs-1
+           tdvs(snval*i)=tdpsi(i+npjs)
+           tdvs(snval*i+1)=tdpsi(i+npjs*2)
+           tdvs(snval*i+2)=tdpsi(i+npjs*3)
+           tdvs(snval*i+3)=tdpsi(i+npjs*4)
+        enddo
+! *** sending and reveiving the data ***
+        irecv=0
+! *** ncompi: number of particles originally sent from iproc=0
+        npj=ncompi
+
+        deallocate(tdpsi)
+        allocate(tdpsi(0:npj*5))
+        
+        do ip=0,nprocs-1
+           
+           allocate(trbuf(0:npjr(ip)*snval))
+           
+           call MPI_SCATTERV(tdvs,jjlen,idisp,MPI_DOUBLE_PRECISION &
+                ,trbuf,npjr(ip)*snval,MPI_DOUBLE_PRECISION,ip &
+                ,MPI_COMM_WORLD,ierr)
+! *** set the data to tdvr ***
+           do i=0,npjr(ip)-1
+              tdpsi(irecv+npj)=trbuf(snval*i)
+              tdpsi(irecv+npj*2)=trbuf(snval*i+1)
+              tdpsi(irecv+npj*3)=trbuf(snval*i+2)
+              tdpsi(irecv+npj*4)=trbuf(snval*i+3)
+              irecv=irecv+1
+           enddo
+
+           deallocate(trbuf)
+           
+        enddo
+        
+        deallocate(tdvs)
+#endif
+! Transfer BBAT variables
+#ifdef BBAT
+        isend=0
+        snval=6
+        allocate(tdvs(0:npjs*snval))
+
+! *** setting the number of particles to send
+        do i=0,nprocs-1
+           idisp(i)=isend 
+           jjlen(i)=tivs(i)*snval
+           isend=isend+jjlen(i)          
+        enddo
+! *** setting the sending back data ***
+        do i=0,npjs-1
+           tdvs(snval*i)=tdbat(i)
+           tdvs(snval*i+1)=tdbat(i+npjs)
+           tdvs(snval*i+2)=tdbat(i+npjs*2)
+           tdvs(snval*i+3)=tdbat(i+npjs*3)
+           tdvs(snval*i+4)=tdbat(i+npjs*4)
+           tdvs(snval*i+5)=tdbat(i+npjs*5)
+        enddo
+! *** sending and reveiving the data ***
+        irecv=0
+! *** ncompi: number of particles originally sent from iproc=0
+        npj=ncompi
+
+        deallocate(tdbat)
+        allocate(tdbat(0:npj*6))
+
+        do ip=0,nprocs-1
+
+          allocate(trbuf(0:npjr(ip)*snval))
+
+          call MPI_SCATTERV(tdvs,jjlen,idisp,MPI_DOUBLE_PRECISION &
+          ,trbuf,npjr(ip)*snval,MPI_DOUBLE_PRECISION,ip,MPI_COMM_WORLD,ierr)
+! *** set the data to tdvr ***
+          do i=0,npjr(ip)-1
+            tdbat(irecv)=trbuf(snval*i)
+            tdbat(irecv+npj)=trbuf(snval*i+1)
+            tdbat(irecv+npj*2)=trbuf(snval*i+2)
+            tdbat(irecv+npj*3)=trbuf(snval*i+3)
+            tdbat(irecv+npj*4)=trbuf(snval*i+4)
+            tdbat(irecv+npj*5)=trbuf(snval*i+5)
             irecv=irecv+1
           enddo
 
@@ -1767,6 +2067,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
         enddo
 
         deallocate(tdvs)
+#endif
 #endif
 
 #if defined(SF_EFD) || defined(SF_ZFD)
@@ -1864,22 +2165,43 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 #ifdef MHD
       do i=0,npj-1
-        pni=pn_nfp(i)
+         pni=pn_nfp(i)
 #ifdef BBAT
-        bbdpxp(pni)=bbdpxp(pni)+tdmhd(i+npj*11)
-        bbdpyp(pni)=bbdpyp(pni)+tdmhd(i+npj*12)
-        bbdpzp(pni)=bbdpzp(pni)+tdmhd(i+npj*13)
-        bbdrhoxp(pni)=bbdrhoxp(pni)+tdmhd(i+npj*14)/omgh_p(pni)
-        bbdrhoyp(pni)=bbdrhoyp(pni)+tdmhd(i+npj*15)/omgh_p(pni)
-        bbdrhozp(pni)=bbdrhozp(pni)+tdmhd(i+npj*16)/omgh_p(pni)
+         bbdpxp(pni)=bbdpxp(pni)+tdbat(i)
+         bbdpyp(pni)=bbdpyp(pni)+tdbat(i+npj)
+         bbdpzp(pni)=bbdpzp(pni)+tdbat(i+npj*2)
+         bbdrhoxp(pni)=bbdrhoxp(pni)+tdbat(i+npj*3)/omgh_p(pni)
+         bbdrhoyp(pni)=bbdrhoyp(pni)+tdbat(i+npj*4)/omgh_p(pni)
+         bbdrhozp(pni)=bbdrhozp(pni)+tdbat(i+npj*5)/omgh_p(pni)
 #endif
-        dbx_p(pni)=dbx_p(pni)+tdmhd(i+npj*3)
-        dby_p(pni)=dby_p(pni)+tdmhd(i+npj*4)
-        dbz_p(pni)=dbz_p(pni)+tdmhd(i+npj*5)
-        divb_p(pni)=divb_p(pni)+tdmhd(i+npj*6)
-        rotbxp(pni)=rotbxp(pni)+tdmhd(i+npj*7)
-        rotbyp(pni)=rotbyp(pni)+tdmhd(i+npj*8)
-        rotbzp(pni)=rotbzp(pni)+tdmhd(i+npj*9)
+         dbx_p(pni)=dbx_p(pni)+tdmhd(i+npj*3)
+         dby_p(pni)=dby_p(pni)+tdmhd(i+npj*4)
+         dbz_p(pni)=dbz_p(pni)+tdmhd(i+npj*5)
+         divb_p(pni)=divb_p(pni)+tdmhd(i+npj*6)
+#ifdef PM05
+         rotbxp(pni)=rotbxp(pni)+tdmhd(i+npj*8)
+         rotbyp(pni)=rotbyp(pni)+tdmhd(i+npj*9)
+         rotbzp(pni)=rotbzp(pni)+tdmhd(i+npj*10)
+#endif
+#ifdef TP12
+         dbxdxp(pni)=dbxdxp(pni)+tdmhd(i+npj*8)
+         dbxdyp(pni)=dbxdyp(pni)+tdmhd(i+npj*9)
+         dbxdzp(pni)=dbxdzp(pni)+tdmhd(i+npj*10)
+         dbydxp(pni)=dbydxp(pni)+tdmhd(i+npj*11)
+         dbydyp(pni)=dbydyp(pni)+tdmhd(i+npj*12)
+         dbydzp(pni)=dbydzp(pni)+tdmhd(i+npj*13)
+         dbzdxp(pni)=dbzdxp(pni)+tdmhd(i+npj*14)
+         dbzdyp(pni)=dbzdyp(pni)+tdmhd(i+npj*15)
+         dbzdzp(pni)=dbzdzp(pni)+tdmhd(i+npj*16)
+#endif
+#ifdef DCLEAN
+         if(tdpsi(i+npj).gt.maxvmhd_p(pni)) then
+            maxvmhd_p(pni)=tdpsi(i+npj)
+         endif
+         dpsixp(pni)=dpsixp(pni)+tdpsi(i+npj*2)
+         dpsiyp(pni)=dpsiyp(pni)+tdpsi(i+npj*3)
+         dpsizp(pni)=dpsizp(pni)+tdpsi(i+npj*4)
+#endif
       enddo
 #endif
 
@@ -2287,9 +2609,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 
 #ifdef MHD
-! *** for integer values ***
         isend=0
         snmhdval=4
+#ifdef DCLEAN
+        snmhdval=snmhdval+2
+#endif
 
         if(allocated(tdvs)) then
           deallocate(tdvs)
@@ -2302,6 +2626,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
            tdvs(snmhdval*i+1)=by_p(pni)
            tdvs(snmhdval*i+2)=bz_p(pni)
            tdvs(snmhdval*i+3)=alpb_p(pni)
+#ifdef DCLEAN
+           tdvs(snmhdval*i+4)=psi_p(pni)
+           tdvs(snmhdval*i+5)=maxvmhd_p(pni)
+#endif           
         enddo
 ! *** reset sending parameters ***
         do i=0,nprocs-1
@@ -2312,6 +2640,10 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 ! reallocate tdmhd to receive npj particles
         deallocate(tdmhd)
         allocate(tdmhd(0:npj*nvalmhd))
+#ifdef DCLEAN
+        deallocate(tdpsi)
+        allocate(tdpsi(0:npj*5))
+#endif
 
 ! *** sending and reveiving the data ***
         irecv=0
@@ -2326,7 +2658,11 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             tdmhd(irecv)=trbuf(snmhdval*i)
             tdmhd(irecv+npj)=trbuf(snmhdval*i+1)
             tdmhd(irecv+npj*2)=trbuf(snmhdval*i+2)
-            tdmhd(irecv+npj*10)=trbuf(snmhdval*i+3)
+            tdmhd(irecv+npj*7)=trbuf(snmhdval*i+3)
+#ifdef DCLEAN
+            tdpsi(irecv)=trbuf(snmhdval*i+4)
+            tdpsi(irecv+npj)=trbuf(snmhdval*i+5)
+#endif
             irecv=irecv+1
           enddo
 
@@ -2336,12 +2672,27 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
         deallocate(tdvs)
 
-        do i=npj*3,npj*10-1
+        do i=npj*3,npj*7-1
            tdmhd(i)=0.0d0
         enddo
-#ifdef BBAT
-        do i=npj*11,npj*nvalmhd-1
+#ifdef PM05
+        do i=npj*8,npj*11-1
            tdmhd(i)=0.0d0
+        enddo
+#endif
+#ifdef TP12
+        do i=npj*8,npj*17-1
+           tdmhd(i)=0.0d0
+        enddo
+#endif        
+#ifdef BBAT
+        do i=0,npj*6-1
+           tdbat(i)=0.0d0
+        enddo
+#endif
+#ifdef DCLEAN
+        do i=npj,npj*5-1
+           tdpsi(i)=0.0d0
         enddo
 #endif
         snval=snmhdval
@@ -2446,45 +2797,94 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #endif
         enddo
 
-#ifdef MHD 
+#ifdef MHD
         do i=0,nag-1
            pn=list_ap(i)
-           dbx_p(pn)=dbx_p(pn)/(omgh_p(pn)*rho_p(pn))
-           dby_p(pn)=dby_p(pn)/(omgh_p(pn)*rho_p(pn))
-           dbz_p(pn)=dbz_p(pn)/(omgh_p(pn)*rho_p(pn))
-           divb_p(pn)=-divb_p(pn)/rho_p(pn)
+! Cleaning Limiter
+#ifdef DCLEAN
+#ifdef DLIM
+           dpsimag=0.0d0
+           dbmag=0.0d0
+           dpsimag=dsqrt(dpsixp(pn)*dpsixp(pn)+dpsiyp(pn)*dpsiyp(pn) &
+                +dpsizp(pn)*dpsizp(pn))
+           dbmag=clim*dsqrt(dbx_p(pn)*dbx_p(pn)+dby_p(pn)*dby_p(pn) &
+                +dbz_p(pn)*dbz_p(pn))
+           if(dpsimag.gt.dbmag) then
+              norm=dbmag/dpsimag
+              dpsixp(pn)=dpsixp(pn)*norm
+              dpsiyp(pn)=dpsiyp(pn)*norm
+              dpsizp(pn)=dpsizp(pn)*norm
+           endif
+#endif
+! Cleaning contribution to Induction Equation           
+           dbx_p(pn)=dbx_p(pn)+dpsixp(pn)
+           dby_p(pn)=dby_p(pn)+dpsiyp(pn)
+           dbz_p(pn)=dbz_p(pn)+dpsizp(pn)
+#endif
+! Total div-B
+           divb_p(pn)=divb_p(pn)/(omgh_p(pn)*rho_p(pn))
+! Dpsi
+#ifdef DCLEAN
+           dpsi_p(pn)=-divb_p(pn)*maxvmhd_p(pn)**2 &
+#ifdef DENER
+                -0.5d0*psi_p(pn)*div_v_p(pn) &
+#endif
+                -2.0d0*(psi_p(pn)*sigma*maxvmhd_p(pn))/h_p(pn)
+#endif
+! Total curl-B
+#ifdef PM05
            arotb_p(pn)=dsqrt(rotbxp(pn)**2+rotbyp(pn)**2 &
-            +rotbzp(pn)**2)/rho_p(pn)
-! *** Calculate Divergence error
+                +rotbzp(pn)**2)/(dabs(omgh_p(pn))*rho_p(pn))
+#endif
+! Total grad-B
+#ifdef TP12
+           agradb_p(pn)=dsqrt(dbxdxp(pn)**2+dbxdyp(pn)**2 &
+                +dbxdzp(pn)**2+dbydxp(pn)**2+dbydyp(pn)**2 &
+                +dbydzp(pn)**2+dbzdxp(pn)**2+dbzdyp(pn)**2 &
+                +dbzdzp(pn)**2)/(dabs(omgh_p(pn))*rho_p(pn))
+#endif
+! Calculate Divergence error
            divberr_p(pn)=dabs(divb_p(pn)*h_p(pn))/dsqrt(bx_p(pn)**2 &
-            +by_p(pn)**2+bz_p(pn)**2)
+                +by_p(pn)**2+bz_p(pn)**2)
            if(divberr_p(pn).gt.0.0d0) then
-             divberr_p(pn)=dlog10(divberr_p(pn))
+              divberr_p(pn)=dlog10(divberr_p(pn))
            else
-             divberr_p(pn)=-INF
+              divberr_p(pn)=-INF
            endif
         enddo
-
+#ifdef PM05
         deallocate(rotbxp)
         deallocate(rotbyp)
         deallocate(rotbzp)
-
+#endif
+#ifdef TP12
+        deallocate(dbxdxp)
+        deallocate(dbxdyp)
+        deallocate(dbxdzp)
+        deallocate(dbydxp)
+        deallocate(dbydyp)
+        deallocate(dbydzp)
+        deallocate(dbzdxp)
+        deallocate(dbzdyp)
+        deallocate(dbzdzp)
+#endif
+#ifdef DCLEAN
+        deallocate(dpsixp)
+        deallocate(dpsiyp)
+        deallocate(dpsizp)
+#endif
 #ifdef BBAT
-
 ! set listab
         do i=0,nag-1
           listb=list_ap(i)
         enddo
-
 ! only for active gas
         call setchi(nag,listb,zn)
-
         do i=0,nag-1
            pni=list_ap(i)
            bbdpxp(pni)=bbdpxp(pni)*rho_p(pni)
            bbdpyp(pni)=bbdpyp(pni)*rho_p(pni)
            bbdpzp(pni)=bbdpzp(pni)*rho_p(pni)
-
 ! Alternative Battery term
            genbx=((bbdpyp(pni)*bbdrhozp(pni))-(bbdrhoyp(pni) &
             *bbdpzp(pni)))/(MCH*(1+chi_p(pni))*(rho_p(pni)**2))
@@ -2492,7 +2892,6 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             *bbdpxp(pni)))/(MCH*(1+chi_p(pni))*(rho_p(pni)**2))
            genbz=((bbdpxp(pni)*bbdrhoyp(pni))-(bbdrhoxp(pni) &
             *bbdpyp(pni)))/(MCH*(1+chi_p(pni))*(rho_p(pni)**2))
-
 ! Add to magnetic field change           
            dbx_p(pn)=dbx_p(pn)+genbx
            dby_p(pn)=dby_p(pn)+genby
@@ -2685,6 +3084,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 
 #ifdef MHD
       deallocate(tdmhd)
+#ifdef DCLEAN
+      deallocate(tdpsi)
+#endif
 #endif
 #endif
 

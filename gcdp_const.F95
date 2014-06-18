@@ -25,6 +25,7 @@ module gcdp_const
 ! specific heat
       double precision,parameter :: GAM=5.0d0/3.0d0
 !      double precision,parameter :: GAM=2.0d0
+!      double precision,parameter :: GAM=1.4d0
 
 ! *** for DM particles ***
 ! Max Number of Total DM Particle
@@ -93,7 +94,7 @@ module gcdp_const
       double precision,parameter :: DU_UPU=0.025d0
 ! *** maxmum simulation radius ***
 #ifdef MAXR
-      double precision,parameter :: MAXRLIM=10.0d0
+      double precision,parameter :: MAXRLIM=0.3d0
 #endif
        
 ! *** Solar Abundances from WW95 ***

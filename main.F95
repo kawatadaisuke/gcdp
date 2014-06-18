@@ -39,7 +39,7 @@ program gcdp
 ! * Total Time Steps *	  
       integer totstep
 ! * Flag for Kin.eq , Ene.eq, dt from gravity, decomposition *
-      integer flagv,flagu,flagdtg
+      integer flagv,flagu,flagdtg,flagb
       integer i
 ! * flag for output *
       integer flagend
@@ -271,7 +271,30 @@ program gcdp
          write(6,*) '   ###  including MHD  ###'
 #endif
 #ifdef TIMEDIS
-         write(6,*) '   ###  include time dependent resistivity  ###'
+        write(6,*) '   ###  including time dependent resistivity  ###'
+#ifdef PM05
+        write(6,*) '   ###    Using Price & Monaghan 05 scheme    ###'
+#elif defined (TP12)
+        write(6,*) '   ###     Using Tricco & Price 13 scheme     ###'
+#else
+        write(6,*) ' ERROR: Must choose time dependant scheme'
+        call MPI_FINALIZE()
+        stop
+#endif
+#endif
+#ifdef DCLEAN
+        write(6,*) '   ###  including Dedner cleaning  ###'
+#ifdef DENER
+        write(6,*) '   ###    with energy cons term    ###'
+#endif
+#ifdef DIVSYM
+        write(6,*) '   ###  symmetric operator div-B   ###'
+#else
+        write(6,*) '   ###  difference operator div-B  ###'
+#endif
+#ifdef DLIM
+        write(6,*) '   ###        with limiter         ###'
+#endif
 #endif
 #ifdef BBAT
          write(6,*) '   ###  include Biermann battery source  ###'
@@ -534,6 +557,7 @@ program gcdp
 ! *************************************
         flagv = 0
         flagu = 0
+        flagb = 1
 
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ectime=MPI_WTIME()
@@ -542,7 +566,7 @@ program gcdp
         endif
 
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
-         ,nagt,nadmt,nast,nagravgt,flagv,flagu,1)
+         ,nagt,nadmt,nast,nagravgt,flagv,flagu,1,flagb)
 
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ectime=MPI_WTIME()
@@ -1077,7 +1101,7 @@ program gcdp
 ! ************************
 !  Update B, predictor
 ! ************************
-      call updatevb(ng)
+      call updatevb(ng,nag)
 #endif
 
 ! ************************
@@ -1085,12 +1109,12 @@ program gcdp
 ! ************************
       flagv =  1
       flagu = 2
-
+      flagb = 0
 !      write(6,*) ' calcdvdu 1 start',myrank
 !      call system('rm *calvu*')
 
       call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt,nadmt,nast &
-       ,nagravgt,flagv,flagu,0)
+       ,nagravgt,flagv,flagu,0,flagb)
 
 ! *************************************
 !  Update Internal Energy  First!
@@ -1135,11 +1159,12 @@ program gcdp
 ! ************************
       flagv =  0
       flagu = 0
+      flagb = 1
 
 !      write(6,*) ' calcdvdu 2 start',myrank
 
       call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt,nadmt &
-       ,nast,nagravgt,flagv,flagu,0)
+       ,nast,nagravgt,flagv,flagu,0,flagb)
 
 !      write(fileo,'(a6,i3.3)') 'calvu2',myrank
 !      open(60,file=fileo,status='unknown')

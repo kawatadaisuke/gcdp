@@ -58,9 +58,12 @@ SUBROUTINE boundary_xfix(np,npt)
           pdby_p(i)=0.0d0
           pdbz_p(i)=0.0d0
           divb_p(i)=0.0d0
-          rotbx_p(i)=0.0d0
-          rotby_p(i)=0.0d0
-          rotbz_p(i)=0.0d0       
+#ifdef DCLEAN
+          psi_p(i)=0.0d0
+          ppsi_p(i)=0.0d0
+          dpsi_p(i)=0.0d0
+          pdpsi_p(i)=0.0d0
+#endif
 #endif
          else if(npt-id_p(i).le.BCX_ndx) then 
           nfix=nfix+1
@@ -100,9 +103,12 @@ SUBROUTINE boundary_xfix(np,npt)
           pdby_p(i)=0.0d0
           pdbz_p(i)=0.0d0
           divb_p(i)=0.0d0
-          rotbx_p(i)=0.0d0
-          rotby_p(i)=0.0d0
-          rotbz_p(i)=0.0d0          
+#ifdef DCLEAN
+          psi_p(i)=0.0d0
+          ppsi_p(i)=0.0d0
+          dpsi_p(i)=0.0d0
+          pdpsi_p(i)=0.0d0
+#endif
 #endif
 !          write(60,*) xc_p(i),yc_p(i),zc_p(i)
         endif

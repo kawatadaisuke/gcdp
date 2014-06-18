@@ -516,14 +516,18 @@ module gcdp_mhd
       double precision,allocatable,save :: pbx_p(:),pby_p(:),pbz_p(:)
       double precision,allocatable,save :: dbx_p(:),dby_p(:),dbz_p(:) &
        ,pdbx_p(:),pdby_p(:),pdbz_p(:)
-      double precision,allocatable,save :: divb_p(:),arotb_p(:)
-      double precision,allocatable,save :: rotbx_p(:),rotby_p(:),rotbz_p(:)
-      double precision,allocatable,save :: alpb_p(:),divberr_p(:)
+      double precision,allocatable :: divb_p(:),arotb_p(:),agradb_p(:)
+      double precision,allocatable :: alpb_p(:),divberr_p(:)
 ! not used
       double precision,allocatable,save :: valfi_p(:),pb_p(:)
 ! not used
 #ifdef BBAT
       double precision,allocatable,save :: chi_p(:),lognh_p(:),logne_p(:)
+#endif
+#ifdef DCLEAN
+      double precision,allocatable :: psi_p(:),ppsi_p(:)
+      double precision,allocatable :: dpsi_p(:),pdpsi_p(:)
+      double precision,allocatable :: maxvmhd_p(:)
 #endif
 end module gcdp_mhd
 #endif

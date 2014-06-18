@@ -69,8 +69,8 @@
 !
 ! *** move particles azimuthally at randam
 ! see fraction in update.F
-#define RANAZ
-#undef RANAZ
+! #define RANAZ
+! #undef RANAZ
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
@@ -82,8 +82,8 @@
 #define FASTG
 !
 ! *** turn on dt from |a|/|da/dt|
-#define DTDADT
-#undef DTDADT
+! #define DTDADT
+! #undef DTDADT
 !
 !  *** set TM_dt for particles affected by feedback
 #define MINDT_SFD
@@ -95,26 +95,26 @@
 ! #undef NOAC
 ! 
 ! *** turn off AV switch
-#define NOAVSWITCH
+! #define NOAVSWITCH
 ! use V_ALPHAINI and constant
-#undef NOAVSWITCH
+! #undef NOAVSWITCH
 !
 ! *** fix particles withing input id range *** not for stars ***
-#define FIXEDP
-#undef FIXEDP
+! #define FIXEDP
+! #undef FIXEDP
 !
 ! *** fix DM particles withing input id range
-#define FIXEDDMP
-#undef FIXEDDMP
+! #define FIXEDDMP
+! #undef FIXEDDMP
 !
 ! *** accelerate particle to the opposite direction
-#define GLASS
+! #define GLASS
 ! set FGLASS in define.F
-#undef GLASS
+! #undef GLASS
 !
 ! *** artificial acceleration for DM particles (Widrow 2008)
-#define ARTFDM
-#undef ARTFDM
+! #define ARTFDM
+! #undef ARTFDM
 
 ! *** output format for test simulation ***
 ! *** output for test simulation : detailed output
@@ -333,7 +333,7 @@
 #ifdef MHD
 !
 ! *** Balsara switch off ***
-#define BALSWCHOFF
+! #define BALSWCHOFF
 ! #undef BALSWCHOFF
 !
 ! *** Borve divB corrector ***
@@ -344,9 +344,31 @@
 #define TIMEDIS
 ! #undef TIMEDIS
 !
-! *** Balsara switch off
-#define BALSWCHOFF
-! #undef BALSWCHOFF
+! *** Choice of resistivity scheme
+#ifdef TIMEDIS
+! *** Tricco & Price
+! #define TP12
+! #undef TP12
+! *** Price & Monaghan 2005 
+#define PM05
+! #undef PM05
+#endif 
+!
+! *** Dedner divergence cleaning
+#define DCLEAN
+! #undef DCLEAN
+!
+#ifdef DCLEAN
+! *** Dedner energy cons term
+#define DENER
+! #undef DENER
+! *** Symmetric divergence operator (not recommended TP12)
+! #define DIVSYM
+! #undef DIVSYM
+! *** Cleaning Limiter
+! #define DLIM
+! #undef DLIM
+#endif
 !
 ! *** Battery Generation
 ! #define BBAT
@@ -359,6 +381,7 @@
 #undef TIMEDIS
 #undef BALSWCHOFF
 #undef BBAT
+#undef DCLEAN
 
 #endif
 
