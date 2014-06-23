@@ -391,6 +391,13 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             dvy_dm(pn)=G*dvy_dm(pn)+SI_lam0*y_dm(pn)
             dvz_dm(pn)=G*dvz_dm(pn)+SI_lam0*z_dm(pn)
          enddo
+#else
+          do i=0,nadm-1
+            pn = list_adm(i)
+            dvx_dm(pn)=G*dvx_dm(pn)
+            dvy_dm(pn)=G*dvy_dm(pn)
+            dvz_dm(pn)=G*dvz_dm(pn)
+         enddo
 #endif
 #endif
 #ifdef WTIME
