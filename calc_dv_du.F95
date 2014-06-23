@@ -451,9 +451,15 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           do i=0,nagravg-1
             pn=list_ap(i)           
 #ifdef COSM
+#ifndef BOXSIM
             ax_p(pn)=G*ax_p(pn)+SI_lam0*x_p(pn)
             ay_p(pn)=G*ay_p(pn)+SI_lam0*y_p(pn)
             az_p(pn)=G*az_p(pn)+SI_lam0*z_p(pn)
+#else
+            ax_p(pn)=G*ax_p(pn)
+            ay_p(pn)=G*ay_p(pn)
+            az_p(pn)=G*az_p(pn)
+#endif
 #else
             ax_p(pn)=G*ax_p(pn)
             ay_p(pn)=G*ay_p(pn)
@@ -489,9 +495,15 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             do i=ng,nas+ng-1
               pn=list_ap(i)           
 #ifdef COSM
+#ifndef BOXSIM
               ax_p(pn)=G*ax_p(pn)+SI_lam0*x_p(pn)
               ay_p(pn)=G*ay_p(pn)+SI_lam0*y_p(pn)
               az_p(pn)=G*az_p(pn)+SI_lam0*z_p(pn)
+#else
+              ax_p(pn)=G*ax_p(pn)
+              ay_p(pn)=G*ay_p(pn)
+              az_p(pn)=G*az_p(pn)
+#endif
 #else
               ax_p(pn)=G*ax_p(pn)
               ay_p(pn)=G*ay_p(pn)

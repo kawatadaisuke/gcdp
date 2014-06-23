@@ -155,7 +155,6 @@ subroutine hubfroma(an,hub)
        -(SI_omg0+SI_lam0-1.0)*iai*iai+SI_lam0)
 
 end subroutine
-#endif 
 
 ! 1/a integration
 subroutine integrate1oa(np,t0,t1,in1oa)
@@ -272,5 +271,5 @@ subroutine integrate1oa2(np,t0,t1,in1oa2)
       enddo
 end subroutine
 
-
+#endif 
 #endif
