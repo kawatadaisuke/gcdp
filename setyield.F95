@@ -11,9 +11,11 @@ subroutine  setyield()
       use gcdp_yields
 
       implicit none
+      include 'mpif.h'
 
       integer i,j,k
       integer nzg
+      integer ierr
 ! *** metallicity and age ***
       double precision llz,luz,dlz,llt,lut,dlt
       double precision x,mu,ml,mlsnii
@@ -72,6 +74,7 @@ subroutine  setyield()
       endif
 
       close(50)
+
 ! *** reset Metallicity ***
       llz = -6.0d0
       luz = 0.0d0

@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! ***************************************
 !      set_ini.F95 for GCD+ ver. f03.0
-!  04 Feb., 2013    produced by D.KAWATA
+!  26 Jun., 2014    produced by D.KAWATA
 ! *************************************** 
 
 subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
@@ -35,13 +35,17 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       integer MNL
       parameter (MNL=3)
       character fin*20,tcha*1,fileo*60,ctmp*60,mname*20
-      integer i,j,il,nc,pn,itmp
+      integer i,j,il,ip,nc,pn,itmp
+      integer ipsta,ipend
       integer flagrf
-      integer nif,idf,ndmf,ngf,nsf,ngt,nst,ngi
+      integer nif,idf,ndmf,ngf,nsf,ngt,nst
       integer flagfdm,flagfg,flagfs
+      integer nval,nival,nprp
       double precision gamf,gkmm
+#ifdef COSM
 ! *** nd0, nd1 for number of particles for level 0 and 1 ***
-      integer nd(0:MNL),ndl,ndt(0:MNL)
+      integer nd(0:MNL),ndl,ndt(0:MNL),nplev
+#endif
 ! * om0 (km s^-1 kpc^-1) *      
       double precision Ini_OMGg,dxi(0:MNL)
 ! * (10^12 M@), (100 kpc),(1.0e4 K),(4.71e8 yr) * /     
@@ -62,8 +66,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** Ini_mul: 0: only level0, 1: level 0 and 1 ***
       integer Ini_hyd,Ini_mul
 ! work
-      integer jsta,jend,ierr
-      double precision,allocatable :: tx(:),ty(:),tz(:),adv(:)
+      integer jsta,jend,ierr,rrank
+      integer,allocatable :: jstap(:),jendp(:)
+      integer,allocatable :: istatus(:)
+      integer,allocatable :: ireqs(:),ireqr(:)
+      integer,allocatable :: tivr(:)
+      double precision,allocatable :: tdvr(:)
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! work
       double precision,allocatable :: mfd(:)
@@ -74,6 +82,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
        ,tmzSi_sn(:),tmzFe_sn(:),tmzZ_sn(:),nsw_sn(:)
 #endif
 
+! allocate array for MPI
+      allocate(istatus(MPI_STATUS_SIZE))
+      allocate(ireqs(0:nprocs))
+      allocate(ireqr(0:nprocs))
+      allocate(jstap(0:nprocs-1))
+      allocate(jendp(0:nprocs-1))
 
 #ifdef COSM
       if(myrank.eq.0) then
@@ -86,38 +100,129 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #else
       SI_flagrad=1
 #endif
+
+      if(myrank.eq.0) then
 !*****   Open Initial Data File ./ini/input.dat
-      open(50,file='ini/input.dat',status='old')      
+        open(50,file='ini/input.dat',status='old')      
 ! *** Read Initial Parameter ***
 ! * Number of Particle etc. *  
-      read(50,*) Ini_mul
+        read(50,*) Ini_mul
 ! * Interval of Output Data, Distribution *
-      read(50,*) Ini_nd
-      read(50,*) SI_nof
+        read(50,*) Ini_nd
+        read(50,*) SI_nof
 ! * Initial Values unit is our Unit *
 #ifdef COSM
-      read(50,*) Ini_OMGg
-      read(50,*) Ini_ze
+        read(50,*) Ini_OMGg
+        read(50,*) Ini_ze
 #else
-      read(50,*) Ini_zi
-      read(50,*) flagtime
-      read(50,*) TM_tot,TM_t0
-      read(50,*) flagfg,flagfdm,flagfs
-      Ini_ze=Ini_zi
+        read(50,*) Ini_zi
+        read(50,*) flagtime
+        read(50,*) TM_tot,TM_t0
+        read(50,*) flagfg,flagfdm,flagfs
 #endif
 #ifdef TREEPM
-      read(50,*) nx_m,ny_m,nz_m
-      if((mod(nx_m,2).ne.0)) then
-        if(myrank.eq.0) then
+        read(50,*) nx_m,ny_m,nz_m
+        if((mod(nx_m,2).ne.0)) then
           write(6,*) ' Error in set_ini(): nx_m,ny_m,nz_m=',nx_m,ny_m,nz_m
           write(6,*) ' nx_m should be able to be devided by 2.'
+          call MPI_FINALIZE(ierr)
+          stop
         endif
-        call MPI_FINALIZE(ierr)
-        stop
+#endif
+#ifndef MULTI_LEV
+        if(Ini_mul.gt.0) then
+          write(6,*) ' Error: MULTI_LEV is off in gcdp.def, but Ini_mul=' &
+           ,Ini_mul
+          call MPI_FINALIZE(ierr)
+          stop
+        endif
+#endif
+        close(50)
       endif
+
+! send the input parameters
+! integer 
+#ifdef COSM
+      nval=3
+#else
+      nval=7
+#endif
+#ifdef TREEPM
+      nval=nval+3
 #endif
 
-      close(50)
+      allocate(tivr(0:nval-1))
+ 
+      if(myrank.eq.0) then
+        tivr(0)=Ini_mul
+        tivr(1)=Ini_nd
+        tivr(2)=SI_nof
+#ifdef COSM
+        i=3
+#else
+        tivr(3)=flagtime
+        tivr(4)=flagfg
+        tivr(5)=flagfdm
+        tivr(6)=flagfs
+        i=7
+#endif
+#ifdef TREEPM
+        tivr(i)=nx_m
+        tivr(i+1)=ny_m
+        tivr(i+2)=nz_m
+#endif  
+      endif
+      call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      Ini_mul=tivr(0)
+      Ini_nd=tivr(1)
+      SI_nof=tivr(2)
+#ifdef COSM
+      i=3
+#else
+      flagtime=tivr(3)
+      flagfg=tivr(4)
+      flagfdm=tivr(5)
+      flagfs=tivr(6)
+      i=7
+#endif
+#ifdef TREEPM
+      nx_m=tivr(i)
+      ny_m=tivr(i+1)
+      nz_m=tivr(i+2)
+#endif  
+
+      deallocate(tivr)
+
+! double
+#ifdef COSM
+      nval=2
+#else
+      nval=3
+#endif
+
+      allocate(tdvr(0:nval-1))
+
+      if(myrank.eq.0) then
+#ifdef COSM
+        tdvr(0)=Ini_OMGg
+        tdvr(1)=Ini_ze
+#else
+        tdvr(0)=Ini_zi
+        tdvr(1)=TM_tot
+        tdvr(2)=TM_t0
+#endif
+      endif
+      call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+#ifdef COSM
+      Ini_OMGg=tdvr(0)
+      Ini_ze=tdvr(1)
+#else
+      Ini_zi=tdvr(0)
+      TM_tot=tdvr(1)
+      TM_t0=tdvr(2)
+#endif
+      deallocate(tdvr)
+
 ! *** initialization for number of particles ***   
       npt=0
       ndmt=0
@@ -127,17 +232,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       ng=0
       ndm=0
       ns=0
-#ifndef MULTI_LEV
-      if(Ini_mul.gt.0) then
-        if(myrank.eq.0) then
-          write(6,*) ' Error: MULTI_LEV is off in gcdp.def, but Ini_mul=' &
-           ,Ini_mul
-        endif
-        stop
-      endif
+#ifndef COSM
+      Ini_ze=Ini_zi
 #endif
 
 #ifdef COSM
+! *****   cosmological simulation data input *****
 #ifdef STAR
       SI_tnsf=0
 #endif
@@ -157,175 +257,423 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DM
 ! get ndm for each rank
       do il=Ini_mul,0,-1
-        write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
-        open(51,file=fin,status='old',form='unformatted')
-        read(51) nif,idf,ndl,nd(il),flagrf
+        if(myrank.eq.0) then
+! read all the data by rank 0
+          write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
+          open(51,file=fin,status='old',form='unformatted')
 ! *** read the data ***
+          read(51) nif,idf,ndl,nd(il),flagrf
+          write(6,*) il,'level ndm=',ndl
+          close(51)
+        endif
+        call MPI_BCAST(ndl,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+! count the number DM for each core for each level
         call para_range(0,ndl-1,nprocs,myrank,jsta,jend)
         ndm=ndm+jend-jsta+1
-        close(51)
-      enddo
+      enddo 
 
 ! allocate dm variables
       call allocate_dm_all(ndm)      
 
-      allocate(tx(0:ndm))
-      allocate(ty(0:ndm))
-      allocate(tz(0:ndm))
-
       ndm=0
       do il=Ini_mul,0,-1
-        write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
-        open(51,file=fin,status='old',form='unformatted')
-        read(51) nif,idf,ndl,nd(il),flagrf
+        nval=5
+      
+        allocate(tivr(0:nval-1))
+
+        if(myrank.eq.0) then
+          write(fin,'(a9,i1,a5)') 'ini/level',il,'d.dat'
+          open(51,file=fin,status='old',form='unformatted')
+          read(51) nif,idf,ndl,nd(il),flagrf
+
+! store the range of the particle for each rank
+          do ip=0,nprocs-1
+            call para_range(0,ndl-1,nprocs,ip,jstap(ip),jendp(ip))
+          enddo
+
+          tivr(0)=nif
+          tivr(1)=idf
+          tivr(2)=ndl
+          tivr(3)=nd(il)
+          tivr(4)=flagrf
+        endif
+        call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        nif=tivr(0)
+        idf=tivr(1)
+        ndl=tivr(2)
+        nd(il)=tivr(3)
+        flagrf=tivr(4)
+
+        deallocate(tivr)
+
+! count the number DM for each core for each level
+        call para_range(0,ndl-1,nprocs,myrank,jsta,jend)
+! number of particle in each level
+        nplev=jend-jsta+1
+
+! for double data
+        nval=5
+
+        allocate(tdvr(0:nval-1))
+
+        if(myrank.eq.0) then
 ! *** flagrf: 0: read only position and velocity, otherwise read also mass
 ! *** dx (Mpc, Comoving), zstart,omegam,lambda ***
-        read(51) dxi(il),SI_a,SI_omg0,SI_lam0,SI_h0
-        dxi(il) = dxi(il)*10.0d0
-        if(myrank.eq.0) then
-          write(6,*) il,'level ndm=',ndl
+          read(51) dxi(il),SI_a,SI_omg0,SI_lam0,SI_h0
+          tdvr(0)=dxi(il)
+          tdvr(1)=SI_a
+          tdvr(2)=SI_omg0
+          tdvr(3)=SI_lam0
+          tdvr(4)=SI_h0
         endif
-!        call MPI_BCAST(ndl,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-! *** read the data ***
-        call para_range(0,ndl-1,nprocs,myrank,jsta,jend)
-!       call MPI_BCAST(flagrf,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+        dxi(il)=tdvr(0)
+        SI_a=tdvr(1)
+        SI_omg0=tdvr(2)
+        SI_lam0=tdvr(3)
+        SI_h0=tdvr(4)
+        dxi(il) = dxi(il)*10.0d0
+
+        deallocate(tdvr)
 
         ndt(il)=0
-        nd(il)=0
-        do i=0,ndl-1
-          if(i.ge.jsta.and.i.le.jend) then
-            if(flagrf.eq.0) then
-              read(51) x_dm(ndm),y_dm(ndm),z_dm(ndm) &
-               ,tx(ndm),ty(ndm),tz(ndm)
-            else
-              read(51) x_dm(ndm),y_dm(ndm),z_dm(ndm) &
-               ,tx(ndm),ty(ndm),tz(ndm),m_dm(ndm)
-            endif
-            id_dm(ndm)=ndmt
-            ndm = ndm+1
-            nd(il)=nd(il)+1
+        nd(il)=nplev
+        if(flagrf.eq.0) then
+          nval=6
+        else
+          nval=7
+        endif
+
+        rrank=0
+        if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number DM particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+
           else
-            read(51)
+
+            allocate(tdvr(0:nplev*nval-1))
+ 
           endif
-          ndmt = ndmt+1
-          ndt(il)=ndt(il)+1
+
+          if(myrank.eq.0) then
+            if(flagrf.eq.0) then
+              do i=0,nprp-1
+                read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                 ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5)
+              enddo
+            else
+              do i=0,nprp-1
+                read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                 ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5),tdvr(i*nval+6)
+              enddo
+            endif
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+            endif
+          else
+            call MPI_IRECV(tdvr,nplev*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+          endif
+          if(myrank.eq.ip) then
+            do i=0,nplev-1
+              x_dm(ndm)=tdvr(i*nval)
+              y_dm(ndm)=tdvr(i*nval+1)
+              z_dm(ndm)=tdvr(i*nval+2)     
+              vx_dm(ndm)=tdvr(i*nval+3)
+              vy_dm(ndm)=tdvr(i*nval+4)
+              vz_dm(ndm)=tdvr(i*nval+5)     
+              if(flagrf.ne.0) then
+                m_dm(ndm)=tdvr(i*nval+6)
+              endif
+              id_dm(ndm)=ndmt+jsta+i
+              ndm=ndm+1
+            enddo
+          endif
+
+          deallocate(tdvr)
+
         enddo
+        if(myrank.eq.0) then
+#ifdef BOXSIM
+          if(il.eq.0) then
+            read(51) SI_lbox0(0),SI_lbox0(1),SI_lbox0(2)
+! Mpc -> 100 kpc
+            SI_lbox0(0)=SI_lbox0(0)*10.0d0
+            SI_lbox0(1)=SI_lbox0(1)*10.0d0
+            SI_lbox0(2)=SI_lbox0(2)*10.0d0
+          endif
+#endif
+          close(51)
+        endif
 #ifdef BOXSIM
         if(il.eq.0) then
-          read(51) SI_lbox0(0),SI_lbox0(1),SI_lbox0(2)
-! Mpc -> 100 kpc
-          SI_lbox0(0)=SI_lbox0(0)*10.0d0
-          SI_lbox0(1)=SI_lbox0(1)*10.0d0
-          SI_lbox0(2)=SI_lbox0(2)*10.0d0
+          nval=3
+          call MPI_BCAST(SI_lbox0,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 ! set box size at the initial redshift
           SI_lbox(0)=SI_a*SI_lbox0(0)
           SI_lbox(1)=SI_a*SI_lbox0(1)
           SI_lbox(2)=SI_a*SI_lbox0(2)
           if(myrank.eq.0) then
             write(6,*) ' box size (comoving)=',SI_lbox0(0),SI_lbox0(1) &
-              ,SI_lbox0(2)
+             ,SI_lbox0(2)
             write(6,*) ' box size (initial) =',SI_lbox(0),SI_lbox(1) &
-              ,SI_lbox(2)
+            ,SI_lbox(2)
           endif
         endif
 #endif
-        close(51)
+
+! update ndmt       
+        ndmt=ndmt+ndl
+        ndt(il)=ndl
 
       enddo
+!endif DM
 #endif
-  151 format(5(1pE13.5))
-  152 format(6(1pE13.5))
-  153 format(7(1pE13.5))
+
 ! *** for Gas particles
 ! *** Open Initial Data File for level 1 ***
       npt = 0
       np = 0
 #ifdef GAS
       il=Ini_mul
-      write(fin,'(a9,i1,a5)') 'ini/level',il,'p.dat'
-      open(51,file=fin,status='old',form='unformatted')
-      read(51) nif,idf,npt,itmp,flagrf
-! *** dx (Mpc, Comoving), zstart,omegam,lambda ***
-      read(51) dxi(il),SI_a,SI_omg0,SI_lam0,SI_h0
-      dxi(il) = dxi(il)*10.0d0
+      nval=5
 
-#ifdef MHD
-      open(57,file='ini/gas-mhd.dat',status='old',form='unformatted')
+      allocate(tivr(0:nval-1))
+
       if(myrank.eq.0) then
-         write(6,*) 'reading ini/gas-mhd.dat'
+        write(fin,'(a9,i1,a5)') 'ini/level',il,'p.dat'
+        open(51,file=fin,status='old',form='unformatted')
+        read(51) nif,idf,npt,itmp,flagrf
+! store the range of the particle for each rank
+        do ip=0,nprocs-1
+          call para_range(0,npt-1,nprocs,ip,jstap(ip),jendp(ip))
+        enddo
+        tivr(0)=nif
+        tivr(1)=idf
+        tivr(2)=npt
+        tivr(3)=itmp
+        tivr(4)=flagrf
       endif
-#endif
-
+      call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      nif=tivr(0)
+      idf=tivr(1)
+      npt=tivr(2)
+      itmp=tivr(3)
+      flagrf=tivr(4)
 ! *** read the data ***
       call para_range(0,npt-1,nprocs,myrank,jsta,jend)
+      nplev=jend-jsta+1
 
-      allocate(adv(0:jend-jsta+1))
-      np=jend-jsta+1
-      call allocate_baryon_all(np)
+      deallocate(tivr)
+
+      call allocate_baryon_all(nplev)
 #ifdef MHD
-      call allocate_mhd(np)
+      call allocate_mhd(nplev)
 #endif
+
+      nval=5
+
+      allocate(tdvr(0:nval-1))
+
+      if(myrank.eq.0) then
+! *** dx (Mpc, Comoving), zstart,omegam,lambda ***
+        read(51) dxi(il),SI_a,SI_omg0,SI_lam0,SI_h0
+        tdvr(0)=dxi(il)
+        tdvr(1)=SI_a
+        tdvr(2)=SI_omg0
+        tdvr(3)=SI_lam0
+        tdvr(4)=SI_h0        
+      endif
+      call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      dxi(il)=tdvr(0)
+      SI_a=tdvr(1)
+      SI_omg0=tdvr(2)
+      SI_lam0=tdvr(3)
+      SI_h0=tdvr(4)
+      dxi(il) = dxi(il)*10.0d0
+
+      deallocate(tdvr)
+
       np=0
+      if(flagrf.eq.0) then
+        nval=7
+      else
+        nval=8
+      endif
+      rrank=0
+      if(myrank.eq.0) then
+        ipsta=0
+        ipend=nprocs-1
+      else
+        ipsta=myrank
+        ipend=myrank
+      endif
 
 ! *** Read and  Set Position ***
-      do i=0,npt-1
+      do ip=ipsta,ipend
+        if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+          nprp=jendp(ip)-jstap(ip)+1
+       
+          allocate(tdvr(0:nprp*nval-1))
+
+        else
+
+          allocate(tdvr(0:nplev*nval-1))
+  
+        endif
+
+        if(myrank.eq.0) then
+! read the data only by rank 0
 ! * x, y, z, a(t)b(t)p(q) (Mpc) *		           
-        if(i.ge.jsta.and.i.le.jend) then
+
           if(flagrf.eq.0) then
-            read(51) xc_p(np),yc_p(np),zc_p(np) &
-             ,vnx_p(np),vny_p(np),vnz_p(np),adv(np)
+            do i=0,nprp-1
+              read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5),tdvr(i*nval+6)
+            enddo
           else
-            read(51) xc_p(np),yc_p(np),zc_p(np) &
-             ,vnx_p(np),vny_p(np),vnz_p(np),adv(np),m_p(np)
+            do i=0,nprp-1
+              read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                 ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                 ,tdvr(i*nval+6),tdvr(i*nval+7)
+            enddo
           endif
+          if(ip.ne.myrank) then
+            call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+             ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+            call MPI_WAIT(ireqs(ip),istatus,ierr)
+          endif
+        else
+          call MPI_IRECV(tdvr,nplev*nval,MPI_DOUBLE_PRECISION &
+           ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+          call MPI_WAIT(ireqr(ip),istatus,ierr)
+        endif
+        if(myrank.eq.ip) then
+          do i=0,nplev-1
+            xc_p(np)=tdvr(i*nval)
+            yc_p(np)=tdvr(i*nval+1)
+            zc_p(np)=tdvr(i*nval+2)
+            vnx_p(np)=tdvr(i*nval+3)
+            vny_p(np)=tdvr(i*nval+4)
+            vnz_p(np)=tdvr(i*nval+5)
+            rho_p(np)=tdvr(i*nval+6)
+            if(flagrf.ne.0) then
+              m_p(np)=tdvr(i*nval+7)
+            endif
 #if defined(SF_EFD) || defined(SF_ZFD)
-          flagfd_p(np)=0
-          flagrfd_p(np)=0
-          ts_p(np)=0.0d0
+            flagfd_p(np)=0
+            flagrfd_p(np)=0
+            ts_p(np)=0.0d0
 #endif
+            id_p(np)=jsta+i
+            np = np+1
+          enddo
+        endif
+
+        deallocate(tdvr)
+
+      enddo
+      if(myrank.eq.0) then
+        close(51)
+      endif
 
 #ifdef MHD
-          read(57) bx_p(np),by_p(np),bz_p(np)
-          pbx_p(np)=bx_p(np)
-          pby_p(np)=by_p(np)
-          pbz_p(np)=bz_p(np)
-          dbx_p(np)=0.0d0
-          dby_p(np)=0.0d0
-          dbz_p(np)=0.0d0
-          pdbx_p(np)=0.0d0
-          pdby_p(np)=0.0d0
-          pdbz_p(np)=0.0d0
-          divb_p(np)=0.0d0
-          arotb_p(np)=0.0d0
-          agradb_p(np)=0.0d0
+
+      if(myrank.eq.0) then
+        open(57,file='ini/gas-mhd.dat',status='old',form='unformatted')
+        write(6,*) 'reading ini/gas-mhd.dat'
+      endif
+
+! read MHD data
+      nc=0
+      nval=3
+      do ip=0,nprocs-1
+        if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+          nprp=jendp(ip)-jstap(ip)+1
+       
+          allocate(tdvr(0:nprp*nval-1))
+
+        else
+
+          allocate(tdvr(0:nplev*nval-1))
+  
+        endif
+        if(myrank.eq.0) then
+! read the data only by rank 0
+! bx, by, bz
+          do i=0,nprp-1
+            read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2)
+          enddo
+          if(ip.ne.0) then
+            call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+             ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+            call MPI_WAIT(ireqs(ip),istatus,ierr)
+          endif
+        else
+          rrank=0
+          call MPI_IRECV(tdvr,nplev*nval,MPI_DOUBLE_PRECISION &
+           ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+          call MPI_WAIT(ireqr(ip),istatus,ierr)
+        endif
+        if(myrank.eq.ip) then
+          do i=0,nplev-1
+            bx_p(nc)=tdvr(i*nval)
+            by_p(nc)=tdvr(i*nval+1)
+            bz_p(nc)=tdvr(i*nval+2)
+            pbx_p(nc)=bx_p(nc)
+            pby_p(nc)=by_p(nc)
+            pbz_p(nc)=bz_p(nc)
+            dbx_p(nc)=0.0d0
+            dby_p(nc)=0.0d0
+            dbz_p(nc)=0.0d0
+            pdbx_p(nc)=0.0d0
+            pdby_p(nc)=0.0d0
+            pdbz_p(nc)=0.0d0
+            divb_p(nc)=0.0d0
+            arotb_p(nc)=0.0d0
+            agradb_p(nc)=0.0d0
 #ifdef TIMEDIS
-          alpb_p(np)=ALPB_MIN
+            alpb_p(nc)=ALPB_MIN
 #else
-          alpb_p(np)=ALPHA_CONST
+            alpb_p(nc)=ALPHA_CONST
 #endif
 #ifdef DCLEAN
-          psi_p(np)=0.0d0
-          ppsi_p(np)=0.0d0
-          dpsi_p(np)=0.0d0
-          pdpsi_p(np)=0.0d0
+            psi_p(nc)=0.0d0
+            ppsi_p(nc)=0.0d0
+            dpsi_p(nc)=0.0d0
+            pdpsi_p(nc)=0.0d0
 #endif
+            nc=nc+1
+          enddo
+        endif
+
+        deallocate(tdvr)
+
+      enddo
+      if(myrank.eq.0) then
+        read(57)
+      endif
+!endif MHD
+#endif
+! endif Gas
 #endif
 
-          id_p(np)=i
-          np = np+1
-        else
-          read(51)
-#ifdef MHD
-          read(57)
-#endif
-        endif
-      enddo
-      close(51)
-#ifdef MHD   
-      close(57)
-#endif
-!        write(6,*) myrank,' rank ',il,' level np = ',np
-#endif
       SI_h0 = SI_h0/100.0d0
 #ifdef GAS
       Ini_OMGg = Ini_OMGg
@@ -345,73 +693,74 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' cosmology: Omg0,lam0,h,omb=',SI_omg0,SI_lam0,SI_h0,SI_omgb
       endif
 #ifdef GAS
-      open(50,file='./ini/recfast.out',status='old')
-      read(50,*)
-      read(50,'(a1,6(1pE13.5))') tcha,Crec(1),Crec(2),Crec(3) &
-       ,Crec(4),Crec(5),Crec(6)
-      read(50,*)
+! read only with rank 0
       if(myrank.eq.0) then
+        open(50,file='./ini/recfast.out',status='old')
+        read(50,*)
+        read(50,'(a1,6(1pE13.5))') tcha,Crec(1),Crec(2),Crec(3) &
+         ,Crec(4),Crec(5),Crec(6)
+        read(50,*)
         write(6,*) ' Ob, Odm, lam, H0, T0, Yp'
         write(6,*) Crec(1),Crec(2),Crec(3),Crec(4),Crec(5),Crec(6)      
-      endif
 ! *** check ***
-      if(dabs(Crec(1)-Ini_OMGg).gt.0.001d0) then
-        if(myrank.eq.0) then
+        if(dabs(Crec(1)-Ini_OMGg).gt.0.001d0) then
           write(6,*) ' Error in reading recfast.out: Omgb'
           write(6,*) ' input OMGg and in recfast=',Ini_OMGg,Crec(1)
+          call MPI_FINALIZE(ierr)
+          stop
         endif
-        stop
-      endif
-      if(dabs((Crec(2)-(SI_omg0-Ini_OMGg))).gt.0.001d0) then
-        if(myrank.eq.0) then
-        write(6,*) ' Error in reading recfast.out: Omgdm'
-        write(6,*) ' Omgdm (sim)',SI_omg0-Ini_OMGg
+        if(dabs((Crec(2)-(SI_omg0-Ini_OMGg))).gt.0.001d0) then
+          write(6,*) ' Error in reading recfast.out: Omgdm'
+          write(6,*) ' Omgdm (sim)',SI_omg0-Ini_OMGg
+          call MPI_FINALIZE(ierr)
+          stop
         endif
-        stop
-      endif
-      if(dabs(Crec(3)-SI_lam0).gt.0.001d0) then
-        if(myrank.eq.0) then
-        write(6,*) ' Error in reading recfast.out: lam0'
+        if(dabs(Crec(3)-SI_lam0).gt.0.001d0) then
+          write(6,*) ' Error in reading recfast.out: lam0'
+          call MPI_FINALIZE(ierr)
+          stop
         endif
-        stop
-      endif
-      if(dabs(Crec(4)-100.0d0*SI_h0).gt.0.001d0) then
-        if(myrank.eq.0) then
-        write(6,*) ' Error in reading recfast.out: h0'
+        if(dabs(Crec(4)-100.0d0*SI_h0).gt.0.001d0) then
+          write(6,*) ' Error in reading recfast.out: h0'
+          call MPI_FINALIZE(ierr)
+          stop
         endif
-        stop
-      endif
-      zrec(1) = 10000.0d0
-      do i=1,4
-        xrec(i,1)=0.0d0
-      enddo
-      do i=1,2000
-        do j=1,4
-          xrec(j,2)=xrec(j,1)
-        enddo  
-        zrec(2) = zrec(1)
+        zrec(1) = 10000.0d0
+        do i=1,4
+          xrec(i,1)=0.0d0
+        enddo
+        do i=1,2000
+          do j=1,4
+            xrec(j,2)=xrec(j,1)
+          enddo  
+          zrec(2) = zrec(1)
 ! *** read z xe xh xhe Tmat ***
-        read(50,'(5(1pE13.5))') zrec(1),xrec(1,1),xrec(2,1),xrec(3,1),xrec(4,1)
-        if(zrec(1).lt.Ini_zi) then
-          goto 71
+          read(50,'(5(1pE13.5))') zrec(1),xrec(1,1),xrec(2,1),xrec(3,1),xrec(4,1)
+          if(zrec(1).lt.Ini_zi) then
+            goto 71
+          endif
+        enddo
+        if(myrank.eq.0) then
+          write(6,*) ' Error in reading recfast: z(sim)=',Ini_zi 
         endif
-      enddo
-      if(myrank.eq.0) then
-        write(6,*) ' Error in reading recfast: z(sim)=',Ini_zi 
-      endif
-   71 if(myrank.eq.0) then
-        write(6,*) ' zregrid(1,2), zi=',zrec(1),zrec(2),Ini_zi
-      endif
-      do i=1,4
-        xe(i)=xrec(i,2)+(xrec(i,1)-xrec(i,2))*(Ini_zi-zrec(2)) &
-         /(zrec(1)-zrec(2))
-      enddo
+   71   if(myrank.eq.0) then
+          write(6,*) ' zregrid(1,2), zi=',zrec(1),zrec(2),Ini_zi
+        endif
+        close(50)
+        do i=1,4
+          xe(i)=xrec(i,2)+(xrec(i,1)-xrec(i,2))*(Ini_zi-zrec(2)) &
+           /(zrec(1)-zrec(2))
+        enddo
 ! *** set initial temperature ***
-      Ini_T0 = xe(4)/TUK
-      if(myrank.eq.0) then
-        write(6,*) ' Temperature   = ',Ini_T0,' (10^4 K)'
-        write(6,*) ' xe, xH, xHe = ',xe(1),xe(2),xe(3)
+        Ini_T0 = xe(4)/TUK
+        if(myrank.eq.0) then
+          write(6,*) ' Temperature   = ',Ini_T0,' (10^4 K)'
+          write(6,*) ' xe, xH, xHe = ',xe(1),xe(2),xe(3)
+        endif
       endif
+! send Ini_T0 and Crec(6)
+      call MPI_BCAST(Ini_T0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(Crec(6),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 #endif
 ! *** Set Coordinate and Data of particle **
       nag=np
@@ -482,20 +831,15 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       do i=0,ndm-1      
 #ifdef BOXSIM
 ! v = a^2 vpec, tx = a x vpec
-        vnx_dm(i)=(SI_a)*tx(i)/VUKMS
-        vny_dm(i)=(SI_a)*ty(i)/VUKMS
-        vnz_dm(i)=(SI_a)*tz(i)/VUKMS
+        vnx_dm(i)=(SI_a)*vx_dm(i)/VUKMS
+        vny_dm(i)=(SI_a)*vy_dm(i)/VUKMS
+        vnz_dm(i)=(SI_a)*vz_dm(i)/VUKMS
 #else
-        vnx_dm(i)=hubi*x_dm(i)+tx(i)/VUKMS
-        vny_dm(i)=hubi*y_dm(i)+ty(i)/VUKMS
-        vnz_dm(i)=hubi*z_dm(i)+tz(i)/VUKMS
+        vnx_dm(i)=hubi*x_dm(i)+vx_dm(i)/VUKMS
+        vny_dm(i)=hubi*y_dm(i)+vy_dm(i)/VUKMS
+        vnz_dm(i)=hubi*z_dm(i)+vz_dm(i)/VUKMS
 #endif
       enddo
-
-      deallocate(tx)
-      deallocate(ty)
-      deallocate(tz)
-
 #endif
 #ifdef GAS
 ! *** mass of Gas ***
@@ -542,7 +886,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         if(flagrf.eq.0) then
           m_p(i)=m
         endif
-        rho_p(i)=rhob*(1.0d0+adv(i))
+        rho_p(i)=rhob*(1.0d0+rho_p(i))
         p_p(i)=kmmp*rho_p(i)*Ini_T0
 ! just for test
 !        p_p(i)=kmmp*rho_p(i)*(Ini_T0+10.0d0**(dble(i)*1.5e-3-1.0d0))
@@ -560,14 +904,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         list_ap(i)=i
       enddo
 
-      deallocate(adv)
-
 ! *** Set Initial Metallicity ***
 ! *** H and He mass fraction w.r.t. w.r.t. the total number of p *
       hnf = 1.0d0-Crec(6)
       henf = Crec(6)
       do i=0,np-1
 #ifdef METAL
+        mzHe_p(i)=henf*m_p(i)*MUSM
         mzC_p(i)=0.0d0
         mzN_p(i)=0.0d0
         mzO_p(i)=0.0d0
@@ -591,8 +934,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         tmzZ_p(i)=0.0d0
 #endif
       enddo
+! end for GAS
 #endif
 ! ***** end of input for cosmological simulation *****
+!else COSM
 #else
       Ini_mul=-1
 ! ***** non-cosmological simulation *****
@@ -608,58 +953,107 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DM
       if(flagfdm.eq.0) then
         if(myrank.eq.0) then
+! *** read DM data only with rank 0 
           write(6,*) ' reading dm.dat'
+          open(51,file='ini/dm.dat',status='old',form='unformatted')
+          read(51) nif,idf,ndmt,ndm
+          if(myrank.eq.0) then
+            write(6,*) ' ndmt,ndm=',ndmt,ndm
+          endif
+! store the range of the particle for each rank
+          do ip=0,nprocs-1
+            call para_range(0,ndmt-1,nprocs,ip,jstap(ip),jendp(ip))
+          enddo
         endif
-! *** Open DM data file ***
-
-        open(51,file='ini/dm.dat',status='old',form='unformatted')
-        read(51) nif,idf,ndmt,ndm
-        if(myrank.eq.0) then
-          write(6,*) ' ndmt,ndm=',ndmt,ndm
-        endif
+        call MPI_BCAST(ndmt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         call para_range(0,ndmt-1,nprocs,myrank,jsta,jend)
-
 ! allocate DM variables
         ndm=jend-jsta+1
         call allocate_dm_all(ndm)
 
         nc=0
-        ndm=0
+        nval=8
 ! *** Read and  Set Position ***
-        do i=0,ndmt-1
-          if(i.ge.jsta.and.i.le.jend) then
-            read(51) x_dm(ndm),y_dm(ndm),z_dm(ndm) &
-            ,vnx_dm(ndm),vny_dm(ndm),vnz_dm(ndm),m_dm(ndm) &
-            ,rho_dm(ndm)
-            id_dm(ndm)=nc
-            ndm=ndm+1
-          else
-            read(51)
-          endif
-          nc=nc+1
-        enddo
-        read(51) mname
+        rrank=0
         if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+
+          else
+
+            allocate(tdvr(0:ndm*nval-1))
+  
+          endif
+
+          if(myrank.eq.0) then
+! read the data only by rank 0
+            do i=0,nprp-1
+              read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                ,tdvr(i*nval+6),tdvr(i*nval+7)
+            enddo
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+            endif
+          else
+            rrank=0
+            call MPI_IRECV(tdvr,ndm*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+          endif
+          if(myrank.eq.ip) then
+            do i=0,ndm-1
+              x_dm(nc)=tdvr(i*nval)
+              y_dm(nc)=tdvr(i*nval+1)
+              z_dm(nc)=tdvr(i*nval+2)
+              vnx_dm(nc)=tdvr(i*nval+3)
+              vny_dm(nc)=tdvr(i*nval+4)
+              vnz_dm(nc)=tdvr(i*nval+5)
+              m_dm(nc)=tdvr(i*nval+6)
+              rho_dm(nc)=tdvr(i*nval+7)
+              id_dm(nc)=jsta+i
+              nc=nc+1
+            enddo
+          endif
+
+          deallocate(tdvr)
+   
+        enddo
+        if(myrank.eq.0) then
+          read(51) mname
           write(6,*) mname
         endif
 #ifdef BOXSIM
-        read(51) SI_lbox(0),SI_lbox(1),SI_lbox(2)
         if(myrank.eq.0) then
+          read(51) SI_lbox(0),SI_lbox(1),SI_lbox(2)
           write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
         endif
+        nval=3
+        call MPI_BCAST(SI_lbox,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 #endif
-        close(51)
         if(myrank.eq.0) then
+          close(51)
           write(6,*) ' mdm(0)=',m_dm(0)
         endif
-#ifdef DM
       else if(myrank.eq.0) then
         write(6,*) '##### Warning in set_ini()#####'
         write(6,*) ' DM data not read, but DM is on in gcdp.def.'
         write(6,*) ' This likely causes a problem.'
-#endif
       endif
 #endif
+
 ! *** for Gas particles
 ! *** Open Initial Data File for level 1 ***
       ng=0
@@ -670,13 +1064,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       if(flagfg.le.0) then
         if(myrank.eq.0) then
           write(6,*) ' reading gas.dat. flagfg=',flagfg
-        endif
-        open(51,file='ini/gas.dat',status='old',form='unformatted')
-        read(51) nif,idf,ngt,ng,flagrf
-        close(51) 
-        if(myrank.eq.0) then
+          open(51,file='ini/gas.dat',status='old',form='unformatted')
+          read(51) nif,idf,ngt,ng,flagrf
+          close(51) 
           write(6,*) ' nif,idf,ngt,ng,flagrf=',nif,idf,ngt,ng,flagrf
-        endif    
+        endif
+        call MPI_BCAST(ngt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         call para_range(0,ngt-1,nprocs,myrank,jsta,jend)
         ng=jend-jsta+1
       endif
@@ -685,21 +1078,22 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef STAR
       SI_tnsf=0
       if(flagfs.eq.0) then
-        open(51,file='ini/star.dat',status='old',form='unformatted')
         if(myrank.eq.0) then
+          open(51,file='ini/star.dat',status='old',form='unformatted')
           write(6,*) ' reading star.dat. flagfs=',flagfs
-        endif
-        read(51) nif,idf,nst,ns
-        close(51)
-
-        if(myrank.eq.0) then
+          read(51) nif,idf,nst,ns
+          close(51)
           write(6,*) ' nif,idf,nst,ns=',nif,idf,nst,ns
         endif      
+        call MPI_BCAST(nst,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         call para_range(0,nst-1,nprocs,myrank,jsta,jend)
+        ns=jend-jsta+1
       endif
 #endif
 #if defined(GAS) || defined(STAR)
       np=ng+ns
+
+      write(6,*) ' Allocate np,myrank=',np,ng,ns,myrank
 
 ! initial allocate memory space
 ! all baryon
@@ -707,19 +1101,38 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef MHD
       call allocate_mhd(np)
 #endif
-
-      ng=0
-      ns=0
-      np=0
 #endif
 #ifdef GAS
 ! *** Read and Set Position and basic values ***
       if(flagfg.le.0) then
-        open(51,file='ini/gas.dat',status='old',form='unformatted')
-!        if(myrank.eq.0) then
-!          write(6,*) ' reading gas.dat. flagfg=',flagfg
-!        endif
-        read(51) nif,idf,ngt,ng,flagrf
+        nval=5
+
+        allocate(tivr(0:nval-1))
+
+        if(myrank.eq.0) then
+          open(51,file='ini/gas.dat',status='old',form='unformatted')
+          read(51) nif,idf,ngt,ng,flagrf
+! store the range of the particle for each rank
+          do ip=0,nprocs-1
+            call para_range(0,ngt-1,nprocs,ip,jstap(ip),jendp(ip))
+          enddo
+          tivr(0)=nif
+          tivr(1)=idf
+          tivr(2)=ngt
+          tivr(3)=ng
+          tivr(4)=flagrf
+        endif
+        call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        nif=tivr(0)
+        idf=tivr(1)
+        ngt=tivr(2)
+        ng=tivr(3)
+        flagrf=tivr(4)
+        call para_range(0,ngt-1,nprocs,myrank,jsta,jend)
+        ng=jend-jsta+1
+
+        deallocate(tivr)
+
 ! flagrf is not 0: read flagfd_p info from gas.dat
 ! since pv31.19
 #ifndef STAR
@@ -728,97 +1141,251 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         endif    
         flagrf=0
 #endif    
-        call para_range(0,ngt-1,nprocs,myrank,jsta,jend)
-        nc=0
-        ng=0
-        if(flagrf.eq.0) then
-          do i=0,ngt-1
-            if(i.ge.jsta.and.i.le.jend) then
-              read(51) xc_p(ng),yc_p(ng),zc_p(ng),vnx_p(ng),vny_p(ng) &
-               ,vnz_p(ng),m_p(ng),rho_p(ng),u_p(ng)
-              id_p(ng)=nc
-#if defined(SF_EFD) || defined(SF_ZFD)
-              flagfd_p(ng)=0
-              flagrfd_p(ng)=0
-              ts_p(ng)=0.0d0
-#endif
-              ng=ng+1
-            else
-              read(51)
-            endif
-            nc=nc+1
-          enddo
-        else
 #ifdef STAR
-          do i=0,ngt-1
-            if(i.ge.jsta.and.i.le.jend) then
-              read(51) xc_p(ng),yc_p(ng),zc_p(ng),vnx_p(ng),vny_p(ng) &
-               ,vnz_p(ng),m_p(ng),rho_p(ng),u_p(ng),ts_p(ng),itmp
-#if defined(SF_EFD) || defined(SF_ZFD)
-              flagfd_p(ng)=itmp
-              if(flagfd_p(ng).lt.0) then
-                flagrfd_p(ng)=1
-              else
-                flagrfd_p(ng)=0
+        if(flagrf.eq.0) then
+          nval=9
+          nival=0
+        else
+          nval=10
+          nival=1
+        endif
+#else
+        nval=9
+#endif
+! *** Read and  Set Position ***
+        nc=0
+! set do loop range
+        if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+        rrank=0
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+#ifdef STAR
+            if(flagrf.ne.0) then
+              allocate(tivr(0:nprp*nival-1))
+            endif
+#endif
+
+          else
+
+            allocate(tdvr(0:ng*nval-1))
+#ifdef STAR
+            if(flagrf.ne.0) then
+              allocate(tivr(0:ng*nival-1))
+            endif
+#endif
+  
+          endif
+          if(myrank.eq.0) then
+! read the data only by rank 0
+#ifdef STAR
+            if(flagrf.eq.0) then 
+#endif
+              do i=0,nprp-1
+                read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                  ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                  ,tdvr(i*nval+6),tdvr(i*nval+7),tdvr(i*nval+8)
+              enddo
+#ifdef STAR
+            else
+              do i=0,nprp-1
+                read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                  ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                  ,tdvr(i*nval+6),tdvr(i*nval+7),tdvr(i*nval+8) &
+                  ,tdvr(i*nval+9),tivr(i*nival)
+              enddo
+            endif 
+#endif
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+#ifdef STAR
+              if(flagrf.ne.0) then 
+                call MPI_ISEND(tivr,nprp*nival,MPI_INTEGER &
+                 ,ip,1,MPI_COMM_WORLD,ireqs(ip),ierr)
+                call MPI_WAIT(ireqs(ip),istatus,ierr)
               endif
 #endif
-              id_p(ng)=nc
-              ng=ng+1
-            else
-              read(51)
             endif
-            nc=nc+1
-          enddo
-#else
-            if(myrank.eq.0) then
-              write(6,*) &
-               ' Error in set_ini.F: STAR is off, but reading ts_p'
+          else
+            call MPI_IRECV(tdvr,ng*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+#ifdef STAR
+            if(flagrf.ne.0) then 
+              call MPI_IRECV(tivr,ng*nival,MPI_INTEGER &
+               ,rrank,1,MPI_COMM_WORLD,ireqr(ip),ierr)
+              call MPI_WAIT(ireqr(ip),istatus,ierr)
             endif
-            stop
 #endif
+          endif
+          if(myrank.eq.ip) then     
+            do i=0,ng-1
+              xc_p(nc)=tdvr(i*nval)
+              yc_p(nc)=tdvr(i*nval+1)
+              zc_p(nc)=tdvr(i*nval+2)
+              vnx_p(nc)=tdvr(i*nval+3)
+              vny_p(nc)=tdvr(i*nval+4)
+              vnz_p(nc)=tdvr(i*nval+5)
+              m_p(nc)=tdvr(i*nval+6)
+              rho_p(nc)=tdvr(i*nval+7)
+              u_p(nc)=tdvr(i*nval+8)
+              id_p(nc)=jsta+i
+#if defined(SF_EFD) || defined(SF_ZFD)
+              if(flagrf.eq.0) then
+                flagfd_p(nc)=0
+                flagrfd_p(nc)=0
+                ts_p(nc)=0.0d0
+              else
+                ts_p(nc)=tdvr(i*nval+9)
+                flagfd_p(nc)=tivr(i*nival)
+                if(flagfd_p(nc).lt.0) then
+                  flagrfd_p(nc)=1
+                else
+                  flagrfd_p(nc)=0
+                endif
+              endif
+#endif
+              nc=nc+1
+            enddo
+          endif
+
+          deallocate(tdvr)
+#ifdef STAR
+          if(flagrf.ne.0) then
+            deallocate(tivr)
+          endif
+#endif  
+        enddo
+        if(nc.ne.ng) then
+          write(6,*) ' Error in reading gas.dat at rank',myrank
+          write(6,*) ' ng in gas.dat gas.dat=',ng,nc
+          call MPI_FINALIZE(ierr)
+          stop
         endif
 
-        read(51) mname
         if(myrank.eq.0) then
-          write(6,*) mname
-        endif
-        read(51) gamf
-        if(dabs(GAM-gamf)/GAM.gt.0.1d0) then
+          read(51) mname
           if(myrank.eq.0) then
-            write(6,*) 
-            if(myrank.eq.0) then
-              write(6,*) ' Error(): gamma is incosnsitent'
-              write(6,*) ' ini/input.dat, ini/gas.dat',GAM,gamf
-            endif
-            call MPI_FINALIZE()
-            stop
+            write(6,*) mname
           endif
-        endif    
+          read(51) gamf
+          if(dabs(GAM-gamf)/GAM.gt.0.1d0) then
+            if(myrank.eq.0) then
+              write(6,*) 
+              if(myrank.eq.0) then
+                write(6,*) ' Error(): gamma is incosnsitent'
+                write(6,*) ' ini/input.dat, ini/gas.dat',GAM,gamf
+              endif
+              call MPI_FINALIZE()
+              stop
+            endif
+          endif    
+        endif
 #ifdef BOXSIM
-        read(51) SI_lbox(0),SI_lbox(1),SI_lbox(2)
         if(myrank.eq.0) then
+          read(51) SI_lbox(0),SI_lbox(1),SI_lbox(2)
           write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
         endif
+        nval=3
+        call MPI_BCAST(SI_lbox,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
 #ifdef BCX_FIX
-        read(51) BCX_ndx
 #ifdef MHD
-        read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0),BCX_vy(0),BCX_vz(0)
-        read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1),BCX_vy(1),BCX_vz(1)
-        read(51) BCX_bx(0),BCX_by(0),BCX_bz(0)
-        read(51) BCX_bx(1),BCX_by(1),BCX_bz(1)
+        nval=16
+#else
+        nval=6
+#endif
+
+        allocate(tdvr(0:nval-1))
+
+        if(myrank.eq.0) then
+          read(51) BCX_ndx
+          tivr(0)=BCX_ndx
+        endif
+        call MPI_BCAST(BCX_ndx,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        if(myrank.eq.0) then
+#ifdef MHD
+          read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0),BCX_vy(0),BCX_vz(0)
+          read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1),BCX_vy(1),BCX_vz(1)
+          read(51) BCX_bx(0),BCX_by(0),BCX_bz(0)
+          read(51) BCX_bx(1),BCX_by(1),BCX_bz(1)
+          tdvr(0)=BCX_rhox(0)
+          tdvr(1)=BCX_px(0)
+          tdvr(2)=BCX_vx(0)
+          tdvr(3)=BCX_vy(0)
+          tdvr(4)=BCX_vz(0)
+          tdvr(5)=BCX_rhox(1)
+          tdvr(6)=BCX_px(1)
+          tdvr(7)=BCX_vx(1)
+          tdvr(8)=BCX_vy(1)
+          tdvr(9)=BCX_vz(1)
+          tdvr(10)=BCX_bx(0)
+          tdvr(11)=BCX_by(0)
+          tdvr(12)=BCX_bz(0)
+          tdvr(13)=BCX_bx(1)
+          tdvr(14)=BCX_by(1)
+          tdvr(15)=BCX_bz(1)
+#else
+          read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0)
+          read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1)
+          tdvr(0)=BCX_rhox(0)
+          tdvr(1)=BCX_px(0)
+          tdvr(2)=BCX_vx(0)
+          tdvr(3)=BCX_rhox(1)
+          tdvr(4)=BCX_px(1)
+          tdvr(5)=BCX_vx(1)
+#endif
+        endif
+        call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+#ifdef MHD
+        BCX_rhox(0)=tdvr(0)
+        BCX_px(0)=tdvr(1)
+        BCX_vx(0)=tdvr(2)
+        BCX_vy(0)=tdvr(3)
+        BCX_vz(0)=tdvr(4)
+        BCX_rhox(1)=tdvr(5)
+        BCX_px(1)=tdvr(6)
+        BCX_vx(1)=tdvr(7)
+        BCX_vy(1)=tdvr(8)
+        BCX_vz(1)=tdvr(9)
+        BCX_bx(0)=tdvr(10)
+        BCX_by(0)=tdvr(11)
+        BCX_bz(0)=tdvr(12)
+        BCX_bx(1)=tdvr(13)
+        BCX_by(1)=tdvr(14)
+        BCX_bz(1)=tdvr(15)
         BCX_ndx=5
 #else
-        read(51) BCX_rhox(0),BCX_px(0),BCX_vx(0)
-        read(51) BCX_rhox(1),BCX_px(1),BCX_vx(1)
+        BCX_rhox(0)=tdvr(0)
+        BCX_px(0)=tdvr(1)
+        BCX_vx(0)=tdvr(2)
+        BCX_rhox(1)=tdvr(3)
+        BCX_px(1)=tdvr(4)
+        BCX_vx(1)=tdvr(5)
 #endif
         if(myrank.eq.0) then
           write(6,*) ' boundary is fixed from the edge+-dx=',BCX_ndx
         endif
+!ifdef BCX_FIX
 #endif
+!ifdef BOX_SIM
 #endif
-        close(51)
         if(myrank.eq.0) then
-          write(6,*) ' mgas(0)=',m_p(0)
+          close(51)
+        endif
+        if(myrank.eq.0) then
+          write(6,*) ' mgas(0)=',m_p(0),myrank
         endif
       else
         if(myrank.eq.0) then
@@ -826,38 +1393,85 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
            ' Error: not reading gas.dat, but GAS is defined.'
           write(6,*) ' input flagfg=',flagfg
         endif
+        call MPI_FINALIZE(ierr)
         stop
       endif
 #ifdef METAL
 ! *** reading metal data ***
       if(flagfg.eq.-1.or.flagfg.le.-3) then
-        open(51,file='ini/gas-metal.dat',status='old',form='unformatted')
         if(myrank.eq.0) then
           write(6,*) ' reading ini/gas-metal.dat'
-        endif 
-        ngi=0
-        do i=0,ngt-1
-          if(i.ge.jsta.and.i.le.jend) then
-            read(51) mzHe_p(ngi),mzC_p(ngi),mzN_p(ngi),mzO_p(ngi) &
-             ,mzNe_p(ngi),mzMg_p(ngi),mzSi_p(ngi),mzFe_p(ngi),mzZ_p(ngi)
-            ngi=ngi+1
+          open(51,file='ini/gas-metal.dat',status='old',form='unformatted')
+        endif
+        nval=9
+! *** Read metal info ***
+        rrank=0
+        if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+
           else
-            read(51)
+
+            allocate(tdvr(0:ng*nval-1))
+  
           endif
+          if(myrank.eq.0) then
+! read the data only by rank 0
+            do i=0,nprp-1
+              read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                ,tdvr(i*nval+6),tdvr(i*nval+7),tdvr(i*nval+8)
+            enddo
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+            endif
+          else
+            call MPI_IRECV(tdvr,ng*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+          endif
+          if(myrank.eq.ip) then
+            do i=0,ng-1
+              mzHe_p(i)=tdvr(i*nval)
+              mzC_p(i)=tdvr(i*nval+1)
+              mzN_p(i)=tdvr(i*nval+2)
+              mzO_p(i)=tdvr(i*nval+3)
+              mzNe_p(i)=tdvr(i*nval+4)
+              mzMg_p(i)=tdvr(i*nval+5)
+              mzSi_p(i)=tdvr(i*nval+6)
+              mzFe_p(i)=tdvr(i*nval+7)
+              mzZ_p(i)=tdvr(i*nval+8)
+            enddo
+          endif
+
+          deallocate(tdvr)
+
         enddo
-        close(51)
-        if(ngi.ne.ng) then
-          write(6,*) ' Error in reading gas-metal.dat at rank',myrank
-          write(6,*) ' ng in gas.dat gas-metail.dat=',ng,ngi
-          stop
+        if(myrank.eq.0) then
+          close(51)
         endif
       endif
+
+
 #else
       if(flagfg.eq.-1.or.flagfg.le.-3) then
         if(myrank.eq.0) then
           write(6,*) ' Error: flagfg is inconsistent=',flagfg
           write(6,*) ' METAL is NOT defined, but trying to read gas-metal.dat'
         endif
+        call MPI_FINALIZE(ierr)
         stop
       endif
 #endif
@@ -880,49 +1494,85 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
 #ifdef MHD
-
-! *** reading B data ***
-      open(51,file='ini/gas-mhd.dat',status='old',form='unformatted')
       if(myrank.eq.0) then
-         write(6,*) 'reading ini/gas-mhd.dat'
+! *** reading B data ***
+        open(51,file='ini/gas-mhd.dat',status='old',form='unformatted')
+        write(6,*) 'reading ini/gas-mhd.dat'
+      endif 
+      nval=3
+! *** Read metal info ***
+      rrank=0
+      if(myrank.eq.0) then
+        ipsta=0
+        ipend=nprocs-1
+      else
+        ipsta=myrank
+        ipend=myrank
       endif
-      ngi=0
-      do i=0,ngt-1
-         if(i.ge.jsta.and.i.le.jend) then
-            read(51) bx_p(ngi),by_p(ngi),bz_p(ngi)
-            pbx_p(ngi)=bx_p(ngi)
-            pby_p(ngi)=by_p(ngi)
-            pbz_p(ngi)=bz_p(ngi)
-            dbx_p(ngi)=0.0d0
-            dby_p(ngi)=0.0d0
-            dbz_p(ngi)=0.0d0
-            pdbx_p(ngi)=0.0d0
-            pdby_p(ngi)=0.0d0
-            pdbz_p(ngi)=0.0d0
-            divb_p(ngi)=0.0d0
-            arotb_p(ngi)=0.0d0
+      do ip=ipsta,ipend
+        if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+          nprp=jendp(ip)-jstap(ip)+1
+
+          allocate(tdvr(0:nprp*nval-1))
+
+        else
+
+          allocate(tdvr(0:ng*nval-1))
+
+        endif
+        if(myrank.eq.0) then
+! read the data only by rank 0
+          do i=0,nprp-1
+            read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2)
+          enddo
+          if(ip.ne.myrank) then
+            call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+             ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+            call MPI_WAIT(ireqs(ip),istatus,ierr)
+          endif
+        else
+          call MPI_IRECV(tdvr,ng*nval,MPI_DOUBLE_PRECISION &
+           ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+          call MPI_WAIT(ireqr(ip),istatus,ierr)
+        endif
+        if(myrank.eq.ip) then
+          do i=0,ng-1
+            bx_p(i)=tdvr(i*nval)
+            by_p(i)=tdvr(i*nval+1)
+            by_p(i)=tdvr(i*nval+2)
+            pbx_p(i)=bx_p(i)
+            pby_p(i)=by_p(i)
+            pbz_p(i)=bz_p(i)
+            dbx_p(i)=0.0d0
+            dby_p(i)=0.0d0
+            dbz_p(i)=0.0d0
+            pdbx_p(i)=0.0d0
+            pdby_p(i)=0.0d0
+            pdbz_p(i)=0.0d0
+            divb_p(i)=0.0d0
+            arotb_p(i)=0.0d0
 #ifdef TIMEDIS
-            alpb_p(ngi)=ALPB_MIN
+            alpb_p(i)=ALPB_MIN
 #else
-            alpb_p(ngi)=ALPHA_CONST
+            alpb_p(i)=ALPHA_CONST
 #endif
 #ifdef DCLEAN
-            psi_p(ngi)=0.0d0
-            ppsi_p(ngi)=0.0d0
-            dpsi_p(ngi)=0.0d0
-            pdpsi_p(ngi)=0.0d0
+            psi_p(i)=0.0d0
+            ppsi_p(i)=0.0d0
+            dpsi_p(i)=0.0d0
+            pdpsi_p(i)=0.0d0
 #endif
-            ngi=ngi+1
-         else
-            read(51)
-         endif
+          enddo
+        endif
+    
+        deallocate(tdvr)
+     
       enddo
-      close(51)
-      if(ngi.ne.ng) then
-         write(6,*) 'Error in reading gad-mhd.dat at rank',myrank
-         write(6,*) 'ng in gat.dat gas-mhd.dat=',ng,ngi
-         stop
+      if(myrank.eq.0) then
+        close(51)
       endif
+!endif MHD
 #endif
 
 ! ***** end of reading files *****
@@ -958,57 +1608,185 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef STAR
       SI_tnsf=0
       if(flagfs.eq.0) then
-        open(51,file='ini/star.dat',status='old',form='unformatted')
-#ifdef METAL
-        open(52,file='ini/star-metal.dat',status='old',form='unformatted')
-#endif
+        nval=4
+
+        allocate(tivr(0:nval-1))
+
         if(myrank.eq.0) then
           write(6,*) ' reading star.dat. flagfs=',flagfs
-        endif
-!        read(51,'(a24,4I10)') ctmp,nif,idf,ngt,ng
-        read(51) nif,idf,nst,ns
-        if(myrank.eq.0) then
+          open(51,file='ini/star.dat',status='old',form='unformatted')
+          read(51) nif,idf,nst,ns
           write(6,*) ' nif,idf,nst,ns=',nif,idf,nst,ns
-        endif      
+! store the range of the particle for each rank
+          do ip=0,nprocs-1
+            call para_range(0,nst-1,nprocs,ip,jstap(ip),jendp(ip))
+          enddo
+          tivr(0)=nif
+          tivr(1)=idf
+          tivr(2)=nst
+          tivr(3)=ns
+        endif
+        call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        nif=tivr(0)
+        idf=tivr(1)
+        nst=tivr(2)
+        ns=tivr(3)
         call para_range(0,nst-1,nprocs,myrank,jsta,jend)
+        ns=jend-jsta+1
 ! keep the total number of formed star 
         SI_tnsf=nst
 
-        nc=ngt
-        ns=0
-        np=ng
-        do i=0,nst-1
-          if(i.ge.jsta.and.i.le.jend) then
-            read(51) xc_p(np),yc_p(np),zc_p(np),vnx_p(np),vny_p(np) &
-             ,vnz_p(np),m_p(np),m_p(np),rho_p(np),ts_p(np),itmp
-#if defined(SF_EFD) || defined(SF_ZFD)
-           flagfd_p(np)=itmp
-#endif
-! *** age -> formation time ***
-            ts_p(np)=TM_tot-ts_p(np)            
-#ifdef METAL
-            read(52) mzHe_p(np),mzC_p(np),mzN_p(np),mzO_p(np),mzNe_p(np) &
-             ,mzMg_p(np),mzSi_p(np),mzFe_p(np),mzZ_p(np)
-#endif
-            id_p(np)=nc
-            ns=ns+1
-            np=np+1
-          else
-            read(51)
-#ifdef METAL
-            read(52)
-#endif
-          endif
-          nc=nc+1
-        enddo
-        read(51) mname
-        close(51)
+        deallocate(tivr)
+
+        nval=10
+        nival=1
+! *** Read and  Set Position ***
+        nc=ng
+        rrank=0
         if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+            allocate(tivr(0:nprp*nival-1))
+
+          else
+
+            allocate(tdvr(0:ns*nval-1))
+            allocate(tivr(0:ns*nival-1))
+  
+          endif
+          if(myrank.eq.0) then
+! read the data only by rank 0
+            do i=0,nprp-1
+              read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                ,tdvr(i*nval+6),tdvr(i*nval+7),tdvr(i*nval+8) &
+                ,tdvr(i*nval+9),tivr(i*nival)
+            enddo
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+              call MPI_ISEND(tivr,nprp*nival,MPI_INTEGER &
+               ,ip,1,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+            endif
+          else
+            call MPI_IRECV(tdvr,ns*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+            call MPI_IRECV(tivr,ns*nival,MPI_INTEGER &
+             ,rrank,1,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+          endif
+          if(myrank.eq.ip) then
+            do i=0,ns-1
+              xc_p(nc)=tdvr(i*nval)
+              yc_p(nc)=tdvr(i*nval+1)
+              zc_p(nc)=tdvr(i*nval+2)
+              vnx_p(nc)=tdvr(i*nval+3)
+              vny_p(nc)=tdvr(i*nval+4)
+              vnz_p(nc)=tdvr(i*nval+5)
+              m_p(nc)=tdvr(i*nval+6)
+! tdvr(i*nval+7):
+! in case of stellar mass needs two values, like initial and current
+! in current version, stellar mass does not change, therefore this is not used
+              rho_p(nc)=tdvr(i*nval+8)
+! *** age -> formation time ***
+              ts_p(nc)=TM_tot-tdvr(i*nval+9)
+#if defined(SF_EFD) || defined(SF_ZFD)
+              flagfd_p(nc)=tivr(i*nival)
+#endif
+              id_p(nc)=ngt+jsta+i
+              nc=nc+1
+            enddo
+          endif
+
+          deallocate(tdvr)
+          deallocate(tivr)
+
+        enddo
+        if(myrank.eq.0) then
+          read(51) mname
+          close(51)
           write(6,*) ' mstar(0)=',m_p(ng)
         endif
+
 #ifdef METAL
-        close(52)
+        if(myrank.eq.0) then
+          open(52,file='ini/star-metal.dat',status='old',form='unformatted')
+        endif
+        nval=9
+! *** Read metal info ***
+        rrank=0
+        if(myrank.eq.0) then
+          ipsta=0
+          ipend=nprocs-1
+        else
+          ipsta=myrank
+          ipend=myrank
+        endif
+        do ip=ipsta,ipend
+          if(myrank.eq.0) then
+! number of baryon particle read for rank ip
+            nprp=jendp(ip)-jstap(ip)+1
+
+            allocate(tdvr(0:nprp*nval-1))
+
+          else
+
+            allocate(tdvr(0:ns*nval-1))
+  
+          endif
+          if(myrank.eq.0) then
+! read the data only by rank 0
+            do i=0,nprp-1
+              read(52) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2) &
+                ,tdvr(i*nval+3),tdvr(i*nval+4),tdvr(i*nval+5) &
+                ,tdvr(i*nval+6),tdvr(i*nval+7),tdvr(i*nval+8)
+            enddo
+            if(ip.ne.myrank) then
+              call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
+               ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
+              call MPI_WAIT(ireqs(ip),istatus,ierr)
+            endif
+          else
+            call MPI_IRECV(tdvr,ns*nval,MPI_DOUBLE_PRECISION &
+             ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+          endif
+          if(myrank.eq.ip) then
+            do i=0,ns-1
+              mzHe_p(i+ng)=tdvr(i*nval)
+              mzC_p(i+ng)=tdvr(i*nval+1)
+              mzN_p(i+ng)=tdvr(i*nval+2)
+              mzO_p(i+ng)=tdvr(i*nval+3)
+              mzNe_p(i+ng)=tdvr(i*nval+4)
+              mzMg_p(i+ng)=tdvr(i*nval+5)
+              mzSi_p(i+ng)=tdvr(i*nval+6)
+              mzFe_p(i+ng)=tdvr(i*nval+7)
+              mzZ_p(i+ng)=tdvr(i*nval+8)
+            enddo
+          endif
+
+          deallocate(tdvr)
+
+        enddo
+        if(myrank.eq.0) then
+          close(52)
+        endif
 #endif
+        np=ng+ns
+
         do i=ng,np-1
 ! *** the other properties **
 #ifdef SF_EFD
@@ -1044,7 +1822,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         mzZ0_p(i)=mzZ_p(i)
       enddo
 #endif
-
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! *** get yield even if there is no star, but for feedback gas ***
       call setyield()
@@ -1147,7 +1924,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
       npt=ngt+nst
 ! *** end of non-cosmological simulation input ***
-#endif  
+#endif
 ! *** end of data setting ***
 
 ! *** Set the data in common for cosmological and non-cosmological mode ***
@@ -1319,13 +2096,17 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       enddo
 #endif
 
+#ifdef COSM
       if(Ini_mul.gt.0) then
         SI_ndm1=nd(Ini_mul)
         SI_ndm1t=ndt(Ini_mul)
       else
+#endif
         SI_ndm1t=ndmt
         SI_ndm1=ndm
+#ifdef COSM
       endif
+#endif
       flagcont=0
       SI_flagout = 0
       SI_mms = 0.0d0
@@ -1583,9 +2364,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef GAS
         write(60,'(a3,(1pE13.5))') 'mb=',m_p(0)
 #endif
+#ifdef COSM
         do i=0,Ini_mul
           write(60,'(i2,a12,I10,1pE13.5)') i,' level n,dx=',ndt(i),dxi(i)
-           
         enddo
         nc = 0
 #ifdef DM
@@ -1593,6 +2374,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           nc = nc+nd(il)
           write(60,'(a4,i2,a2,(1pE13.5))') 'mdm(l',il,')=',m_dm(nc-1)
         enddo
+#endif
 #endif
         write(60,'(a21,2(1pE13.5))') ' MGROOT,THETA,ALPHAT=',MGROOT,THETA,ALPHAT
         write(60,'(a10,I10)') ' NATTABLE=',NATTABLE
@@ -1780,15 +2562,51 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       endif
 
 #ifdef GAS
-!      write(fileo,'(a4,i3.3)') 'inip',myrank
-!      open(60,file=fileo,status='unknown')
-!      do i=0,ng-1
-!        pn=list_ap(i) 
-!        write(60,'(9(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
-!         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
-!         ,h_p(pn),id_p(pn),flagc_p(pn)
-!      enddo
-!      close(60)
+      write(fileo,'(a4,i3.3)') 'inip',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,ng-1
+        pn=list_ap(i) 
+        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
+         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
+#ifdef METAL
+         ,h_p(pn),mzZ_p(pn),id_p(pn),flagc_p(pn)
+#else
+         ,h_p(pn),u_p(pn),id_p(pn),flagc_p(pn)
 #endif
+      enddo
+      close(60)
+#ifdef STAR
+      write(fileo,'(a4,i3.3)') 'inis',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,ns-1
+        pn=list_ap(i+ng) 
+        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
+         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
+#ifdef METAL
+         ,h_p(pn),mzZ_p(pn),id_p(pn),flagfd_p(pn)
+#else
+         ,h_p(pn),ts_p(pn),id_p(pn),flagfd_p(pn)
+#endif
+      enddo
+      close(60)
+#endif
+#endif
+
+#ifdef DM
+      write(fileo,'(a4,i3.3)') 'inid',myrank
+      open(60,file=fileo,status='unknown')
+      do i=0,ndm-1
+        pn=list_adm(i)
+        write(60,'(8(1pE13.5),I10)') xc_dm(pn),yc_dm(pn),zc_dm(pn) &
+         ,vnx_dm(pn),vny_dm(pn),vnz_dm(pn),m_dm(pn),h_dm(pn),id_dm(pn)
+      enddo
+      close(60)
+#endif
+
+      deallocate(istatus)
+      deallocate(ireqs)
+      deallocate(ireqr)
+      deallocate(jstap)
+      deallocate(jendp)
 
 end subroutine
