@@ -2561,47 +2561,46 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' end writing inipara.dat'
       endif
 
-#ifdef GAS
-      write(fileo,'(a4,i3.3)') 'inip',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,ng-1
-        pn=list_ap(i) 
-        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
-         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
-#ifdef METAL
-         ,h_p(pn),mzZ_p(pn),id_p(pn),flagc_p(pn)
-#else
-         ,h_p(pn),u_p(pn),id_p(pn),flagc_p(pn)
-#endif
-      enddo
-      close(60)
-#ifdef STAR
-      write(fileo,'(a4,i3.3)') 'inis',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,ns-1
-        pn=list_ap(i+ng) 
-        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
-         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
-#ifdef METAL
-         ,h_p(pn),mzZ_p(pn),id_p(pn),flagfd_p(pn)
-#else
-         ,h_p(pn),ts_p(pn),id_p(pn),flagfd_p(pn)
-#endif
-      enddo
-      close(60)
-#endif
-#endif
-
-#ifdef DM
-      write(fileo,'(a4,i3.3)') 'inid',myrank
-      open(60,file=fileo,status='unknown')
-      do i=0,ndm-1
-        pn=list_adm(i)
-        write(60,'(8(1pE13.5),I10)') xc_dm(pn),yc_dm(pn),zc_dm(pn) &
-         ,vnx_dm(pn),vny_dm(pn),vnz_dm(pn),m_dm(pn),h_dm(pn),id_dm(pn)
-      enddo
-      close(60)
-#endif
+!#ifdef GAS
+!      write(fileo,'(a4,i3.3)') 'inip',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ng-1
+!        pn=list_ap(i) 
+!        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
+!         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
+!#ifdef METAL
+!         ,h_p(pn),mzZ_p(pn),id_p(pn),flagc_p(pn)
+!#else
+!         ,h_p(pn),u_p(pn),id_p(pn),flagc_p(pn)
+!#endif
+!      enddo
+!      close(60)
+!#ifdef STAR
+!      write(fileo,'(a4,i3.3)') 'inis',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ns-1
+!        pn=list_ap(i+ng) 
+!        write(60,'(10(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
+!         ,vnx_p(pn),vny_p(pn),vnz_p(pn),m_p(pn),rho_p(pn) &
+!#ifdef METAL
+!         ,h_p(pn),mzZ_p(pn),id_p(pn),flagfd_p(pn)
+!#else
+!         ,h_p(pn),ts_p(pn),id_p(pn),flagfd_p(pn)
+!#endif
+!      enddo
+!      close(60)
+!#endif
+!#endif
+!#ifdef DM
+!      write(fileo,'(a4,i3.3)') 'inid',myrank
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        pn=list_adm(i)
+!        write(60,'(8(1pE13.5),I10)') xc_dm(pn),yc_dm(pn),zc_dm(pn) &
+!         ,vnx_dm(pn),vny_dm(pn),vnz_dm(pn),m_dm(pn),h_dm(pn),id_dm(pn)
+!      enddo
+!      close(60)
+!#endif
 
       deallocate(istatus)
       deallocate(ireqs)
