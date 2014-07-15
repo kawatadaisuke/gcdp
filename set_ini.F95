@@ -1093,8 +1093,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #if defined(GAS) || defined(STAR)
       np=ng+ns
 
-      write(6,*) ' Allocate np,myrank=',np,ng,ns,myrank
-
 ! initial allocate memory space
 ! all baryon
       call allocate_baryon_all(np)
@@ -2479,6 +2477,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef SF_ZFD
         write(60,'(a33)') '   ###  include metal feedback  ###'
 #endif
+#if defined(SF_EFD) || defined(SF_ZFD)
+        write(60,'(a34,I8,I8)') ' star mass group: SI_nsp, SI_snii=' &
+          ,SI_nsp,SI_snii
+#endif
 #ifdef COREDW
         write(60,'(a33)') '   ###  core dw/ds for P grad   ###'
 #endif
@@ -2555,6 +2557,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 !                          123456789012345678901234567890123456
         write(60,'(a30)') '   ###  artF DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_artfdm(0),SI_artfdm(1)
+#endif
+#ifdef NOLOWMSF
+!                          123456789012345678901234567890123456
+        write(60,'(a30)') '   ###  NOWMSF on ###'
+        write(60,'(a30)') '   ###  Do not creat star ID>SI_snii ###'
 #endif
 
         close(60)

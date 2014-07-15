@@ -87,18 +87,32 @@ subroutine starf(ng,ns,nag,nas,nagravg)
           endif
 #if defined(SF_EFD) || defined(SF_ZFD)
         endif
+
 #endif
+#if defined(SF_EFD) || defined(SF_ZFD)
+        if(p(pn).gt.1.5d0) then
+! *** set flagfd_p
+          ifd=int(ran1(idum)*dble(SI_nsp))+1
+#ifdef NOLOWMSF
+          if(ifd.le.SI_snii) then
+#endif        
+            flagfd_p(pn)=ifd
+            flagrfd_p(pn)=0
+#ifdef NOLOWMSF
+          else
+! no star partcle creation
+            p(pn)=0.0d0
+          endif
+#endif        
+         
+        endif
+#endif
+
         if(p(pn).gt.1.5d0) then
 ! * make star particle *
           slist(dns)=pn
           dns=dns+1
           flagc_p(pn) = 1
-#if defined(SF_EFD) || defined(SF_ZFD)
-! *** set flagfd_p
-          ifd=int(ran1(idum)*dble(SI_nsp))+1
-          flagfd_p(pn)=ifd
-          flagrfd_p(pn)=0
-#endif
 ! *** keep the data of density and pressure, when star forms ***
         else if(i.lt.nagravg) then
           list(nagrav)=pn

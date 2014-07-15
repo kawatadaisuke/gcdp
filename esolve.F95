@@ -133,11 +133,30 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
 ! *** check cooling time vs. dt_p and set dti ***
       do i=0,nptc-1
         pn=pn_nfp(i)
-! *** calculate total du/dt
+! use full das/dt (since 15/07/2014)
+! Note: ndu_p is das/dt
         if(flagdu.eq.0) then
-          dudt=0.5d0*(pdu_p(pn)+ndu_p(pn))-adv(pn)
+          dudt=0.5d0*(pdu_p(pn)+ndu_p(pn)) &
+#ifdef SF_EFD
+! cooling
+           -gamrhogam1(pn)*adv(pn) &
+! stellar feedback
+           +gamrhogam1(pn)*Gsn_p(pn)/dt_p(pn)
+#else
+! cooling
+           -gamrhogam1(pn)*adv(pn)
+#endif
         else
-          dudt=ndu_p(pn)-adv(pn)
+          dudt=ndu_p(pn) &
+#ifdef SF_EFD
+! cooling
+           -gamrhogam1(pn)*adv(pn) &
+! stellar feedback
+           +gamrhogam1(pn)*Gsn_p(pn)/dt_p(pn)
+#else
+! cooling
+           -gamrhogam1(pn)*adv(pn)
+#endif
         endif
         dudt=dabs(dudt)
 #ifdef SF_EFD
@@ -146,8 +165,9 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
 #else
         if(dudt.gt.0.0d0) then
 #endif
-          dtc=CCOOLEDT*u_p(pn)/dudt
+          dtc=CCOOLEDT*as_p(pn)/dudt
           dti(pn)=dtc
+! av: time since the last timestep, which should be less than dt_p
           if(av(pn)+dti(pn).gt.dt_p(pn)) then
             dti(pn)=dt_p(pn)-av(pn)
             flagtc(pn)=0              
@@ -336,9 +356,11 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
             write(6,'(a30,5I10)') 'Thlim1 myrank,id,flagfd,ie,it=' &
              ,myrank,id_p(pn),flagfd_p(pn),ie,it
             write(6,*) 'flagdu,Gsn,ndu,ram,asp,uhlim=' &
-             ,flagdu,Gsn_p(pn),ndu_p(pn),ram_p(pn),asp(pn),uhlim(pn)
+             ,flagdu,Gsn_p(pn),ndu_p(pn),ram(pn),asp(pn),uhlim(pn)
             write(6,*) 'flagtc,flagu,dti,dt=' &
              ,flagtc(pn),flagu(pn),dti(pn),dt_p(pn)
+            write(6,*) ' initial T,as,du0,ram=' &
+             ,(u_p(pn)/gkmm)*(MYU/myu_p(pn)),as_p(pn),du0(pn),ram_p(pn)
 
             stop
 #endif

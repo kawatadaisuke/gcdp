@@ -5,7 +5,7 @@
 !
 ! *** cosmological simulation
 #define COSM
-! #define MULTI_LEV
+#define MULTI_LEV
 !
 ! *** hydrodynamics
 #define GAS
@@ -125,15 +125,19 @@
 ! #define PINI
 ! *** no UVB heating  (assume lognh=0.0)
 ! #define NOUVB
-!
+
+! *** No creation for non SNe II feedback particle, to keep gas number 
+#define NOLOWMSF
+
 ! *** TreePM
-#define TREEPM
+! #define TREEPM
+! #undef TREEPM
 ! #define PMONLY
-#define FFTW3
+! #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
-#define FFTW3_ESTIMATE
+! #define FFTW3_ESTIMATE
 ! use MPI and distributed 
-#define FFTW3_MPI
+! #define FFTW3_MPI
 #
 !
 ! *** integrator for cosmological simulation
@@ -148,23 +152,23 @@
 !
 ! *** isolated galaxy
 ! #define MAXR
-! #define MEXT
+#define MEXT
 ! #define CENTRE0
 !
-! #undef COSM
+#undef COSM
 #undef MULTI_LEV
-! #undef DM
+#undef DM
 ! #undef GAS
 ! *** adiabatic! ***
-#undef COOL
-#undef STAR
-#undef SF
-#undef METAL
-#undef SF_EFD
-#undef SF_ZFD
-#undef METALDIFF
-#undef UTHLIM_JM
-#undef UTHLIM_POLY
+! #undef COOL
+! #undef STAR
+! #undef SF
+! #undef METAL
+! #undef SF_EFD
+! #undef SF_ZFD
+! #undef METALDIFF
+! #undef UTHLIM_JM
+! #undef UTHLIM_POLY
 
 ! *** for test simulation ****
 ! *** no individual timestep

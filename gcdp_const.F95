@@ -145,7 +145,8 @@ module gcdp_const
       double precision,parameter :: CGRAV=0.15d0
 ! * dt factor from cooling rate in *time.F, esolve.F durin reionization
       double precision,parameter :: CCOOLDT=1.0d8
-      double precision,parameter :: CCOOLEDT=1.0d8
+!      double precision,parameter :: CCOOLEDT=1.0d8
+      double precision,parameter :: CCOOLEDT=0.5d0
       double precision,parameter :: CCOOLRIDT=0.1d0
 ! *** Factor of Individual Timestep limiter
 ! *** 4: Saitoh & Makino (2008)
