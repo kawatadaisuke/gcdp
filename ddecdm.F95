@@ -1153,6 +1153,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 !      enddo
 !      close(60)
 
+!      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+
+!      stop
+
 end subroutine
 #endif
 

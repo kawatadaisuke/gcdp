@@ -79,6 +79,8 @@ subroutine  setyield()
         close(50)
       endif
 
+      call MPI_BCAST(SI_nsp,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+
 ! sending the data to the other ranks
       nval=12
 

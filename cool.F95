@@ -23,12 +23,38 @@ subroutine cool(np,plist,current_z,ngs,ram)
 
       integer i
       double precision cradp,hradp,radp
-      double precision lowmet
+      double precision lowmet,highmet
       double precision nhp,lognhp,logTp,metp,logmetp,logTlimK
       double precision dnh,dmet,dt
       double precision wt1,wt2,wd1,wd2,wz1,wz2,dz
       double precision wm1,wm2
       integer pn,it,id,iz,im
+#ifdef METAL
+! store original mzZ_p and mzHe_p
+      double precision,allocatable :: mzZp0(:),mzHep0(:)
+
+      allocate(mzZp0(0:np-1))
+      allocate(mzHep0(0:np-1))
+
+      do i=0,np-1
+        pn=plist(i)
+        mzZp0(i)=mzZ_p(pn)
+        mzHep0(i)=mzHe_p(pn)
+     enddo
+
+! check highest metallicity (solar=1)
+     highmet=10.0d0**met_crtb(nmet_crtb-1)
+     do i=0,np-1
+       pn=plist(i)
+       metp = (mzZ_p(pn))/(m_p(pn)*MUSM*XZSOL)
+       if(metp.gt.highmet) then
+         mzZ_p(pn)=highmet*m_p(pn)*MUSM*XZSOL
+! He scale from solar to primordial
+         mzHe_p(pn)=m_p(pn)*MUSM*(XHE0+(XHESOL-XHE0)*highmet)
+       endif
+     enddo
+
+#endif
 
 ! lowest metallicity
       lowmet=10.0d0**met_crtb(0)
@@ -333,6 +359,18 @@ subroutine cool(np,plist,current_z,ngs,ram)
         ram(pn)=radp/rho_p(pn)
 
       enddo
+
+#ifdef METAL
+! restore original metal
+      do i=0,np-1
+        pn=plist(i)
+        mzZ_p(pn)=mzZp0(i)
+        mzHe_p(pn)=mzHep0(i)
+     enddo
+
+     deallocate(mzZp0)
+     deallocate(mzHep0)
+#endif
 
 end subroutine
 #endif

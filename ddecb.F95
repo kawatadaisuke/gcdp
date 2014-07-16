@@ -1391,21 +1391,26 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       endif
 #endif
 
+! gas
 !      if(step.gt.0) then
-!        write(fileo,'(a4,i3.3,i3.3)') 'decb',myrank,step
+!        write(fileo,'(a4,i3.3,i3.3)') 'decg',myrank,step
 !      else
-!        write(fileo,'(a4,i3.3,i3.3)') 'decb',myrank,0
+!        write(fileo,'(a4,i3.3,i3.3)') 'decg',myrank,0
 !      endif
 !       write(fileo,'(a4,i3.3)') 'decb',myrank
-!      open(60,file=fileo,status='unknown')
+!       open(60,file=fileo,status='unknown')
 !      do i=0,np-1
-!        write(60,'(13(1pE13.5),2I10)') xc_p(i),yc_p(i),zc_p(i) &
-!        ,vnx_p(i),vny_p(i),vnz_p(i),dvx_p(i),dvy_p(i),dvz_p(i) &
-!        ,rho_p(i),vdt_p(i),dt_p(i),lt_p(i),id_p(i),i
+!        pn=list_ap(i)
+!        pn=i
+!        write(60,'(13(1pE13.5),2I10)') xc_p(pn),yc_p(pn),zc_p(pn) &
+!        ,vnx_p(pn),vny_p(pn),vnz_p(pn),dvx_p(pn),dvy_p(pn),dvz_p(pn) &
+!        ,rho_p(pn),vdt_p(pn),dt_p(pn),lt_p(pn),id_p(pn),pn
 !      enddo
 !      close(60)
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+
 !      write(6,*) 'after decb ng,nag,myrank=',ng,nag,ns,nas,nagravg,myrank
+
 !      stop
 
 

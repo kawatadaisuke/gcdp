@@ -227,6 +227,9 @@ module gcdp_const
       double precision,parameter :: HUB0=100.0d0/(VUKMS*10.0d0)
 ! * Solar metallicity *
       double precision,parameter :: XZSOL=0.019d0
+! He primordial and Solar metallicity
+      double precision,parameter :: XHE0=0.24d0
+      double precision,parameter :: XHESOL=0.275d0
 ! * photon velocity *
       double precision,parameter :: CVEL=(2.997925e5/VUKMS)
 
