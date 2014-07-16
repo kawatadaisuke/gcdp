@@ -9,7 +9,11 @@ module gcdp_const
 
       double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***
+#ifdef TREEPM
       integer,parameter ::  NDSTEPDDEC=1
+#else
+      integer,parameter ::  NDSTEPDDEC=100
+#endif
 ! maximum number of cpus
       integer,parameter :: NCPU=256
 ! maximum number of node to be sent

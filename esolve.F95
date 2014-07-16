@@ -162,9 +162,13 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
 #ifdef SF_EFD
 ! *** adiabatic if flagc_p=-1
         if(flagc_p(pn).eq.0.and.dudt.gt.0.0d0) then
+! only when cooling or heating is dominated
+          if(dabs(adv(pn)).gt.dabs(Gsn_p(pn)/dt_p(pn))) then
+
 #else
         if(dudt.gt.0.0d0) then
 #endif
+
           dtc=CCOOLEDT*as_p(pn)/dudt
           dti(pn)=dtc
 ! av: time since the last timestep, which should be less than dt_p
@@ -172,6 +176,12 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
             dti(pn)=dt_p(pn)-av(pn)
             flagtc(pn)=0              
           endif 
+#ifdef SF_EFD
+          else
+            dti(pn)=dt_p(pn)-av(pn)
+            flagtc(pn)=0
+          endif
+#endif
         else
           dti(pn)=dt_p(pn)-av(pn)
           flagtc(pn)=0
@@ -360,7 +370,35 @@ subroutine energy_solver(ngs,nlist0,plist,current_z,flagdu)
             write(6,*) 'flagtc,flagu,dti,dt=' &
              ,flagtc(pn),flagu(pn),dti(pn),dt_p(pn)
             write(6,*) ' initial T,as,du0,ram=' &
-             ,(u_p(pn)/gkmm)*(MYU/myu_p(pn)),as_p(pn),du0(pn),ram_p(pn)
+             ,u_p(pn)*gkmm,as_p(pn),du0(pn),ram_p(pn)
+            write(6,*) ' flagu,T(MYU),fx/as, ram,fx,fhx, Tl,Tu ='
+            write(6,*) flagu(pn),(as_p(pn)*MYU/(GAM-1.0d0)) &
+              *(rho_p(pn)**(GAM-1.0d0))*gkmm,fx(pn)/asp(pn)
+            write(6,*) ram(pn),fx(pn),fhx(pn)
+            write(6,*) (10.0**(lu(pn))/(GAM-1.0d0))*(rho_p(pn)**(GAM-1.0d0)) &
+             *gkmm,(10.0**(hu(pn))/(GAM-1.0d0))*(rho_p(pn)**(GAM-1.0d0))*gkmm
+            write(6,*) ' du, pdu, duram,nnb=',ndu_p(pn),pdu_p(pn) &
+             ,(gamrhogam1(pn))*ram_p(pn),nnb_p(pn)
+            write(6,*) ' alpv,u,u2,div,arot,h,omgh=',alpv_p(pn) &
+             ,alpu_p(pn),d2u_p(pn),div_v_p(pn),arot_v_p(pn),h_p(pn),omgh_p(pn)
+            write(6,*) ' id, original as,rho,nh,ram,myu,T,Y,Z=' &
+             ,id_p(pn),as_p(pn),rho_p(pn) &
+#ifdef METAL
+             ,((m_p(pn)-((mzZ_p(pn)+mzHe_p(pn))/MUSM))/m_p(pn)) &
+#else
+             ,0.0d0 &
+#endif
+             ,rho_p(pn)*(DU/MP),ram_p(pn),tx(pn),(as_p(pn)*(tx(pn)/MYU) &
+             /(GAM-1.0d0))*(rho_p(pn)**(GAM-1.0d0))*gkmm &
+#ifdef METAL
+             ,mzHe_p(pn)/(m_p(pn)*MUSM),mzZ_p(pn)/(m_p(pn)*MUSM) 
+#else
+             ,0.0d0,0.0d0
+#endif
+#ifdef SF_EFD
+            write(6,*) ' Gsn,dtp,dtsf,TMd,flagfd,rfd,fc',Gsn_p(pn) &
+            ,dt_p(pn),TMsf_dt,TM_dt,flagfd_p(pn),flagrfd_p(pn),flagc_p(pn)
+#endif
 
             stop
 #endif
