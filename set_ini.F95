@@ -602,7 +602,15 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! read MHD data
       nc=0
       nval=3
-      do ip=0,nprocs-1
+      rrank=0
+      if(myrank.eq.0) then
+        ipsta=0
+        ipend=nprocs-1
+      else
+        ipsta=myrank
+        ipend=myrank
+      endif
+      do ip=ipsta,ipend
         if(myrank.eq.0) then
 ! number of baryon particle read for rank ip
           nprp=jendp(ip)-jstap(ip)+1
@@ -618,15 +626,14 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! read the data only by rank 0
 ! bx, by, bz
           do i=0,nprp-1
-            read(51) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2)
+            read(57) tdvr(i*nval),tdvr(i*nval+1),tdvr(i*nval+2)
           enddo
-          if(ip.ne.0) then
+          if(ip.ne.myrank) then
             call MPI_ISEND(tdvr,nprp*nval,MPI_DOUBLE_PRECISION &
              ,ip,0,MPI_COMM_WORLD,ireqs(ip),ierr)
             call MPI_WAIT(ireqs(ip),istatus,ierr)
           endif
         else
-          rrank=0
           call MPI_IRECV(tdvr,nplev*nval,MPI_DOUBLE_PRECISION &
            ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
           call MPI_WAIT(ireqr(ip),istatus,ierr)
@@ -667,7 +674,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
       enddo
       if(myrank.eq.0) then
-        read(57)
+        close(57)
       endif
 !endif MHD
 #endif
