@@ -89,6 +89,9 @@ subroutine gtreebuild(ng,ns)
 ! the last 0 for node 0
 ! gmakeroot use pn_nfp
       call gmakeroot(ng+ns,pn_nfp)
+! not set np_gtr(0) in gmakeroot, but set = ng after gmakeroot,
+! because gmakeroot use ng+ns
+      np_gtr(0)=ng
       next_gtr(0)=0
       pare_tr(0)=-1
       daughter_gtr(0)=1
@@ -114,7 +117,8 @@ subroutine gtreebuild(ng,ns)
         endif
 #endif
       enddo
-! note that gmakeroot use ng+ns, and np_gtr is to be ng+ns, even if ng=0
+! note that np_gtr(0) can be 0 even if numnfp=0, if there is only transition 
+! (star->gas) particle, flagfd_p>0
       if(numnfp.eq.0) then
         np_gtr(0)=0
         numgtr=0
@@ -676,7 +680,7 @@ subroutine gtreebuild(ng,ns)
             next_gtr(0)=numtr0
           endif
 ! *** set end of tree ***
-          do i=numtri,numgtr-1
+          do i=numtr0,numgtr-1
 ! *** set next_tr ***
             if(next_gtr(i).eq.numgtr) then
               next_gtr(i)=-1
@@ -740,10 +744,8 @@ subroutine gmakeroot(ng,pn_nfp)
       min_x=INF
       min_y=INF
       min_z=INF
-      np_gtr(0)=0
       do i=0,ng-1
         pn=pn_nfp(i)
-        np_gtr(0)=np_gtr(0)+1
         if(x_p(pn).lt.min_x) then
           min_x = x_p(pn)
         endif

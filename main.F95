@@ -562,7 +562,7 @@ program gcdp
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ectime=MPI_WTIME()
         if(myrank.eq.0) then
-          write(6,*) ' begin tree force',ectime-ntime
+          write(6,*) ' begin calc_dv_du',ectime-ntime
         endif
 
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
@@ -571,7 +571,7 @@ program gcdp
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ectime=MPI_WTIME()
         if(myrank.eq.0) then
-          write(6,*) ' finish tree force',ectime-ntime
+          write(6,*) ' finish calc_dv_du',ectime-ntime
         endif
 
 #ifdef TREEPM
