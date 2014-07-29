@@ -1090,15 +1090,14 @@ subroutine set_value(ng,nag,ns,flag)
                 else
 #endif
 ! *** store the data for bi-section
-                if(adv(pn).gt.0.0d0.and.adv(pn).lt.fhx(pn)) then
+                if(adv(pn).gt.0.0d0.and.h_p(pn).gt.hu(pn)) then
+! largest hu
                   hu(pn)=h_p(pn)
                   fhx(pn)=adv(pn)
-                else if(adv(pn).lt.0.0d0.and.adv(pn).gt.fx(pn)) then
-! look for minimum lu
-                  if(lu(pn).lt.0.0d0.or.h_p(pn).lt.lu(pn)) then
-                    lu(pn)=h_p(pn)
-                    fx(pn)=adv(pn)
-                  endif
+                else if(adv(pn).lt.0.0d0.and.h_p(pn).lt.lu(pn)) then
+! smallest lu
+                  lu(pn)=h_p(pn)
+                  fx(pn)=adv(pn)
                 endif
 ! *** update ***
                 if(av(pn).gt.DHFLIM*h_p(pn)) then
