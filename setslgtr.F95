@@ -74,8 +74,13 @@ subroutine setslgtr(nssl,nalist,npb,flag)
         pni=nalist(i)
         list(i)=pni
         node(pni)=nodess_gtr
+        if(l_gtr(nodess_gtr).gt.0.0d0) then
 ! *** set 2nd largest one ***
-        tdvr(pni)=(crit2*l_gtr(nodess_gtr))**2
+          tdvr(pni)=crit2*l_gtr(nodess_gtr)
+        else
+! *** set 2nd largest one can be 0, then set l_gtr(0)***
+          tdvr(pni)=crit2*l_gtr(0)
+        endif
       enddo 
       nlist=nssl
    77 if(nlist.eq.0) then
@@ -90,7 +95,9 @@ subroutine setslgtr(nssl,nalist,npb,flag)
         pni=list(i)
         nd=node(pni)         
         pn=pn_gtr(nd)
-        if(np_gtr(nd).gt.1) then
+        if(proc_gtr(nd).ne.myrank) then
+          node(pni)=next_gtr(nd)
+        else if(np_gtr(nd).gt.1) then
           xij=x_p(pni)-cx_gtr(nd)
 #ifdef BCX_PERIOD   
           tij=xij-SI_lbox(0)
@@ -137,12 +144,7 @@ subroutine setslgtr(nssl,nalist,npb,flag)
           if(rc2.lt.tdvr(pni) &
            .or.dsqrt(rc2)-crit*l_gtr(nd).lt.dsqrt(tdvr(pni))) then
 ! *** possible to find a particle closer ***
-! *** check if or not it's pseudo node
-            if(proc_gtr(nd).ne.myrank) then
-              node(pni)=next_gtr(nd)
-            else
-              node(pni)=daughter_gtr(nd)
-            endif
+            node(pni)=daughter_gtr(nd)
           else
             node(pni)=next_gtr(nd)
           endif
@@ -203,7 +205,7 @@ subroutine setslgtr(nssl,nalist,npb,flag)
       tnlist = nlist
       nlist = 0
       do i=0,tnlist-1
-        if(node(list(i)).ne.0) then
+        if(node(list(i)).ne.0.and.proc_gtr(node(list(i))).eq.myrank) then
           list(nlist)=list(i)
           nlist=nlist+1
         endif

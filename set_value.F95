@@ -59,6 +59,7 @@ subroutine set_value(ng,nag,ns,flag)
       integer,allocatable :: flagi(:)
       integer,allocatable :: pncomp(:),flagproc(:),flagcom(:)
       integer,allocatable :: npproc(:),isproc(:),ieproc(:),cproc(:)
+      double precision,allocatable :: hn0p(:)
 ! *** for pseudo node 
       integer,allocatable :: nextpnd(:),daupnd(:),ndpnd(:),idpnd(:)
       double precision,allocatable :: xpnd(:),ypnd(:),zpnd(:),lpnd(:)
@@ -132,6 +133,7 @@ subroutine set_value(ng,nag,ns,flag)
       allocate(av(0:npb))
       allocate(adv(0:npb))
       allocate(nd_nfp(0:npb))
+      allocate(hn0p(0:npb))
 
       do i=0,np-1
         pn_nfp(i) = list_ap(i)
@@ -146,6 +148,8 @@ subroutine set_value(ng,nag,ns,flag)
         lu(pni)=-INF
 ! store original h since 8/7 2008, try but too strict condition
         du0(pni)=h_p(pni)
+! largest h when nnb_p=0
+        hn0p(pni)=0.0d0
       enddo
 
 ! *** allocate work space for active particles ***
@@ -1047,6 +1051,9 @@ subroutine set_value(ng,nag,ns,flag)
               pn_nfp(nlist)=pn
               nlist = nlist+1
               flagi(pn)=0
+              if(h_p(pn).gt.hn0p(pn)) then
+                hn0p(pn)=h_p(pn)
+              endif
             else
 #ifdef SIM1D
 ! *** target density ***
@@ -1087,8 +1094,11 @@ subroutine set_value(ng,nag,ns,flag)
                   hu(pn)=h_p(pn)
                   fhx(pn)=adv(pn)
                 else if(adv(pn).lt.0.0d0.and.adv(pn).gt.fx(pn)) then
-                  lu(pn)=h_p(pn)
-                  fx(pn)=adv(pn)
+! look for minimum lu
+                  if(lu(pn).lt.0.0d0.or.h_p(pn).lt.lu(pn)) then
+                    lu(pn)=h_p(pn)
+                    fx(pn)=adv(pn)
+                  endif
                 endif
 ! *** update ***
                 if(av(pn).gt.DHFLIM*h_p(pn)) then
@@ -1168,7 +1178,7 @@ subroutine set_value(ng,nag,ns,flag)
 ! this includes lu(pn).lt.0.0d0
                 flagi(pn)=-1
               else if(hu(pn).lt.0.0d0) then     
-                h_p(pn)=lu(pn)
+!                h_p(pn)=lu(pn)
                 flagi(pn)=1
                 if(lu(pn).lt.0.0d0) then
                   write(6,*) ' Error in set_value(): rank,id=',myrank,id_p(pn)
@@ -1205,10 +1215,22 @@ subroutine set_value(ng,nag,ns,flag)
                 av(pn)=0.5d0*(lu(pn)+hu(pn))
                 flagi(pn)=0
               else if(nnb_p(pn).le.0) then
-                av(pn)=1.01d0*h_p(pn)
+                if(h_p(pn).gt.hn0p(pn)) then
+                  hn0p(pn)=h_p(pn)
+                endif 
+                av(pn)=0.5d0*(lu(pn)+hn0p(pn))
               else
 ! *** believe that decreasing h would increase f(h) ***
-                av(pn)=0.8d0*h_p(pn)
+                if(h_p(pn).lt.lu(pn)) then
+                  lu(pn)=h_p(pn)
+                  fx(pn)=adv(pn)
+                  av(pn)=0.5d0*(h_p(pn)+hn0p(pn))
+                else
+                  av(pn)=0.8d0*lu(pn)
+                  if(av(pn).lt.hn0p(pn)) then
+                   av(pn)=0.5d0*(h_p(pn)+hn0p(pn))
+                  endif
+                endif
               endif
             else if(flagi(pn).eq.-1) then
 ! **** Note: hu < lu ***
@@ -1226,10 +1248,9 @@ subroutine set_value(ng,nag,ns,flag)
                 av(pn)=1.2d0*h_p(pn)
               endif
             endif
-            if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH &
+            if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH) then
 ! tried below, but too strict condtion 8/7 2008
 !            if(dabs(h_p(pn)-av(pn))/du0(pn).gt.ERRH
-             .or.flagi(pn).ne.0) then
 #ifdef SGRAV
               if(flagi(pn).eq.10) then
                 omgh_p(pn)=1.0d0 
@@ -1242,6 +1263,37 @@ subroutine set_value(ng,nag,ns,flag)
               nlist = nlist+1
 #ifdef SGRAV
               endif
+#endif
+           else if(flagi(pn).eq.1.and. &
+            (nnb_p(pn).le.0.or.(lu(pn)-hn0p(pn))/lu(pn).gt.ERRH)) then
+#ifdef SGRAV
+              if(flagi(pn).eq.10) then
+                omgh_p(pn)=1.0d0 
+                zetah_p(pn)=0.0d0
+              else
+#endif
+! *** update ***
+              h_p(pn)=av(pn)
+              pn_nfp(nlist)=pn
+              nlist = nlist+1
+#ifdef SGRAV
+              endif
+#endif
+           else if(flagi(pn).ne.0.and.flagi(pn).ne.1) then
+#ifdef SGRAV
+              if(flagi(pn).eq.10) then
+                omgh_p(pn)=1.0d0 
+                zetah_p(pn)=0.0d0
+              else
+#endif
+! *** update ***
+              h_p(pn)=av(pn)
+              pn_nfp(nlist)=pn
+              nlist = nlist+1
+#ifdef SGRAV
+              endif
+#endif
+#ifdef SGRAV
 #ifdef GEPSLIM_G
             else if(h_p(pn).le.FH*SI_eps*(m_p(pn)**THIRD) &
              .and.flagi(pn).ne.10) then
@@ -1271,15 +1323,34 @@ subroutine set_value(ng,nag,ns,flag)
                ,' Warning: iteration does not work in set_value' &
                ,nlist,flagnb,flag
             endif
-            write(fileo,'(a5,i3.3)') 'error',myrank
-            open(60,file=fileo,status='unknown')
-            do i=0,nlist-1
-              pn=pn_nfp(i)
-              write(60,'(3I6,3(1pE13.5))') myrank,pn,nnb_p(pn),h_p(pn) &
-               ,rho_p(pn),ETAH*((m_p(pn)/rho_p(pn))**THIRD)
-              write(60,'(I3,7(1pE13.5))') flagi(pn),av(pn),adv(pn),hu(pn) &
-               ,hu(pn),lu(pn),fhx(pn),fx(pn),du0(pn)
-            enddo
+            if(nlist.gt.0) then
+              write(fileo,'(a5,i3.3)') 'error',myrank
+              open(60,file=fileo,status='unknown')
+              do i=0,nlist-1
+                pn=pn_nfp(i)
+                write(60,'(14(1pE13.5),6I10)') x_p(pn),y_p(pn),z_p(pn),h_p(pn) &
+                 ,rho_p(pn),ETAH*((m_p(pn)/rho_p(pn))**THIRD) &                
+                 ,av(pn),adv(pn),hu(pn) &
+                 ,lu(pn),fhx(pn),fx(pn),du0(pn),hn0p(pn) &
+#if defined(SF_EFD) || defined(SF_ZFD)
+                 ,nnb_p(pn),pn,id_p(pn),flagc_p(pn),flagfd_p(pn),flagi(pn)
+#else
+                 ,nnb_p(pn),pn,id_p(pn),flagc_p(pn),flagi(pn),flagi(pn)
+#endif
+              enddo
+              write(6,*) ' myrank,ng,nlist=',myrank,ng,nlist
+            endif
+
+!            write(fileo,'(a4,i3.3)') 'allp',myrank
+!            open(60,file=fileo,status='unknown')
+!            do i=0,ng-1
+!              pn=list_ap(i)
+!              write(60,'(5(1pE13.5),5I10)') x_p(pn),y_p(pn),z_p(pn),h_p(pn) &
+!               ,rho_p(pn),nnb_p(pn),id_p(pn),pn,flagc_p(pn),flagfd_p(pn)
+!            enddo
+!            close(60)
+
+            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
             call MPI_ABORT(MPI_COMM_WORLD,ierr)
             stop
           endif
@@ -1385,6 +1456,7 @@ subroutine set_value(ng,nag,ns,flag)
       deallocate(av)
       deallocate(adv)
       deallocate(nd_nfp)
+      deallocate(hn0p)
 
       if(allocated(list)) then
         deallocate(list)

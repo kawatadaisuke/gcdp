@@ -158,7 +158,7 @@ subroutine gtreebuild(ng,ns)
       if(numnfp.gt.1) then
         daughter_gtr(numtr0)=0
       else
-        daughter_gtr(numtr0)=0
+        daughter_gtr(numtr0)=-1
         daughter_gtr(numtr0+1)=-1
       endif
       level = 0
@@ -543,7 +543,7 @@ subroutine gtreebuild(ng,ns)
 ! list(level) is the first node for the last level 
 ! if level=1, this do loop will be skipped, but nodess_gtr=1
         do i=0,level-2
-          if(nodess_gtr.eq.0.and.np_gtr(list(i)).ne.np_gtr(list(i+1))) then
+          if(nodess_gtr.eq.1.and.np_gtr(list(i)).ne.np_gtr(list(i+1))) then
             nodess_gtr=list(i)
           endif
           if(list(i+2)-nodess_gtr+1.gt.MAXNODESEND) then
