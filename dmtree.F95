@@ -499,10 +499,10 @@ subroutine dmtreebuild(np)
 ! *** list(0)=1=numtr0 ***
         i=0
         do i=0,level-2
-          if(nodess_dmtr.eq.0.and.np_dmtr(list(i)).ne.np_dmtr(list(i+1))) then
+!          if(nodess_dmtr.eq.0.and.np_dmtr(list(i)).ne.np_dmtr(list(i+1))) then
 ! *** set starting node ***
-            nodess_dmtr=list(i)
-          endif
+!            nodess_dmtr=list(i)
+!          endif
           if(list(i+2)-nodess_dmtr+1.gt.MAXNODESEND) then
 ! *** sending up to level i+1
             goto 92

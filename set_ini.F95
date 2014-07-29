@@ -2556,19 +2556,21 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a12,2I10)') '   ID range=',SI_fid(0),SI_fid(1)
 #endif
 #ifdef FIXEDDMP
-!                          123456789012345678901234567890123456
         write(60,'(a31)') '   ###  fixed DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_fiddm(0),SI_fiddm(1)
 #endif
 #ifdef ARTFDM
-!                          123456789012345678901234567890123456
         write(60,'(a30)') '   ###  artF DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_artfdm(0),SI_artfdm(1)
 #endif
 #ifdef NOLOWMSF
-!                          123456789012345678901234567890123456
         write(60,'(a30)') '   ###  NOWMSF on ###'
         write(60,'(a30)') '   ###  Do not creat star ID>SI_snii ###'
+#endif
+#ifdef HMAXNNB
+!                          123456789012345678901234567890123456
+        write(60,'(a21)') '   ###  MAXNNB on ###'
+        write(60,'(a31,I8)') '   Maximum number of neighbour=',MAXNNB
 #endif
 
         close(60)

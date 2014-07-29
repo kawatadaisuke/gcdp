@@ -485,10 +485,10 @@ subroutine ldmtreebuild(np)
 ! *** list(0)=1=numtr0 ***
         i=0
         do i=0,level-2
-          if(nodess_ldmtr.eq.0.and.np_ldmtr(list(i)) &
-           .ne.np_ldmtr(list(i+1))) then
-            nodess_ldmtr=list(i)
-          endif
+!          if(nodess_ldmtr.eq.0.and.np_ldmtr(list(i)) &
+!           .ne.np_ldmtr(list(i+1))) then
+!            nodess_ldmtr=list(i)
+!          endif
           if(list(i+2)-nodess_ldmtr+1.gt.MAXNODESEND) then
             goto 92
           endif

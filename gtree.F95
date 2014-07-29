@@ -543,9 +543,9 @@ subroutine gtreebuild(ng,ns)
 ! list(level) is the first node for the last level 
 ! if level=1, this do loop will be skipped, but nodess_gtr=1
         do i=0,level-2
-          if(nodess_gtr.eq.1.and.np_gtr(list(i)).ne.np_gtr(list(i+1))) then
-            nodess_gtr=list(i)
-          endif
+!          if(nodess_gtr.eq.1.and.np_gtr(list(i)).ne.np_gtr(list(i+1))) then
+!            nodess_gtr=list(i)
+!          endif
           if(list(i+2)-nodess_gtr+1.gt.MAXNODESEND) then
 ! *** sending up to level i+1
             goto 92

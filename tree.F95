@@ -515,9 +515,9 @@ subroutine treebuild(np)
 ! *** list(0)=1=numtr0 ***
         i=0
         do i=0,level-2
-          if(nodess.eq.0.and.np_tr(list(i)).ne.np_tr(list(i+1))) then
-            nodess=list(i)
-          endif
+!          if(nodess.eq.0.and.np_tr(list(i)).ne.np_tr(list(i+1))) then
+!            nodess=list(i)
+!          endif
           if(list(i+2)-nodess+1.gt.MAXNODESEND) then
 ! *** sending up to level i+1
             goto 92

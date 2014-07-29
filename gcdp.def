@@ -129,6 +129,9 @@
 ! *** No creation for non SNe II feedback particle, to keep gas number 
 #define NOLOWMSF
 
+! *** set h with maximum neighbour number
+#define HMAXNNB
+
 ! *** TreePM
 ! #define TREEPM
 ! #undef TREEPM
@@ -152,23 +155,23 @@
 !
 ! *** isolated galaxy
 ! #define MAXR
-! #define MEXT
+#define MEXT
 ! #define CENTRE0
 !
 #undef COSM
 #undef MULTI_LEV
-! #undef DM
+#undef DM
 ! #undef GAS
 ! *** adiabatic! ***
-#undef COOL
-#undef STAR
-#undef SF
-#undef METAL
-#undef SF_EFD
-#undef SF_ZFD
-#undef METALDIFF
-#undef UTHLIM_JM
-#undef UTHLIM_POLY
+! #undef COOL
+! #undef STAR
+! #undef SF
+! #undef METAL
+! #undef SF_EFD
+! #undef SF_ZFD
+! #undef METALDIFF
+! #undef UTHLIM_JM
+! #undef UTHLIM_POLY
 
 ! *** for test simulation ****
 ! *** no individual timestep

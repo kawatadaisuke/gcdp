@@ -60,6 +60,10 @@ subroutine set_value(ng,nag,ns,flag)
       integer,allocatable :: pncomp(:),flagproc(:),flagcom(:)
       integer,allocatable :: npproc(:),isproc(:),ieproc(:),cproc(:)
       double precision,allocatable :: hn0p(:)
+#ifdef HMAXNNB
+! maximum h, nnb<MAXNNB and minimum h, nnb>MAXNNB
+      double precision,allocatable ::hnmaxinp(:),hnmaxoutp(:)
+#endif
 ! *** for pseudo node 
       integer,allocatable :: nextpnd(:),daupnd(:),ndpnd(:),idpnd(:)
       double precision,allocatable :: xpnd(:),ypnd(:),zpnd(:),lpnd(:)
@@ -134,6 +138,10 @@ subroutine set_value(ng,nag,ns,flag)
       allocate(adv(0:npb))
       allocate(nd_nfp(0:npb))
       allocate(hn0p(0:npb))
+#ifdef HMAXNNB
+      allocate(hnmaxinp(0:npb))
+      allocate(hnmaxoutp(0:npb))
+#endif
 
       do i=0,np-1
         pn_nfp(i) = list_ap(i)
@@ -150,6 +158,10 @@ subroutine set_value(ng,nag,ns,flag)
         du0(pni)=h_p(pni)
 ! largest h when nnb_p=0
         hn0p(pni)=0.0d0
+#ifdef HMAXNNB
+        hnmaxinp(pni)=0.0d0
+        hnmaxoutp(pni)=INF
+#endif
       enddo
 
 ! *** allocate work space for active particles ***
@@ -598,7 +610,7 @@ subroutine set_value(ng,nag,ns,flag)
         npj=ncompi
 
         deallocate(tivr)
-        allocate(tivr(0:npj*nival))
+        allocate(tivr(0:npj*snival))
 
         do ip=0,nprocs-1
 
@@ -1044,6 +1056,14 @@ subroutine set_value(ng,nag,ns,flag)
 
           do i = 0,tnlist-1
             pn = list(i)
+#ifdef HMAXNNB
+            if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
+              hnmaxinp(pn)=h_p(pn)
+            endif
+            if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
+              hnmaxoutp(pn)=h_p(pn)
+            endif
+#endif
             if(nnb_p(pn).le.0) then
 ! *** density is zero. can happen for star ***
               nalist(nssl)=pn 
@@ -1079,7 +1099,12 @@ subroutine set_value(ng,nag,ns,flag)
 ! tried below, but convergence is slower. 8/7 2008
 !              av(pn)=h_p(pn)-adv(pn)/(-3.0d0*av(pn)*omgh_p(pn)/h_p(pn))
 #endif
+#ifdef HMAXNNB
+              if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH &
+                .or.nnb_p(pn).gt.MAXNNB) then
+#else
               if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH) then
+#endif
 ! tried below, but too strict condtion 8/7 2008
 !              if(dabs(h_p(pn)-av(pn))/du0(pn).gt.ERRH) then
 #ifdef SGRAV
@@ -1107,6 +1132,11 @@ subroutine set_value(ng,nag,ns,flag)
                 else
                   h_p(pn)=0.5d0*h_p(pn)
                 endif
+#ifdef HMAXNNB
+                if(h_p(pn).gt.hnmaxoutp(pn)) then
+                  h_p(pn)=0.5d0*(hnmaxinp(pn)+hnmaxoutp(pn))
+                endif
+#endif
                 pn_nfp(nlist)=pn
                 nlist = nlist+1
 #ifdef SGRAV
@@ -1145,6 +1175,16 @@ subroutine set_value(ng,nag,ns,flag)
         else
           do i = 0,tnlist-1
             pn = list(i)
+#ifdef HMAXNNB
+            if(nnb_p(pn).gt.0) then
+              if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
+                hnmaxinp(pn)=h_p(pn)
+              endif
+              if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
+                hnmaxoutp(pn)=h_p(pn)
+              endif
+            endif
+#endif
 #ifdef SIM1D
 ! *** target density ***
             av(pn)=m_p(pn)*(ETAH/h_p(pn))
@@ -1206,6 +1246,20 @@ subroutine set_value(ng,nag,ns,flag)
                 fhx(pn)=adv(pn)
               endif
               av(pn)=0.5d0*(lu(pn)+hu(pn))
+#ifdef HMAXNNB
+              if(av(pn).gt.hnmaxoutp(pn)) then
+! for test
+!              write(6,'(a11,2I6,8(1pE13.5),2I6)') 'reduced av=' &
+!              ,nit,id_p(pn),av(pn) &
+!              ,0.5d0*(hnmaxinp(pn)+av(pn)),h_p(pn) &
+!              ,hnmaxinp(pn),hnmaxoutp(pn) &
+!              ,hu(pn),lu(pn),adv(pn) &
+!              ,nnb_p(pn),flagi(pn)
+
+                av(pn)=0.5d0*(hnmaxinp(pn)+hnmaxoutp(pn))
+              endif
+#endif
+
             else if(flagi(pn).eq.1) then
 ! *** need to find f(hu)>0 ***
               if(adv(pn).gt.0.0d0.and.nnb_p(pn).gt.0) then
@@ -1247,7 +1301,12 @@ subroutine set_value(ng,nag,ns,flag)
                 av(pn)=1.2d0*h_p(pn)
               endif
             endif
+
+#ifdef HMAXNNB
+            if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH.or.nnb_p(pn).gt.MAXNNB) then
+#else
             if(dabs(h_p(pn)-av(pn))/h_p(pn).gt.ERRH) then
+#endif
 ! tried below, but too strict condtion 8/7 2008
 !            if(dabs(h_p(pn)-av(pn))/du0(pn).gt.ERRH
 #ifdef SGRAV
@@ -1327,10 +1386,10 @@ subroutine set_value(ng,nag,ns,flag)
               open(60,file=fileo,status='unknown')
               do i=0,nlist-1
                 pn=pn_nfp(i)
-                write(60,'(14(1pE13.5),6I10)') x_p(pn),y_p(pn),z_p(pn),h_p(pn) &
+                write(60,'(16(1pE13.5),6I10)') x_p(pn),y_p(pn),z_p(pn),h_p(pn) &
                  ,rho_p(pn),ETAH*((m_p(pn)/rho_p(pn))**THIRD) &                
                  ,av(pn),adv(pn),hu(pn) &
-                 ,lu(pn),fhx(pn),fx(pn),du0(pn),hn0p(pn) &
+                 ,lu(pn),fhx(pn),fx(pn),du0(pn),hn0p(pn),hnmaxinp(pn),hnmaxoutp(pn) &
 #if defined(SF_EFD) || defined(SF_ZFD)
                  ,nnb_p(pn),pn,id_p(pn),flagc_p(pn),flagfd_p(pn),flagi(pn)
 #else
@@ -1456,6 +1515,10 @@ subroutine set_value(ng,nag,ns,flag)
       deallocate(adv)
       deallocate(nd_nfp)
       deallocate(hn0p)
+#ifdef HMAXNNB
+      deallocate(hnmaxinp)
+      deallocate(hnmaxoutp)
+#endif
 
       if(allocated(list)) then
         deallocate(list)
