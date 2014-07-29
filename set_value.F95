@@ -1068,7 +1068,7 @@ subroutine set_value(ng,nag,ns,flag)
               endif
             else
 #ifdef HMAXNNB
-              if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
+              if(nnb_p(pn).le.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
                 hnmaxinp(pn)=h_p(pn)
               endif
               if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
@@ -1159,15 +1159,30 @@ subroutine set_value(ng,nag,ns,flag)
           enddo
           if(nssl.gt.0) then
 
-            allocate(slgtrlist(0:nssl))
+!            allocate(slgtrlist(0:nssl))
+!
+!            do i=0,nssl-1
+!              slgtrlist(i)=nalist(i)
+!            enddo
+! *** set h for particles whose density is zero, using local _gtr ***
+!            call setslgtr(nssl,slgtrlist,npb,0)
+!
+!            deallocate(slgtrlist)
 
             do i=0,nssl-1
-              slgtrlist(i)=nalist(i)
-            enddo
-! *** set h for particles whose density is zero, using local _gtr ***
-            call setslgtr(nssl,slgtrlist,npb,0)
+              pn=nalist(i)
+              h_p(pn)=1.2d0*h_p(pn)
+              if(h_p(pn).gt.hnmaxoutp(pn)) then
+                if(hnmaxinp(pn).gt.0.0d0) then
+                  h_p(pn)=0.5d0*(hnmaxoutp(pn)+hnmaxoutp(pn))
+                else
+                  h_p(pn)=0.5d0*(h_p(pn)/1.2d0+hnmaxoutp(pn))
+                endif
+              else if(h_p(pn).lt.hnmaxinp(pn)) then
+                h_p(pn)=0.5d0*(h_p(pn)+hnmaxinp(pn))
+              endif
 
-            deallocate(slgtrlist)
+            enddo
 
           endif
 
@@ -1178,7 +1193,7 @@ subroutine set_value(ng,nag,ns,flag)
             pn = list(i)
 #ifdef HMAXNNB
             if(nnb_p(pn).gt.0) then
-              if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
+              if(nnb_p(pn).le.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
                 hnmaxinp(pn)=h_p(pn)
               endif
               if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
@@ -1248,15 +1263,8 @@ subroutine set_value(ng,nag,ns,flag)
               endif
               av(pn)=0.5d0*(lu(pn)+hu(pn))
 #ifdef HMAXNNB
+! lu can be reduced, because fx is not used.
               if(av(pn).gt.hnmaxoutp(pn)) then
-! for test
-!              write(6,'(a11,2I6,8(1pE13.5),2I6)') 'reduced av=' &
-!              ,nit,id_p(pn),av(pn) &
-!              ,0.5d0*(hnmaxinp(pn)+av(pn)),h_p(pn) &
-!              ,hnmaxinp(pn),hnmaxoutp(pn) &
-!              ,hu(pn),lu(pn),adv(pn) &
-!              ,nnb_p(pn),flagi(pn)
-
                 av(pn)=0.5d0*(hnmaxinp(pn)+hnmaxoutp(pn))
               endif
 #endif
@@ -1400,7 +1408,7 @@ subroutine set_value(ng,nag,ns,flag)
               write(6,*) ' myrank,ng,nlist=',myrank,ng,nlist
             endif
 
-!            write(fileo,'(a4,i3.3)') 'allp',myrank
+!           write(fileo,'(a4,i3.3)') 'allp',myrank
 !            open(60,file=fileo,status='unknown')
 !            do i=0,ng-1
 !              pn=list_ap(i)
@@ -1424,6 +1432,17 @@ subroutine set_value(ng,nag,ns,flag)
           allocate(talist(0:npj))
           do i=0,npj-1
             pni = pn_nfp(i)
+
+! for test
+!            if(id_p(pni).eq.7935) then
+!              write(6,'(a2,2I6,9(1pE13.5),2I6)') 'h=' &
+!              ,nit,id_p(pni),h_p(pni) &
+!              ,hnmaxinp(pni),hnmaxoutp(pni) &
+!              ,hu(pni),lu(pni),adv(pni),av(pni),fx(pni),fhx(pni) &
+!              ,nnb_p(pni),flagi(pni)
+!            endif
+
+
             tdvr(i)=x_p(pni)
             tdvr(i+npj)=y_p(pni)
             tdvr(i+npj*2)=z_p(pni)

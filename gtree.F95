@@ -256,6 +256,7 @@ subroutine gtreebuild(ng,ns)
           pn=pn_gtr(i)
           write(6,*) id_p(pn),x_p(pn),vnx_p(pn),dvx_p(pn) &
            ,ax_p(pn),ndu_p(pn),pdu_p(pn),u_p(pn),rho_p(pn) &
+           ,h_p(pn),nnb_p(pn) &
 #if defined(SF_EFD) || defined(SF_ZFD) 
            ,m_p(pn),flagfd_p(pn),alpv_p(pn),alpu_p(pn)
 #else
