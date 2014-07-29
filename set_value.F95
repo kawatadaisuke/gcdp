@@ -1056,14 +1056,6 @@ subroutine set_value(ng,nag,ns,flag)
 
           do i = 0,tnlist-1
             pn = list(i)
-#ifdef HMAXNNB
-            if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
-              hnmaxinp(pn)=h_p(pn)
-            endif
-            if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
-              hnmaxoutp(pn)=h_p(pn)
-            endif
-#endif
             if(nnb_p(pn).le.0) then
 ! *** density is zero. can happen for star ***
               nalist(nssl)=pn 
@@ -1075,6 +1067,15 @@ subroutine set_value(ng,nag,ns,flag)
                 hn0p(pn)=h_p(pn)
               endif
             else
+#ifdef HMAXNNB
+              if(nnb_p(pn).lt.MAXNNB.and.h_p(pn).gt.hnmaxinp(pn)) then
+                hnmaxinp(pn)=h_p(pn)
+              endif
+              if(nnb_p(pn).gt.MAXNNB.and.h_p(pn).lt.hnmaxoutp(pn)) then
+                hnmaxoutp(pn)=h_p(pn)
+              endif
+#endif
+
 #ifdef SIM1D
 ! *** target density ***
               av(pn)=m_p(pn)*(ETAH/h_p(pn))

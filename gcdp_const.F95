@@ -129,11 +129,11 @@ module gcdp_const
       double precision,parameter :: ERRH=0.001d0
 ! *** maximum number of neighbour
 #ifdef SIM1D
-      integer,parameter :: MAXNNB=int(10.0d0*ETAH)
+      integer,parameter :: MAXNNB=int(5.0d0*ETAH)
 #elif SIM2D
-      integer,parameter :: MAXNNB=int(10.0d0*M_PI*(ETAH**2.0d0))
+      integer,parameter :: MAXNNB=int(5.0d0*M_PI*(ETAH**2.0d0))
 #else
-      integer,parameter :: MAXNNB=int(10.0d0*4.0d0*M_PI*(ETAH**3.0d0)/3.0d0)
+      integer,parameter :: MAXNNB=int(5.0d0*4.0d0*M_PI*(ETAH**3.0d0)/3.0d0)
 #endif
 ! *** ETAH for DM, which requires bigger than SPH particles ***
 #ifdef GAS
