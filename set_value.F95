@@ -1134,7 +1134,7 @@ subroutine set_value(ng,nag,ns,flag)
                   h_p(pn)=0.5d0*h_p(pn)
                 endif
 #ifdef HMAXNNB
-                if(h_p(pn).gt.hnmaxoutp(pn)) then
+                if(h_p(pn).ge.hnmaxoutp(pn)) then
                   h_p(pn)=0.5d0*(hnmaxinp(pn)+hnmaxoutp(pn))
                 endif
 #endif
@@ -1172,7 +1172,8 @@ subroutine set_value(ng,nag,ns,flag)
             do i=0,nssl-1
               pn=nalist(i)
               h_p(pn)=1.2d0*h_p(pn)
-              if(h_p(pn).gt.hnmaxoutp(pn)) then
+#ifdef HMAXNNB
+              if(h_p(pn).ge.hnmaxoutp(pn)) then
                 if(hnmaxinp(pn).gt.0.0d0) then
                   h_p(pn)=0.5d0*(hnmaxoutp(pn)+hnmaxoutp(pn))
                 else
@@ -1181,7 +1182,7 @@ subroutine set_value(ng,nag,ns,flag)
               else if(h_p(pn).lt.hnmaxinp(pn)) then
                 h_p(pn)=0.5d0*(h_p(pn)+hnmaxinp(pn))
               endif
-
+#endif
             enddo
 
           endif
@@ -1264,7 +1265,7 @@ subroutine set_value(ng,nag,ns,flag)
               av(pn)=0.5d0*(lu(pn)+hu(pn))
 #ifdef HMAXNNB
 ! lu can be reduced, because fx is not used.
-              if(av(pn).gt.hnmaxoutp(pn)) then
+              if(av(pn).ge.hnmaxoutp(pn)) then
                 av(pn)=0.5d0*(hnmaxinp(pn)+hnmaxoutp(pn))
               endif
 #endif
@@ -1398,7 +1399,11 @@ subroutine set_value(ng,nag,ns,flag)
                 write(60,'(16(1pE13.5),6I10)') x_p(pn),y_p(pn),z_p(pn),h_p(pn) &
                  ,rho_p(pn),ETAH*((m_p(pn)/rho_p(pn))**THIRD) &                
                  ,av(pn),adv(pn),hu(pn) &
+#ifdef HMAXNNB
                  ,lu(pn),fhx(pn),fx(pn),du0(pn),hn0p(pn),hnmaxinp(pn),hnmaxoutp(pn) &
+#else
+                 ,lu(pn),fhx(pn),fx(pn),du0(pn),hn0p(pn),div_v_p(pn),omgh_p(pn) &
+#endif
 #if defined(SF_EFD) || defined(SF_ZFD)
                  ,nnb_p(pn),pn,id_p(pn),flagc_p(pn),flagfd_p(pn),flagi(pn)
 #else
