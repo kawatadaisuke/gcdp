@@ -72,16 +72,28 @@ subroutine  mesh_setfp(ng,nag,nas,nadm)
             pn=list_ap(i)
             pnitp(i)=pn
             xtp(i)=x_p(pn)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ytp(i)=z_p(pn)     
+            ztp(i)=-y_p(pn)     
+#else
             ytp(i)=y_p(pn)
             ztp(i)=z_p(pn)
+#endif
           enddo
 
           do i=0,nas-1
             pn=list_ap(ng+i)
-            pnitp(i)=pn
+            pnitp(i+nag)=pn
             xtp(nag+i)=x_p(pn)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ytp(nag+i)=z_p(pn)     
+            ztp(nag+i)=-y_p(pn)     
+#else
             ytp(nag+i)=y_p(pn)
             ztp(nag+i)=z_p(pn)
+#endif
           enddo
 
 #ifdef DM
@@ -100,8 +112,14 @@ subroutine  mesh_setfp(ng,nag,nas,nadm)
             pn=list_adm(i)
             pnitp(i)=pn
             xtp(i)=x_dm(pn)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ytp(i)=z_dm(pn)
+            ztp(i)=-y_dm(pn)
+#else
             ytp(i)=y_dm(pn)
             ztp(i)=z_dm(pn)
+#endif
           enddo
 #endif
         endif
@@ -465,8 +483,14 @@ subroutine  mesh_setfp(ng,nag,nas,nadm)
             pni=pnitp(pn)
 #endif
             ax_p(pni)=ax_p(pni)+fxp_m(i)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ay_p(pni)=ay_p(pni)-fzp_m(i)
+            az_p(pni)=az_p(pni)+fyp_m(i)
+#else
             ay_p(pni)=ay_p(pni)+fyp_m(i)
             az_p(pni)=az_p(pni)+fzp_m(i)
+#endif
           enddo
 #ifdef DM
         else if(ic.eq.1) then
@@ -481,8 +505,14 @@ subroutine  mesh_setfp(ng,nag,nas,nadm)
             pni=pnitp(pn)
 #endif
             dvx_dm(pni)=dvx_dm(pni)+fxp_m(i)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            dvy_dm(pni)=dvy_dm(pni)-fzp_m(i)
+            dvz_dm(pni)=dvz_dm(pni)+fyp_m(i)
+#else
             dvy_dm(pni)=dvy_dm(pni)+fyp_m(i)
             dvz_dm(pni)=dvz_dm(pni)+fzp_m(i)
+#endif
           enddo
 #endif
         endif

@@ -59,6 +59,24 @@ subroutine  fftw3_init()
        ,ior(FFTW_MEASURE,FFTW_MPI_TRANSPOSED_IN))
 #endif
 
+#ifdef ISOPM
+! allocate data array pointer
+      poidgpot_fftw=fftw_alloc_complex(alloc_local)
+! real and k-space data pointer
+! note rsdata and ksdata starting from (1,1,1)
+      call c_f_pointer(poidgpot_fftw,rsdgpot_fftw,[2*(nx_fftw/2+1),ny_fftw,lnz_fftw])
+      call c_f_pointer(poidgpot_fftw,ksdgpot_fftw,[nx_fftw/2+1,nz_fftw,lny_fftw])
+
+      planfgpot_fftw=fftw_mpi_plan_dft_r2c_3d(nz_fftw,ny_fftw,nx_fftw &
+       ,rsdgpot_fftw,ksdgpot_fftw,MPI_COMM_WORLD &
+#ifdef FFTW3_ESTIMATE
+       ,ior(FFTW_ESTIMATE,FFTW_MPI_TRANSPOSED_OUT))
+#else
+       ,ior(FFTW_MEASURE,FFTW_MPI_TRANSPOSED_OUT))
+#endif
+#endif
+
+
 #else
 ! allocate data array pointer
       poid_fftw=fftw_alloc_complex(int((nx_m/2+1)*ny_m*nz_m,C_SIZE_T))

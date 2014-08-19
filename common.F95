@@ -404,7 +404,7 @@ module gcdp_system
       double precision,save :: SI_esns,SI_zsns(0:NYEL-1)
 #endif
       double precision,save :: SI_mms
-#ifdef BOXSIM
+#if defined(BOXSIM) || defined(ISOPM)
 ! *** box size ***
       double precision,save :: SI_lbox(0:2)
 #if defined(COSM) && defined(BOXSIM)
@@ -587,6 +587,17 @@ module fftw3
       real(C_DOUBLE),pointer,save :: rsd_fftw(:,:,:)
       complex(C_DOUBLE_COMPLEX),pointer,save :: ksd_fftw(:,:,:)
       type(C_PTR),save :: poid_fftw
+#ifdef ISOPM
+! forward plan
+      type(C_PTR),save :: planfgpot_fftw
+! to store fourier component of 1/r potential kernel
+! note that rsd and ksd are allocated to the same memory space (Sec. 7.2 p.79
+! of FFTW3 manual)
+      real(C_DOUBLE),pointer,save :: rsdgpot_fftw(:,:,:)
+      complex(C_DOUBLE_COMPLEX),pointer,save :: ksdgpot_fftw(:,:,:)
+      type(C_PTR),save :: poidgpot_fftw
+#endif
+
 
 end module fftw3
 #endif

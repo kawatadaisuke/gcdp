@@ -61,7 +61,7 @@ subroutine makettable(ae)
         endif
         at_ttb(i) = fa(it-1)+(fa(it)-fa(it-1)) &
          *(ta_ttb(i)-f(it-1))/(f(it)-f(it-1))
-#ifdef BOXSIM
+#if defined(BOXSIM) && defined(COSM)
 ! 1/a
         ia_ttb(i)=1.0d0/at_ttb(i)
 ! 1/a^2
@@ -138,7 +138,7 @@ subroutine afromt(tn,an)
 
 end subroutine
 
-#ifdef BOXSIM
+#if defined(BOXSIM) && defined(COSM)
 ! *****   Definition of hubfroma()   *****
 subroutine hubfroma(an,hub)
       use gcdp_const

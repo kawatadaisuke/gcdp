@@ -169,6 +169,9 @@ program gcdp
 ! initial set up for TreePM
       call mesh_gen(0)
 #endif
+#ifdef ISOPM
+      call mesh_isogpot()
+#endif
 #ifdef MEXT
 ! set up the external potential
       call setmext()
@@ -328,6 +331,19 @@ program gcdp
 #endif
 #ifdef BCZ_PERIOD
         write(6,*) ' Periodic boundary on Z-axis'
+#endif
+#ifdef ISOPM
+        write(6,*) ' TREEPM force calculation for Isolated boundary system'
+#ifdef COSM
+        write(6,*) ' Turn off ISOPM for COSM simulation.'
+        call MPI_FINALIZE(ierr)
+        stop
+#endif
+#ifndef FFTW3_MPI
+        write(6,*) ' Turn on FFTW3_MPI for ISOPM.'
+        call MPI_FINALIZE(ierr)
+        stop
+#endif
 #endif
 #ifdef SIM1D
         write(6,*) ' 1 D simulation'
@@ -597,29 +613,31 @@ program gcdp
       endif
 #endif
 
-
-!#ifdef DM
-! test output
-!      write(fileo,'(a4,i3.3)') 'fdmp',myrank
-!      open(60,file=fileo,status='unknown')
-!      do i=0,nadm-1
-!        if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
-!        write(60,'(13(1pE13.5),2I8)') x_dm(i),y_dm(i),z_dm(i) &
-!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,omgh_dm(i),zetah_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
-!        else
+#endif
+! #ifdef DM
+! ! test output
+!       write(fileo,'(a4,i3.3)') 'fdmp',myrank
+!       open(60,file=fileo,status='unknown')
+!       do i=0,nadm-1
+!         if(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2.gt.0.0d0) then
 !         write(60,'(13(1pE13.5),2I8)') x_dm(i),y_dm(i),z_dm(i) &
-!        ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
-!         ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
-!         ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
-!         ,omgh_dm(i),zetah_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
-!        endif
-!      enddo
-!      close(60)
-!#endif
+!          ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!          ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!          ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+!          /dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+! !         ,omgh_dm(i),zetah_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
+!          ,omgh_dm(i),zetah_dm(i),m_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
+!         else
+!          write(60,'(13(1pE13.5),2I8)') x_dm(i),y_dm(i),z_dm(i) &
+!         ,dvx_dm(i),dvy_dm(i),dvz_dm(i) &
+!          ,dsqrt(x_dm(i)**2+y_dm(i)**2+z_dm(i)**2) &
+!          ,-(dvx_dm(i)*x_dm(i)+dvy_dm(i)*y_dm(i)+dvz_dm(i)*z_dm(i)) &
+! !         ,omgh_dm(i),zetah_dm(i),dvz_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
+!          ,omgh_dm(i),zetah_dm(i),m_dm(i),rho_dm(i),h_dm(i),nnb_dm(i),i
+!         endif
+!       enddo
+!       close(60)
+! #endif
 !#if defined(GAS) || defined(STAR)
 !      write(fileo,'(a3,i3.3)') 'fbp',myrank
 !      open(60,file=fileo,status='unknown')
@@ -645,8 +663,6 @@ program gcdp
 !#endif
 !
 !      goto 9999
-
-#endif
 
       endif
 ! *****   >>>  Start Iteration   <<<   *****

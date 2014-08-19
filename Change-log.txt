@@ -11,6 +11,43 @@ term
 
 ### update log ###
 
+31/07/2014
+mesh_setfp: bug fix
+            pnitp(i)=pn
+->
+            pnitp(i+nag)=pn
+
+
+### ISOPM
+
+main.F95
+ call mesh_isogpot.F95 only once. 
+
+mesh_setfp.F95
+ set back fy=fz, -fz=fy
+
+new mesh_isogpot.F95
+ set ksdgpot_fftw
+
+ksdgpot_fftw ... green function for 1/r (eq. 6-113) of Hockney & Eastwood
+initialise in fftw3_init.F95
+assign with poidgpot_fftw share the memory with rsdgpot_fftw
+
+mesh_setrho.F95
+#ifdef ISOPM
+ swap ytp and ztp  ytp=zp, ztp=-yp
+  
+mesh_gen.F95
+#ifdef ISOPM
+x0 set to be -SI_lbox/4+0.5dx
+
+gcdp.def
+add
+#define ISOPM
+This is only for non-cosmological simualtion 
+31/07/2014
+### ISOPM: isolated boundary for PM force calculation
+
 13/08/2013
 ### TreePM branch
 

@@ -134,14 +134,21 @@
 
 ! *** TreePM
 ! #define TREEPM
-! #undef TREEPM
+#undef TREEPM
 ! #define PMONLY
 ! #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
 ! #define FFTW3_ESTIMATE
 ! use MPI and distributed 
 ! #define FFTW3_MPI
-#
+! *** ISOLATED BOUNDARY: MAXR will be turned on.
+! #define ISOPM
+
+! #define BOXSIM
+! #define BCX_PERIOD
+! #define BCY_PERIOD
+! #define BCZ_PERIOD
+
 !
 ! *** integrator for cosmological simulation
 ! apply always Quinn et al. 1997 leapfrog integrator (see also Gadget-2)
@@ -154,14 +161,14 @@
 ! #undef COSM
 !
 ! *** isolated galaxy
-! #define MAXR
-#define MEXT
+#define MAXR
+! #define MEXT
 ! #define CENTRE0
 !
 #undef COSM
 #undef MULTI_LEV
-#undef DM
-! #undef GAS
+! #undef DM
+#undef GAS
 ! *** adiabatic! ***
 ! #undef COOL
 ! #undef STAR
@@ -440,9 +447,12 @@
 #undef RHOINI
 #endif
 
-#ifdef TREEPM
+#if defined(TREEPM) && defined(COSM)
 #define BOXSIM
 #define BCX_PERIOD
 #define BCY_PERIOD
 #define BCZ_PERIOD
+#endif
+#ifdef ISOPM
+#define MAXR
 #endif

@@ -35,6 +35,17 @@ subroutine  mesh_gen(flag)
 ! allocate memory space
       if(flag.eq.0) then
 
+#ifdef ISOPM
+! set SI_lbox for isolated PM 
+        SI_lbox(0)=2.0d0*ISOPMLMARGIN*MAXRLIM*dble(nx_m)/(dble(nx_m-5))
+        SI_lbox(1)=SI_lbox(0)
+        SI_lbox(2)=SI_lbox(0)
+        if(myrank.eq.0) then
+          write(6,*) ' PM box size (including inactive space)=' &
+           ,SI_lbox(0),SI_lbox(1),SI_lbox(2)
+        endif
+#endif
+
 #ifdef FFTW3_MPI
         lnz_m=int(lnz_fftw)
         lzoff_m=int(lkoff_fftw)
@@ -129,9 +140,16 @@ subroutine  mesh_gen(flag)
       dkz_m=2.0d0*M_PI/(SI_lbox(2))
 
 ! first grid points
+#ifdef ISOPM
+! set x=0 to -SI_lbox/4+0.54dx, for making SI_lbox/2-SI_lbox inactive.
+      x0_m=-0.25d0*SI_lbox(0)+0.5d0*dx_m
+      y0_m=-0.25d0*SI_lbox(1)+0.5d0*dy_m
+      z0_m=-0.25d0*SI_lbox(2)+0.5d0*dz_m
+#else
       x0_m=-0.5d0*SI_lbox(0)+0.5d0*dx_m
       y0_m=-0.5d0*SI_lbox(1)+0.5d0*dy_m
       z0_m=-0.5d0*SI_lbox(2)+0.5d0*dz_m
+#endif
 
       if(flag.eq.0) then
         if(myrank.eq.0) then

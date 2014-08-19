@@ -98,7 +98,13 @@ module gcdp_const
       double precision,parameter :: DU_UPU=0.025d0
 ! *** maxmum simulation radius ***
 #ifdef MAXR
-      double precision,parameter :: MAXRLIM=0.3d0
+      double precision,parameter :: MAXRLIM=0.5d0
+!      double precision,parameter :: MAXRLIM=6.0d0*dsqrt(3.0d0)
+#ifdef ISOPM  
+! this should be more than 1, a margin used in mesh_gen() to set SI_lbox using
+! eq. (24) of Springel (2005)
+      double precision,parameter :: ISOPMLMARGIN=1.01d0
+#endif
 #endif
        
 ! *** Solar Abundances from WW95 ***

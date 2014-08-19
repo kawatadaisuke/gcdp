@@ -69,6 +69,22 @@ subroutine  mesh_fftf()
         enddo
       enddo
 
+#ifdef ISOPM
+! test output
+!      write(fileo,'(a7,i3.3)') 'ksdpfft',myrank
+!      open(60,file=fileo,status='unknown')
+!      do jfftw=1,lny_fftw
+!        do kfftw=1,nz_fftw
+!          do ifftw=i1,nx_m/2+1
+!            write(60,'(3I10,2(1pE13.5))') ifftw,kfftw,jfftw &
+!             ,ksdgpot_fftw(ifftw,kfftw,jfftw)
+!          enddo
+!        enddo
+!      enddo
+!      close(60)
+#endif
+
+
 ! forward FFT
 #ifdef FFTW3_MPI
       call fftw_mpi_execute_dft_r2c(planf_fftw,rsd_fftw,ksd_fftw)
@@ -114,12 +130,20 @@ subroutine  mesh_fftf()
             kx=dkx_m*dble(i-1)
             kabs2=kx**2+ky**2+kz**2
 
-!            write(60,'(3I10,6(1pE13.5))') i,j,k,ksd_fftw(ifftw,kfftw,jfftw) &
-!            ,kx,ky,kz,kabs2
+!            write(60,'(3I10,8(1pE13.5))') ifftw,kfftw,jfftw,ksd_fftw(ifftw,kfftw,jfftw) &
+!            ,kx,ky,kz,kabs2,ksdgpot_fftw(ifftw,kfftw,jfftw)
 
 ! x Green function
+#ifdef ISOPM
+! convolve with Fourier component of 1/r kernel
+            ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
+             *ksdgpot_fftw(ifftw,kfftw,jfftw)
+#else
             ksd_fftw(ifftw,kfftw,jfftw)=4.0d0*M_PI &
               *ksd_fftw(ifftw,kfftw,jfftw)/kabs2            
+#endif
+
+
 ! PMTree long range force trunction
 #ifndef PMONLY
             ksd_fftw(ifftw,kfftw,jfftw)=ksd_fftw(ifftw,kfftw,jfftw) &
@@ -216,31 +240,25 @@ subroutine  mesh_fftf()
 !      write(fileo,'(a3,i3.3)') 'rsd',myrank
 !      open(60,file=fileo,status='unknown')
 ! #ifdef FFTW3_MPI
-!      do k=1,lnz_fftw
+!       do k=1,lnz_fftw
 ! #else
-!      do k=1,nz_m
+!       do k=1,nz_m
 ! #endif
-!        do j=1,ny_m
-!          do i=1,nx_m
+!         do j=1,ny_m
+!           do i=1,nx_m
 ! #ifdef FFTW3_MPI
-!            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1+lkoff_fftw) &
-!             ,y_m(i-1,j-1,k-1+lkoff_fftw) &
-!             ,z_m(i-1,j-1,k-1+lkoff_fftw) &
-!             ,rsd_fftw(i,j,k)/dble(nt_m) &
-!             ,dsqrt(x_m(i-1,j-1,k-1+lkoff_fftw)**2 &
-!              +y_m(i-1,j-1,k-1+lkoff_fftw)**2 &
-!              +z_m(i-1,j-1,k-1+lkoff_fftw)**2)
+!             write(60,'(3I6,2(1pE13.5))') i,j,k &
+!              ,rsd_fftw(i,j,k)/dble(nt_m) &
+!              ,dsqrt(dble(i**2+j**2+k**2))
 ! #else
-!            write(60,'(5(1pE13.5))') x_m(i-1,j-1,k-1),y_m(i-1,j-1,k-1) &
-!             ,z_m(i-1,j-1,k-1) &
-!             ,rsd_fftw(i,j,k)/dble(nt_m) &
-!             ,dsqrt(x_m(i-1,j-1,k-1)**2+y_m(i-1,j-1,k-1)**2 &
-!              +z_m(i-1,j-1,k-1)**2)
-!#endif
-!          enddo
-!        enddo
-!      enddo
-!      close(60)
+!             write(60,'(3I6,3(1pE13.5))') i,j,k &
+!              ,rsd_fftw(i,j,k)/dble(nt_m) &
+!              ,dsqrt(dble(i**2+j**2+k**2))
+! #endif
+!           enddo
+!         enddo
+!       enddo
+!       close(60)
 
 ! set real space potential data 
 #ifdef FFTW3_MPI
@@ -260,7 +278,11 @@ subroutine  mesh_fftf()
 ! normalised (has to be done)
 ! first 3 and last 3 arrays will be imported from the other cores -1+3=+2
             pot_m(ifftw-1,jfftw-1,kfftw+2)= &
+#ifdef ISOPM
+              rsd_fftw(ifftw,jfftw,kfftw)/(dnt_m)
+#else
               rsd_fftw(ifftw,jfftw,kfftw)/dnt_m
+#endif
 
 #endif
           enddo

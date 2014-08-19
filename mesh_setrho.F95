@@ -77,9 +77,15 @@ subroutine  mesh_setrho(np,ndm)
           allocate(mtp(0:np))
 
           do i=0,np-1
-            xtp(i)=x_p(i)     
+            xtp(i)=x_p(i)
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ytp(i)=z_p(i)     
+            ztp(i)=-y_p(i)     
+#else
             ytp(i)=y_p(i)     
             ztp(i)=z_p(i)     
+#endif
             mtp(i)=m_p(i)     
           enddo
           ntp=np
@@ -97,8 +103,14 @@ subroutine  mesh_setrho(np,ndm)
 
           do i=0,ndm-1
             xtp(i)=x_dm(i)     
+#ifdef ISOPM
+! swap y and z, because FFTW split the domain with z
+            ytp(i)=z_dm(i)     
+            ztp(i)=-y_dm(i)
+#else
             ytp(i)=y_dm(i)     
             ztp(i)=z_dm(i)     
+#endif
             mtp(i)=m_dm(i)     
           enddo
           ntp=ndm
@@ -255,7 +267,7 @@ subroutine  mesh_setrho(np,ndm)
         deallocate(jjlen)
         deallocate(idisp)
 
-!      write(fileo,'(a4,i3.3)') 'p_m',myrank
+!      write(fileo,'(a3,i3.3)') 'p_m',myrank
 !      open(60,file=fileo,status='unknown')
 !      do i=0,np_m-1
 !        write(60,'(4(1pE13.5))') xp_m(i),yp_m(i),zp_m(i),mp_m(i)
@@ -480,25 +492,24 @@ subroutine  mesh_setrho(np,ndm)
 
 
 ! test output
-!      write(fileo,'(a7,i3.3)') 'meshrho',myrank
-!      open(60,file=fileo,status='unknown')
-
-!#ifdef FFTW3_MPI
-!      do k=0,lnz_m-1
-!#else
-!      do k=0,nz_m-1
-!#endif
-!        do j=0,ny_m-1
-!          do i=0,nx_m-1
-!#ifdef FFTW3_MPI
-!            write(60,'(3I10,(1pE13.5))') i,j,k+lzoff_m,rho_m(i,j,k)
-!#else
-!            write(60,'(3I10,(1pE13.5))') i,j,k,rho_m(i,j,k)
-!#endif
-!          enddo
-!        enddo
-!      enddo
-!      close(60)
+!       write(fileo,'(a7,i3.3)') 'meshrho',myrank
+!       open(60,file=fileo,status='unknown')
+! #ifdef FFTW3_MPI
+!       do k=0,lnz_m-1
+! #else
+!       do k=0,nz_m-1
+! #endif
+!         do j=0,ny_m-1
+!           do i=0,nx_m-1
+! #ifdef FFTW3_MPI
+!             write(60,'(3I10,(1pE13.5))') i,j,k+lzoff_m,rho_m(i,j,k)
+! #else
+!             write(60,'(3I10,(1pE13.5))') i,j,k,rho_m(i,j,k)
+! #endif
+!           enddo
+!         enddo
+!       enddo
+!       close(60)
 
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !      stop      
