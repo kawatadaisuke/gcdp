@@ -416,7 +416,9 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
           ntime=MPI_WTIME()
 #endif
 #ifdef SGRAV
+#ifndef PMONLY
           call treeforce(ng,nagravg,np-ng,nas,ndm,flags)
+#endif
 #endif
 #ifdef MEXT
           do i=0,nagravg-1

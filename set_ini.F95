@@ -2568,10 +2568,38 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a30)') '   ###  Do not creat star ID>SI_snii ###'
 #endif
 #ifdef HMAXNNB
-!                          123456789012345678901234567890123456
         write(60,'(a21)') '   ###  MAXNNB on ###'
         write(60,'(a31,I8)') '   Maximum number of neighbour=',MAXNNB
 #endif
+#ifdef TREEPM
+        write(60,'(a21)') '   ###  TREEPM on ###'
+#endif
+#ifdef FFTW3
+        write(60,'(a19)') '   ###  FFTW on ###'
+#endif
+#ifdef FFTW3_ESTIMATE
+        write(60,'(a29)') '   ###  use FFTW_ESTIMATE ###'
+#endif
+#ifdef FFTW3_MPI
+        write(60,'(a23)') '   ###  FFTW_MPI on ###'
+#endif
+#ifdef ISOPM
+        write(60,'(a20)') '   ###  ISOPM on ###'
+#endif
+#ifdef BOXSIM
+        write(60,'(a21)') '   ###  BOXSIM on ###'
+#endif
+#ifdef BCX_PERIOD
+        write(60,'(a25)') '   ###  BCX_PERIOD on ###'
+#endif
+#ifdef BCY_PERIOD
+        write(60,'(a25)') '   ###  BCY_PERIOD on ###'
+#endif
+#ifdef BCZ_PERIOD
+!                          123456789012345678901234567890123456
+        write(60,'(a25)') '   ###  BCZ_PERIOD on ###'
+#endif
+
 
         close(60)
         write(6,*) ' end writing inipara.dat'

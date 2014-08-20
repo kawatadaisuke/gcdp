@@ -133,16 +133,15 @@
 #define HMAXNNB
 
 ! *** TreePM
-! #define TREEPM
-#undef TREEPM
+#define TREEPM
 ! #define PMONLY
-! #define FFTW3
+#define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
-! #define FFTW3_ESTIMATE
+#define FFTW3_ESTIMATE
 ! use MPI and distributed 
-! #define FFTW3_MPI
+#define FFTW3_MPI
 ! *** ISOLATED BOUNDARY: MAXR will be turned on.
-! #define ISOPM
+#define ISOPM
 
 ! #define BOXSIM
 ! #define BCX_PERIOD
@@ -167,8 +166,8 @@
 !
 #undef COSM
 #undef MULTI_LEV
-! #undef DM
-#undef GAS
+#undef DM
+! #undef GAS
 ! *** adiabatic! ***
 ! #undef COOL
 ! #undef STAR

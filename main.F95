@@ -576,10 +576,7 @@ program gcdp
         flagb = 1
 
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-        ectime=MPI_WTIME()
-        if(myrank.eq.0) then
-          write(6,*) ' begin calc_dv_du',ectime-ntime
-        endif
+        ntime=MPI_WTIME()
 
         call calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg &
          ,nagt,nadmt,nast,nagravgt,flagv,flagu,1,flagb)
@@ -587,7 +584,8 @@ program gcdp
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ectime=MPI_WTIME()
         if(myrank.eq.0) then
-          write(6,*) ' finish calc_dv_du',ectime-ntime
+          write(6,*) ' initial calc_dv_du time=',ectime-ntime
+          write(6,*) ' treeforce time baryon,DM=',WTM_bf,WTM_dmf
         endif
 
 #ifdef TREEPM
