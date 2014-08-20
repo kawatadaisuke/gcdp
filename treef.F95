@@ -80,10 +80,8 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
        ,trbuf(:)
       double precision,allocatable :: tdvs(:),tdvr(:)
 #ifdef TREEPM 
-      double precision crit
+      double precision lr2
       double precision ftrun
-! the distance from the corner of square to the centre, assuming 3D
-      crit=dsqrt(3.0d0)*0.5d0
 #endif
 
 ! *** Basic Value ***
@@ -287,18 +285,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
 #ifdef TREEPM
           if(flago(pn).eq.0) then
-! distance from particle to the closest possible particle within the node
-            rij=dsqrt(xij*xij+yij*yij+zij*zij)
-            if(rij-crit*l_tr(nd).gt.SI_rshtpm) then
+! discard obviously outside of SI_rshtpm
+            lr2=0.5d0*l_tr(nd)+SI_rshtpm
+            if((dabs(xij).gt.lr2.or.dabs(yij).gt.lr2).or. &
+              dabs(zij).gt.lr2) then
 ! no force calculation, goto next node
               node(pn)=next_tr(nd)		              
 ! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
 ! 1, 2, 3 are used for the case of going down to a daughter
               flago(pn)=-1
-            else if(rij+crit*l_tr(nd).gt.SI_rshtpm) then
-! the node may include particles which is outside SI_rshtpm
-! go to daughter
-             flago(pn)=1
             endif
           endif
 #endif
@@ -874,18 +869,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
 #ifdef TREEPM
           if(flago(pn).eq.0) then
-! distance from particle to the closest possible particle within the node
-            rij=dsqrt(xij*xij+yij*yij+zij*zij)
-            if(rij-crit*l_dmtr(nd).gt.SI_rshtpm) then
+! discard obviously outside of SI_rshtpm
+            lr2=0.5d0*l_dmtr(nd)+SI_rshtpm
+            if((dabs(xij).gt.lr2.or.dabs(yij).gt.lr2).or. &
+              dabs(zij).gt.lr2) then
 ! no force calculation, goto next node
               node(pn)=next_dmtr(nd)		              
 ! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
 ! 1, 2, 3 are used for the case of going down to a daughter
               flago(pn)=-1
-            else if(rij+crit*l_dmtr(nd).gt.SI_rshtpm) then
-! the node may include particles which is outside SI_rshtpm
-! go to daughter
-             flago(pn)=1
             endif
           endif
 #endif
@@ -1454,18 +1446,15 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
           endif
 #ifdef TREEPM
           if(flago(pn).eq.0) then
-! distance from particle to the closest possible particle within the node
-            rij=dsqrt(xij*xij+yij*yij+zij*zij)
-            if(rij-crit*l_ldmtr(nd).gt.SI_rshtpm) then
+! discard obviously outside of SI_rshtpm
+            lr2=0.5d0*l_ldmtr(nd)+SI_rshtpm
+            if((dabs(xij).gt.lr2.or.dabs(yij).gt.lr2).or. &
+              dabs(zij).gt.lr2) then
 ! no force calculation, goto next node
               node(pn)=next_ldmtr(nd)		              
 ! set flago(pn)=-1 to skip the following routines, i.e. if(flago(pn).eq.0)
 ! 1, 2, 3 are used for the case of going down to a daughter
               flago(pn)=-1
-            else if(rij+crit*l_ldmtr(nd).gt.SI_rshtpm) then
-! the node may include particles which is outside SI_rshtpm
-! go to daughter
-             flago(pn)=1
             endif
           endif
 #endif
@@ -2351,15 +2340,12 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 
 #ifdef TREEPM
                   if(flagp.eq.0) then
- ! distance from particle to the closest possible particle within the node
-                    rij=dsqrt(xij*xij+yij*yij+zij*zij)
-                    if(rij-crit*lpnd(nd).gt.SI_rshtpm) then
+! discard obviously outside of SI_rshtpm
+                    lr2=0.5d0*lpnd(nd)+SI_rshtpm
+                    if((dabs(xij).gt.lr2.or.dabs(yij).gt.lr2).or. &
+                      dabs(zij).gt.lr2) then
 ! no force calculation, goto next node
                       flagp=-1
-                    else if(rij+crit*lpnd(nd).gt.SI_rshtpm) then
-! the node may include particles which is outside SI_rshtpm
-! go to daughter
-                       flagp=1
                     endif
                   endif
 #endif
