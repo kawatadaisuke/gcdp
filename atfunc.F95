@@ -48,7 +48,7 @@ subroutine makettable(ae)
           endif
         enddo
         if(myrank.eq.0) then
-          write(6,*) ' Error in updatesysha() :'
+          write(6,*) ' Warning in updatesysha() :'
           write(6,*) '   Cannot find a(t) from table at ',ta_ttb(i)
           write(6,*) ' it = NATTABLE',it
         endif
@@ -90,12 +90,12 @@ subroutine tfroma(an,tn)
         endif
       enddo
       if(myrank.eq.0) then
-        write(6,*) ' Error in updatesysha() :'
+        write(6,*) ' Warning in updatesysha() :'
         write(6,*) '   Cannot find t(a) from table at ',an
         write(6,*) ' set it = NATTABLE'
       endif
       it=NATTABLE
-   99 if(an.gt.at_ttb(it).or.an.lt.at_ttb(it-1)) then
+   99 if(an.gt.at_ttb(it)+(at_ttb(it)-at_ttb(it-1)).or.an.lt.at_ttb(it-1)) then
         if(myrank.eq.0) then
           write(6,*) ' Error in tfroma() :'
           write(6,*) '  tn,ta(i),ta(i-1):',an,at_ttb(it),at_ttb(it-1)

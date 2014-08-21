@@ -11,6 +11,27 @@ term
 
 ### update log ###
 
+forcont.F95, cont.F95
+ save OF_time,OF_nof,OF_iof
+
+output.F95
+ set OF_todt from OF_time and update OF_iof
+
+set_ini.F95
+if cosm
+ read ini/output_asc.dat
+else
+ read ini/output_time.dat
+endif
+ if COSM, list of read scale factor, if not cosm, read time (in GCD+ unit).
+
+common.F95
+ add OF_nof, OF_iof, OF_time()
+
+
+specify output time. 
+### OFTIMESPEC 21/08/2014
+
 31/07/2014
 mesh_setfp: bug fix
             pnitp(i)=pn

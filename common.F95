@@ -368,7 +368,14 @@ module gcdp_system
 ! ***** For Output Parameter *****
 ! * This structure have Number of output file. *
 ! * Make file for display by step *
-      double precision,save :: OF_odt,OF_todt
+      double precision,save :: OF_todt
+#ifdef OFTIMESPEC
+      integer,save :: OF_nof,OF_iof
+      double precision,allocatable,save :: OF_time(:)
+#else
+      double precision,save :: OF_odt
+#endif
+
 ! ***** For System Information *****
 ! * number of high resolution DM ***
       integer,save :: SI_ndm1,SI_ndm1t

@@ -51,7 +51,11 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
          ,form='unformatted')
          iwdummy=0
 ! /*** Output continue data ***/
+#ifdef OFTIMESPEC
+         write(60) step,totstep,lstep,SI_flagout,OF_todt &
+#else
          write(60) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
+#endif
 #ifdef BOXSIM
            ,SI_lbox(0),SI_lbox(1),SI_lbox(2) &
 #ifdef COSM
@@ -69,6 +73,10 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
 #endif
         ,iwdummy
+#ifdef OFTIMESPEC
+        write(60) OF_nof,OF_iof
+        write(60) OF_time
+#endif
         close(60)
       endif
 

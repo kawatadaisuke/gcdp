@@ -3,6 +3,9 @@
 #define WTIME
 ! #define WTIMESUB
 !
+! *** specify output time from ini/output_time.dat or output_asc.dat (for COSM)
+#define OFTIMESPEC
+!
 ! *** cosmological simulation
 #define COSM
 #define MULTI_LEV

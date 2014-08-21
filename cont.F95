@@ -54,6 +54,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #if defined(COSM) && defined(BOXSIM)
       double precision iai
 #endif
+#if defined(COSM) && defined(OFTIMESPEC)
+      double precision,allocatable :: OFasc(:)
+#endif
 #ifdef MHD
       integer ndbmhd
 #endif
@@ -139,8 +142,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef COSM
         read(50,'(a19,4(1pE13.5))') tchar,SI_h0,SI_omg0,SI_lam0,Ini_OMGg
 #endif
+#ifndef OFTIMESPEC
 ! *** need a better accuracy, changed since pv30.4 ***
         read(50,'(a5,1pE25.17)') tchar,OF_odt
+#endif
 #ifdef COSM
         read(50,'(a14,2(1pE25.17))') tchar,SI_eps0,SI_epsa
         SI_eps=SI_eps0
@@ -174,7 +179,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
           open(51,file='output/data/cont.dat',status='old',form='unformatted')
 ! *** Read continue data ***
+#ifdef OFTIMESPEC
+          read(51) step,totstep,lstep,SI_flagout,OF_todt &
+#else
           read(51) step,totstep,lstep,SI_flagout,OF_odt,OF_todt &
+#endif
 #ifdef BOXSIM
            ,SI_lbox(0),SI_lbox(1),SI_lbox(2) &
 #ifdef COSM
@@ -196,6 +205,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
            ,SI_esns,(SI_zsns(i),i=0,NYEL-1),TMsf_t,TMsf_dt,SI_tnsf &
 #endif
            ,irdummy
+#ifdef OFTIMESPEC
+          read(51) OF_nof,OF_iof
+
+          allocate(OF_time(0:OF_nof-1))
+
+          read(51) OF_time
+#endif
           close(51)
 
         else
@@ -232,10 +248,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         endif
 
         if(Ini_flagcop.eq.0) then
+#ifndef OFTIMESPEC
           if(TM_kn.eq.TM_k.and.SI_flagout.ne.0) then
              OF_todt=OF_todt+OF_odt
              SI_flagout = 0
           endif
+#endif
        else
           SI_flagout=0
           TM_dt=0.0d0
@@ -245,7 +263,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           TM_k=0
           TM_kn=0
 ! *** This may need to be revised.
+#ifndef OFTIMESPEC
           OF_todt = OF_odt+TM_tot
+#endif
         endif
       endif
 
@@ -332,7 +352,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 ! *** for double values ***
       if(myrank.eq.0) then
+#ifdef OFTIMESPEC
+        tdvr(0)=OF_todt
+#else
         tdvr(0)=OF_odt
+#endif
         tdvr(1)=OF_todt
         tdvr(2)=TM_tot
         tdvr(3)=TM_sdt
@@ -373,7 +397,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
       call MPI_BCAST(tdvr,ndvalc,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 ! *** set the values ***
+#ifdef OFTIMESPEC
+      OF_todt=tdvr(0)
+#else
       OF_odt=tdvr(0)
+#endif
       OF_todt=tdvr(1)
       TM_tot=tdvr(2)
       TM_sdt=tdvr(3)
@@ -573,7 +601,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           ,' sdt=',TM_sdt,' lt=',TM_lt,' ldt=',TM_ldtmin
         endif
 #ifdef BOXSIM
-        write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
+        if(Ini_flagcop.eq.0) then
+          write(6,*) ' box size=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
+        endif
 #ifdef COSM
         write(6,*) ' box size (comoving)=',SI_lbox0(0),SI_lbox0(1) &
           ,SI_lbox0(2)
@@ -1651,10 +1681,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
       deallocate(tdvr)
 
+#ifndef OFTIMESPEC
 ! reset
       if(Ini_flagcop.ne.0) then
         OF_todt = OF_odt+TM_tot
       endif
+#endif
       np=ng+ns
 #ifdef GAS
       do i = 0,ng-1
@@ -1898,9 +1930,85 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 #endif
 
+#ifdef OFTIMESPEC
+      if(myrank.eq.0) then
+        if(Ini_flagcop.eq.0) then
+          if(TM_kn.eq.TM_k.and.SI_flagout.ne.0) then
+             OF_iof=OF_iof+1
+             OF_todt=OF_time(OF_iof)
+             SI_flagout = 0
+          endif
+        else
+! read output time file and set OF_time
+#ifdef COSM
+          open(50,file='ini/output_asc.dat',status='old')      
+#else
+          open(50,file='ini/output_time.dat',status='old')      
+#endif
+          read(50,*) OF_nof
+          write(6,*) ' reading ini/output_time.dat. Noutput=',OF_nof
+
+          allocate(OF_time(0:OF_nof-1))
+#ifdef COSM
+          allocate(OFasc(0:OF_nof-1))
+#endif
+
+          do i=0,OF_nof-1
+#ifdef COSM
+            read(50,*) OFasc(i)
+#else
+            read(50,*) OF_time(i)
+#endif
+          enddo
+#ifdef COSM
+          if(OFasc(OF_nof-2).gt.1.0d0) then
+            write(6,*) ' output scale factor is more than 1, but',OFasc(OF_nof-2)
+            call MPI_FINALIZE(ierr)
+            stop
+          endif
+! set time from a
+          do i=0,OF_nof-1
+            call tfroma(OFasc(i),OF_time(i))
+          enddo
+
+          deallocate(OFasc)
+
+#endif
+! set OF_iof in myrank=0, and send to the other rank
+! get next output time and store OF_iof
+          do i=0,OF_nof-1
+            if(OF_time(i).gt.TM_tot) then
+              OF_iof=i
+              goto 72
+             endif
+          enddo
+          if(myrank.eq.0) then
+            write(6,*) ' Could not find the output time. set to TM_t0'
+          endif
+          OF_todt=TM_t0
+          OF_iof=OF_nof-1
+          goto 73
+ 72       OF_todt=OF_time(OF_iof) 
+        endif
+ 73     write(6,*) ' next output time,iof=',OF_todt,OF_iof
+      endif
+! set output time
+      call MPI_BCAST(OF_nof,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(OF_iof,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      if(myrank.ne.0) then
+
+        allocate(OF_time(0:OF_nof-1))
+
+      endif
+      call MPI_BCAST(OF_time,OF_nof,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+! set OF_todt for all the cores
+      OF_todt=OF_time(OF_iof)
+
+#else
       if(myrank.eq.0) then
         write(6,*) ' output dt, next output t = ',OF_odt,OF_todt
       endif
+#endif
 
 !      if(ng.gt.0) then
 !      write(fileo,'(a4,i3.3,a4)') 'cont',myrank,'.dat'
@@ -1982,6 +2090,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #else
       SI_eps=0.0d0
+#endif
+
+! reset SI_lbox
+#if defined(COSM) && defined(BOXSIM)  
+      SI_lbox(0)=SI_a*SI_lbox0(0)
+      SI_lbox(1)=SI_a*SI_lbox0(1)
+      SI_lbox(2)=SI_a*SI_lbox0(2)
+      if(myrank.eq.0) then
+        write(6,*) ' SI_lbox(z)=',SI_lbox(0),SI_lbox(1),SI_lbox(2)
+      endif
 #endif
 
 #ifdef FIXEDP

@@ -45,6 +45,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef COSM
 ! *** nd0, nd1 for number of particles for level 0 and 1 ***
       integer nd(0:MNL),ndl,ndt(0:MNL),nplev
+#ifdef OFTIMESPEC
+      double precision,allocatable :: OFasc(:)
+#endif
 #endif
 ! * om0 (km s^-1 kpc^-1) *      
       double precision Ini_OMGg,dxi(0:MNL)
@@ -1945,8 +1948,75 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! * Set Time Parameter. This is used at ddecb() for setting tm*_p *
       TM_dt=0.0d0 
 ! ***   about Output   ***
+#ifdef OFTIMESPEC
+! reading the file
+      if(myrank.eq.0) then
+! read output time file
+#ifdef COSM
+        open(50,file='ini/output_asc.dat',status='old')      
+#else
+        open(50,file='ini/output_time.dat',status='old')      
+#endif
+        read(50,*) OF_nof
+        write(6,*) ' reading ini/output_time.dat. Noutput=',OF_nof
+
+        allocate(OF_time(0:OF_nof-1))
+#ifdef COSM
+        allocate(OFasc(0:OF_nof-1))
+#endif
+
+        do i=0,OF_nof-1
+#ifdef COSM
+          read(50,*) OFasc(i)
+#else
+          read(50,*) OF_time(i)
+#endif
+        enddo
+#ifdef COSM
+        if(OFasc(OF_nof-2).gt.1.0d0) then
+          write(6,*) ' output scale factor is more than 1, but',OFasc(OF_nof-2)
+          call MPI_FINALIZE(ierr)
+          stop
+        endif
+! set time from a
+        do i=0,OF_nof-1
+          call tfroma(OFasc(i),OF_time(i))
+        enddo
+
+        deallocate(OFasc)
+
+#endif
+      endif
+
+      call MPI_BCAST(OF_nof,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      if(myrank.ne.0) then
+
+        allocate(OF_time(0:OF_nof-1))
+
+      endif
+      call MPI_BCAST(OF_time,OF_nof,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+! get next output time and store OF_iof
+      do i=0,OF_nof-1
+        if(OF_time(i).gt.TM_tot) then
+          OF_iof=i
+          goto 72
+        endif
+      enddo
+      if(myrank.eq.0) then
+        write(6,*) ' Could not find the output time. set to TM_t0'
+      endif
+      OF_todt=TM_t0
+      OF_iof=OF_nof-1
+      goto 73
+ 72   OF_todt=OF_time(OF_iof) 
+ 73   if(myrank.eq.0) then
+        write(6,*) ' next output time,iof=',OF_todt,OF_iof
+      endif
+#else  
       OF_odt = (TM_t0-TM_tot)/dble(Ini_nd)
       OF_todt = OF_odt+TM_tot
+#endif
 
       if(myrank.eq.0) then
         write(6,*) '#####   Initial Condition Information   #####'
@@ -1963,8 +2033,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' gamma       = ',GAM
         write(6,*) ' simulate z  = ',1.0d0/SI_a-1.0d0,'->',Ini_ze
         write(6,*) '          t  = ',TM_tot,'->',TM_t0
+#ifndef OFTIMESPEC
         write(6,*) '  output dt  = ',OF_odt
+#endif
+#ifndef OFTIMESPEC
         write(6,*) ' # of output = ',Ini_nd
+#endif
         write(6,*) ' # of output file for each output=',SI_nof
         if(SI_nof.gt.nprocs) then
           write(6,*) ' Error: It has to be less than nprocs=',nprocs
@@ -2363,7 +2437,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 !        write(60,'(a5,1pE13.5)') 'OFdt=',OF_odt
 ! since pv30.4
+#ifndef OFTIMESPEC
         write(60,'(a5,1pE25.17)') 'OFdt=',OF_odt
+#endif
 #ifdef COSM
 !                                      1234567890123456789012345678901234
         write(60,'(a14,2(1pE25.17))') ' SI_eps0,epsa=' &
@@ -2371,6 +2447,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #else
         write(60,'(a8,2(1pE25.17))') ' SI_eps=',SI_eps
 #endif
+! up to this will be used in cont.F95
         write(60,'(a6,2(1pE13.5))') 'zi,ze=',1.0d0/SI_a-1.0d0,Ini_ze
         write(60,'(a6,2(1pE12.5))') 'ti,te=',TM_tot,TM_t0
         write(60,'(a4,1pE13.5)') 'GAM=',GAM

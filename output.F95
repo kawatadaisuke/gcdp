@@ -1296,11 +1296,31 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** end for if(flagascii.eq.0) then
         endif
         if(step.ne.0) then
+#ifdef OFTIMESPEC
+          OF_iof=OF_iof+1
+          if(OF_iof.ge.OF_nof.and.TM_tot.lt.TM_t0-0.0000001d0) then
+            if(myrank.eq.0) then
+              write(6,*) ' Error in output(): OF_iof>=OF_nof'
+              write(6,*) ' Ttot,OF_nof,iof=',TM_tot,OF_nof,OF_iof
+            endif
+          else if(OF_iof.lt.OF_nof) then
+            OF_todt=OF_time(OF_iof)
+            if(OF_todt.lt.TM_tot) then
+              if(myrank.eq.0) then
+                write(6,*) ' Error in output(): OF_todt<TM_tot'
+                write(6,*) ' Ttot,OF_nof,iof,todt=',TM_tot,OF_nof,OF_iof,OF_todt
+              endif
+              call MPI_FINALIZE()
+              stop
+            endif
+          endif
+#else       
 !          if(z.lt.1.0d0) then
 !            OF_todt=OF_todt+4.0d0*OF_odt
 !          else
             OF_todt=OF_todt+OF_odt
 !          endif
+#endif
           SI_flagout = 0
         endif
       endif
