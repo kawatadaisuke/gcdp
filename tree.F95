@@ -203,8 +203,9 @@ subroutine treebuild(np)
         else
           izp(i)=1
         endif 
-        call phcurve(snfp(i),c_nfp(i),ixp(i),iyp(i),izp(i),level)
       enddo
+
+      call phcurven(0,numnfp-1,snfp,c_nfp,ixp,iyp,izp,level)
 
       deallocate(ixp)
       deallocate(iyp)

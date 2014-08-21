@@ -166,9 +166,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
           izp(i)=1
         endif 
       enddo
-      do i=0,np-1
 ! *** set c and state ***
-        call phcurve(snfp(i),c_nfp(i),ixp(i),iyp(i),izp(i),level)
+      call phcurven(0,np-1,snfp,c_nfp,ixp,iyp,izp,level)
+
+      do i=0,np-1
 ! *** asign the ph key ***
 ! *** has to be phkey(i)*NDPH 
         phkey(i)=phkey(i)*NDPH+c_nfp(i)

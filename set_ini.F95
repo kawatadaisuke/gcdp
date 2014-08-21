@@ -242,6 +242,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       SI_tnsf=0
 #endif
 ! *** cosmological simulation ***
+#ifdef GAS
+      Ini_OMGg = Ini_OMGg
+#else
+      Ini_OMGg = 0.0d0
+#endif
       SI_omgb=Ini_OMGg
 ! *** Check Input Parameter ***
       if(Ini_OMGg.lt.0.0d0.or.Ini_OMGg.gt.1.0d0) then
@@ -682,11 +687,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
       SI_h0 = SI_h0/100.0d0
-#ifdef GAS
-      Ini_OMGg = Ini_OMGg
-#else
-      Ini_OMGg = 0.0d0
-#endif
 !*********************************
 !  Make Time tabele and Set TM_t0
 ! ******************************** 
@@ -2164,22 +2164,30 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       call MPI_ALLREDUCE(hmin,hmint,1,MPI_DOUBLE_PRECISION &
        ,MPI_MIN,MPI_COMM_WORLD,ierr)
       if(myrank.eq.0) then
-        write(6,*) ' minimum h/(m^1/3)=',hmin
+        write(6,*) ' minimum h/(m^1/3)=',hmint
       endif
 #ifdef COSM
       SI_eps0=SI_eps
+! get dxi(Ini_mul) in the case of flagrf.ne.0
+      if(flagrf.ne.0) then
+        dxi(Ini_mul)=(m_dm(0)/((SI_omg0-Ini_OMGg)*rhob0))**THIRD
+        if(myrank.eq.0) then
+          write(6,*) ' dxi(highest reso) (comoving 100 kpc)=',dxi(Ini_mul)
+        endif
+      endif
 ! *** set redshift when SI_eps becomes effective ***
 ! *** assume mass of DM is always bigger ***
 #ifdef DM
       etahmax=ETAHDM
-! *** try slightly higher density ***
-      SI_epsa=SI_eps*2.0d0*(m_dm(0)**THIRD)/(dxi(Ini_mul)*etahmax)
+! dxi: comoving 100 kpc
+! SI_epsa: scale factor when FIXEDEPS=etahmax x dx 
+      SI_epsa=SI_eps*(m_dm(0)**THIRD)/(dxi(Ini_mul)*etahmax)
 #else
       etahmax=ETAH
-      SI_epsa=SI_eps*2.0d0*(m_p(0)**THIRD)/(dxi(Ini_mul)*etahmax)
+      SI_epsa=SI_eps*(m_p(0)**THIRD)/(dxi(Ini_mul)*etahmax)
 #endif
       if(myrank.eq.0) then
-        write(6,*) ' SI_epsa=',SI_epsa
+        write(6,*) ' SI_epsa,z=',SI_epsa,1.0d0/SI_epsa-1.0d0
       endif
       if(SI_a.lt.SI_epsa) then
         SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps

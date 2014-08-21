@@ -597,8 +597,22 @@ program gcdp
 ! ***** adding PM force *****
 ! assign density
         call mesh_setrho(np,ndm)
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      if(myrank.eq.0) then
+        write(6,*) ' mesh setrho end',ectime-ntime
+      endif
+#endif
 ! calculate potential
         call mesh_fftf()
+#ifdef WTIME
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ectime=MPI_WTIME()
+      if(myrank.eq.0) then
+        write(6,*) ' mesh fftf end',ectime-ntime
+      endif
+#endif
 ! assign force to particles
         call mesh_setfp(ng,nag,nas,nadm)
 
@@ -1195,6 +1209,7 @@ program gcdp
 
 
 #ifdef TREEPM
+      if((nagravgt.gt.0 .or. nast.gt.0).or.nadmt.gt.0) then
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       ntime=MPI_WTIME()
@@ -1214,6 +1229,7 @@ program gcdp
       WTM_pm=WTM_pm+ectime-ntime
 #endif
 #endif
+      endif
 
 !      if(myrank.eq.13) then
 !      write(fileo,'(a4,i3.3,i4.4)') 'test',myrank,totstep
