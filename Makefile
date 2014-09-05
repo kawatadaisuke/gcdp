@@ -33,10 +33,6 @@ FFTW_LIB=/usr/local/lib
 # OPTIONS=-O3
 # FFTW_INC=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/include
 # FFTW_LIB=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/lib
-### guillimin
-# MPI_DIR=/software/tools/openmpi-1.4.3-intel/
-# OPTIONS=-O3 -ldl
-#
 CPP = cpp
 FORT = ${MPI_DIR}/bin/mpif90
 MPI_INC = ${MPI_DIR}/include
@@ -89,6 +85,21 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 #FFLAGS = ${OPTIONS} -I${FFTW_INC}
 #LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 #
+### guillimin
+# module add ifort_icc/14.0.1 mvapich2/1.9-intel FFTW/3.3-mvapich2-intel
+# 
+# FORT=mpif90
+# CPP=cpp
+# OPTIONS=-O3 -xHost -align -ansi-alias -mcmodel=medium -traceback
+# FFLAGS = -I${MPI_INC} -I${FFTW_INC} ${OPTIONS}
+# MPI_DIR=/software/CentOS-6/tools/mvapich2-1.9-intel
+# MPI_INC = ${MPI_DIR}/include
+# MPI_LIB = ${MPI_DIR}/lib
+# FFTW_INC=/software/CentOS-6/libraries/FFTW-3.3/mvapich2-intel/include
+# FFTW_LIB=/software/CentOS-6/libraries/FFTW-3.3/mvapich2-intel/lib
+# LIBS = -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+#
+
 .SUFFIXES : .o .F95 .f90
 
 ${EXEC} : ${OBJS} ${INIOBJ}

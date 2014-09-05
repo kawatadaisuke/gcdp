@@ -90,7 +90,7 @@ program gcdp
 
 ! *** print version ***
       if(myrank.eq.0) then
-        write(6,*) ' GCD+ ver. f03.0 10/03/14'
+        write(6,*) ' GCD+ ver. f03.0 05/09/14'
         print *, "Process ",myrank, " of ", nprocs, " is alive"
       endif
       if(nprocs.gt.NCPU) then
@@ -889,7 +889,7 @@ program gcdp
 #ifdef COSM
       call afromt(TM_tot+TM_dt,SI_a)
       if(SI_a.lt.SI_epsa) then
-        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps0
+        SI_eps=(SI_eps0/SI_epsa)*SI_a
       else
         SI_eps=SI_eps0
       endif

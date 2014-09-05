@@ -2085,7 +2085,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' SI_epsa=',SI_epsa
       endif
       if(SI_a.lt.SI_epsa) then
-        SI_eps=(1.0d0-SI_epsa+SI_a)*SI_eps
+        SI_eps=(SI_eps0/SI_epsa)*SI_a
       endif
 #endif
 #else
