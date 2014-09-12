@@ -1228,8 +1228,9 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_pm=WTM_pm+ectime-ntime
 #endif
-#endif
       endif
+#endif
+
 
 !      if(myrank.eq.13) then
 !      write(fileo,'(a4,i3.3,i4.4)') 'test',myrank,totstep

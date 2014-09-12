@@ -99,6 +99,26 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # FFTW_LIB=/software/CentOS-6/libraries/FFTW-3.3/mvapich2-intel/lib
 # LIBS = -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 #
+# CINECA/EURORA
+#
+# module load intel/cs-xe-2013--binary openmpi/1.6.5--intel--cs-xe-2013--binary fftw/3.3.3--openmpi--1.6.5--intel--cs-xe-2013--binary
+#
+#FORT=mpif90
+#CPP=cpp
+#OPTIONS= -O3
+#FFLAGS = ${OPTIONS} -I${FFTW_INC}
+#LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+#
+# CINECA/PLX
+# module load intel/cs-xe-2013--binary intelmpi
+#
+FORT=mpif90
+CPP=cpp
+FFTW_INC=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/include
+FFTW_LIB=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/lib
+OPTIONS= -O3
+FFLAGS = ${OPTIONS} -I${FFTW_INC}
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 
 .SUFFIXES : .o .F95 .f90
 
