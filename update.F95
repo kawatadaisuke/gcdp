@@ -1065,9 +1065,11 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       double precision FRANAZ
       parameter (FRANAZ=0.1d0)
       integer ng,ndm,ns,nag,nadm,nas,nagravg
-      integer i,pn,nap,nnap,nagp
+      integer i,pn,nap,nnap,nagp,np
       double precision th,pi2,dtgc
-      integer naz,listaz(0:MN-1)
+      integer naz
+      integer,allocatable :: listaz(:),list(:),talist(:),nalist(:)
+      double precision,allocatable :: tx(:),ty(:)
       real ran1
       external ran1
 
@@ -1086,6 +1088,15 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       nnap=0
       naz=0
 ! *** Gas Particles ***
+      np=ng+ns
+
+      allocate(listaz(0:ng-1))
+      allocate(list(0:ng-1))
+      allocate(talist(0:ng-1))
+      allocate(nalist(0:ng-1))
+      allocate(tx(0:np-1))
+      allocate(ty(0:np-1))
+      
       do i=0,ng-1
         pn=list_ap(i)
         if(SI_ranazi(0).eq.0.and.(id_p(pn).ge.SI_ranazi(1) &
@@ -1166,12 +1177,28 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       do i=0,nnap-1
         list_ap(nag+i)=nalist(i)
       enddo
+
+      deallocate(listaz)
+      deallocate(list)
+      deallocate(talist)
+      deallocate(nalist)
+      deallocate(tx)
+      deallocate(ty)
+
 #endif
 #ifdef DM
       nap=0
       nnap=0
       naz=0
 ! *** DM Particles ***
+
+      allocate(listaz(0:ndm-1))
+      allocate(list(0:ndm-1))
+      allocate(talist(0:ndm-1))
+      allocate(nalist(0:ndm-1))
+      allocate(tx(0:ndm-1))
+      allocate(ty(0:ndm-1))
+
       do i=0,ndm-1
         pn=list_adm(i)
         if(SI_ranazi(0).ne.0.and. &
@@ -1234,12 +1261,29 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       do i=0,nnap-1
         list_adm(nadm+i)=nalist(i)
       enddo
+
+      deallocate(listaz)
+      deallocate(list)
+      deallocate(talist)
+      deallocate(nalist)
+      deallocate(tx)
+      deallocate(ty)
+
 #endif
 #ifdef STAR
       nap=0
       nnap=0
       naz=0
 ! *** Star Particles ***
+      np=ng+ns
+
+      allocate(listaz(0:ns-1))
+      allocate(list(0:ns-1))
+      allocate(talist(0:ns-1))
+      allocate(nalist(0:ns-1))
+      allocate(tx(0:np-1))
+      allocate(ty(0:np-1))
+
       do i=ng,ng+nas-1
         pn = list_ap(i)         
         pn=list_ap(i)
