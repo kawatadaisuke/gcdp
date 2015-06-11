@@ -1524,7 +1524,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 #ifdef QPTREEF
             l_r2=(G*mass_ldmtr(nd))*((l_ldmtr(nd)**4)/(r2p(i)**3))
 #else
-            l_r2=(G*mass_ldmtr(nd)/r2p(i))*((l_ldmtr(nd)**2)/(r2p(i)**2))
+            l_r2=(G*mass_ldmtr(nd))*((l_ldmtr(nd)**2)/(r2p(i)**2))
 #endif
             if(l_r2.le.ALPHAT*tdvr(pn+npj*10)) then
               flago(pn)=3
