@@ -2180,6 +2180,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       do i=0,nc-1
         list_adm(nadm+i)=nalist(i)
       enddo
+#endif
 
 #ifdef RANAZ
       open(50,file='ini/ranaz.dat',status='old')      
@@ -2218,8 +2219,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         call MPI_FINALIZE()
         stop
       endif
-#endif
-
 #endif
 
       deallocate(istatus)
