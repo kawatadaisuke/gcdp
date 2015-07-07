@@ -878,7 +878,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 #endif
         else if(np_dmtr(nd).eq.1.and.iproc.eq.0) then
 ! skip own particle
-          if(pn_nfp(pn).eq.pn_dmtr(nd)) then
+          if(proc_dmtr(nd).eq.myrank.and.pn_nfp(pn).eq.pn_dmtr(nd)) then
             flago(pn)=-1
             node(pn)=next_dmtr(nd)		              
           endif
@@ -1462,7 +1462,7 @@ subroutine dmtreeforce(ndm,nadm,np,flags)
 #endif
         else if(np_ldmtr(nd).eq.1.and.iproc.eq.0) then
 ! skip own particle
-          if(pn_nfp(pn).eq.pn_ldmtr(nd)) then
+          if(proc_ldmtr(nd).eq.myrank.and.pn_nfp(pn).eq.pn_ldmtr(nd)) then
             flago(pn)=-1
             node(pn)=next_ldmtr(nd)		              
           endif

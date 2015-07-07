@@ -299,7 +299,7 @@ subroutine treeforce(ng,nag,ns,nas,ndm,flags)
 #endif
         else if(np_tr(nd).eq.1.and.iproc.eq.0) then
 ! skip own particle
-          if(pn_nfp(pn).eq.pn_tr(nd)) then
+          if(proc_tr(nd).eq.myrank.and.pn_nfp(pn).eq.pn_tr(nd)) then
             flago(pn)=-1
             node(pn)=next_tr(nd)		              
           endif
