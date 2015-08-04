@@ -12,7 +12,8 @@ module gcdp_const
 #ifdef TREEPM
       integer,parameter ::  NDSTEPDDEC=1
 #else
-      integer,parameter ::  NDSTEPDDEC=100
+! this should be 1, otherwise angular momentum may not be conserved.
+      integer,parameter ::  NDSTEPDDEC=1
 #endif
 ! maximum number of cpus
       integer,parameter :: NCPU=256

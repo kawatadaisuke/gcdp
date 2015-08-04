@@ -68,6 +68,9 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       integer,allocatable :: ixp(:),iyp(:),izp(:),snfp(:),c_nfp(:)
       integer*8,allocatable :: phkey(:)
       integer*8,allocatable :: phkeyr(:),phkeys(:)
+! subcell
+      integer numsc,pnumsc,nscnf
+      integer,allocatable :: npsc(:),dpsc(:),scp(:),nppsc(:)
 #ifdef NUMREC
       integer*8,allocatable :: phkey1(:)
 #endif
@@ -140,14 +143,34 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       enddo
       l_sc=l_tr(0)*0.5d0	
       level = 0
+
+! allocate daughter subcell
+      numsc=NDTREE
+
+      allocate(npsc(0:numsc-1))
+      allocate(dpsc(0:numsc-1))
+
+      do i=0,NDTREE-1
+        npsc(i)=0
+        dpsc(i)=0
+      enddo
+
+! record current subcell for particles
+        
+      allocate(scp(0:np-1))
+
+      do i=0,np-1
+        scp(i)=0
+      enddo
+
 ! ****   start iteration in level ****
    77 level=level+1	  
       l_sc = 0.5d0*l_sc
 !  find out which subcell it is in 
 
-      allocate(ixp(0:np))
-      allocate(iyp(0:np))
-      allocate(izp(0:np))
+      allocate(ixp(0:np-1))
+      allocate(iyp(0:np-1))
+      allocate(izp(0:np-1))
 
       do i=0,np-1
         if(x_p(i)-cx_tr(i).ge.0.0d0) then
@@ -183,50 +206,79 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       deallocate(iyp)
       deallocate(izp)
 
-! *** check the number of particles whose key overlap>8 ***
-      if(maxlevel.eq.0) then
-        if(level.ge.level_limit) then
-          write(6,*) ' ddecb(): rank',myrank,' hit level limit'
-          goto 90
+      do i=0,np-1
+! allocate subcell
+        scp(i)=dpsc(scp(i))+c_nfp(i)
+! counting number of particles in subcell
+        npsc(scp(i))=npsc(scp(i))+1
+      enddo
+
+! make new subcell
+      pnumsc=numsc
+      numsc=0
+      nscnf=0
+! counting numsc for the next level
+      do i=0,pnumsc-1
+        if(npsc(i).gt.NDTREE) then
+          nscnf=nscnf+1
         endif
-
-        allocate(nd_nfp(0:np))
-
-        do i=0,np-1
-          nd_nfp(i)=0
-          do j=i+1,np-1
-            if(phkey(i).eq.phkey(j)) then
-              nd_nfp(i)=nd_nfp(i)+1
-            endif
+        if(npsc(i).gt.0) then
+          do j=0,NDTREE-1
+            numsc=numsc+1
           enddo
-          if(nd_nfp(i).gt.int(NDPH)) then
+        endif
+      enddo
 
-            deallocate(nd_nfp)
+      allocate(nppsc(0:pnumsc-1))
 
-            goto 77
-          endif
-        enddo
+      do i=0,pnumsc-1
+        nppsc(i)=npsc(i)
+      enddo
 
-        deallocate(nd_nfp)
+      deallocate(dpsc)
+      deallocate(npsc)
 
+      allocate(dpsc(0:pnumsc-1))
+      allocate(npsc(0:numsc-1))
+
+      numsc=0
+      do i=0,pnumsc-1
+        if(nppsc(i).gt.0) then
+          dpsc(i)=numsc
+          do j=0,NDTREE-1
+            npsc(numsc)=0
+            numsc=numsc+1
+          enddo
+        endif
+      enddo
+
+      deallocate(nppsc)
+
+      if(maxlevel.eq.0) then
+        if(nscnf.gt.0.and.numsc*NDTREE.lt.MAXNODE) then
+! goto lower level
+          goto 77
+        endif
 ! *** get the max level among the processors ***
-!        write(6,*) myrank,' np,level=',np,level
-   90   call MPI_ALLREDUCE(level,maxlevel,1,MPI_INTEGER &
-         ,MPI_MAX,MPI_COMM_WORLD,ierr)
+        call MPI_ALLREDUCE(level,maxlevel,1,MPI_INTEGER &
+           ,MPI_MAX,MPI_COMM_WORLD,ierr)
         maxlevel = maxlevel+level_mergin
-!        write(6,*) myrank,' level,maxlevel=',level,maxlevel
-        goto 77
-      else if(level+1.le.maxlevel) then
+      endif  
+
+      if(level.le.maxlevel) then
         goto 77
       endif
 
       deallocate(c_nfp)
       deallocate(snfp)
+      deallocate(dpsc)
+      deallocate(npsc)
+      deallocate(scp)
 
 #ifdef NUMREC
 
-      allocate(phkey1(1:np+1))
-      allocate(ord1(1:np+1))
+      allocate(phkey1(1:np))
+      allocate(ord1(1:np))
 
       do i=0,np-1
         phkey1(i+1)=phkey(i)
@@ -253,8 +305,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
 #endif
 
-      allocate(list(0:np))
-      allocate(ord(0:np))
+      allocate(list(0:np-1))
+      allocate(ord(0:np-1))
 
       do i=0,np-1
         list(i)=ord1(i+1)-1
