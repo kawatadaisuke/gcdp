@@ -74,6 +74,9 @@
 ! see fraction in update.F
 ! #define RANAZ
 ! #undef RANAZ
+! #ifdef RANAZ
+! #define RANAZRLIM
+! #endif
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm

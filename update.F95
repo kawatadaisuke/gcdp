@@ -1067,6 +1067,9 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       integer ng,ndm,ns,nag,nadm,nas,nagravg
       integer i,pn,nap,nnap,nagp,np
       double precision th,pi2,dtgc
+#ifdef RANAZRLIM
+      double precision rp,rlim2
+#endif
       integer naz
       integer,allocatable :: listaz(:),list(:),talist(:),nalist(:)
       double precision,allocatable :: tx(:),ty(:)
@@ -1078,6 +1081,10 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
       if(TM_tot.ge.SI_ranazt) then
         return
       endif
+
+#ifdef RANAZRLIM
+      rlim2=SI_ranazrlim**2
+#endif
 
 #ifdef GAS
 ! number of active gravitationally particles
@@ -1101,6 +1108,10 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
         pn=list_ap(i)
         if(SI_ranazi(0).eq.0.and.(id_p(pn).ge.SI_ranazi(1) &
          .and.id_p(pn).le.SI_ranazi(2))) then
+#ifdef RANAZRLIM
+          rp=x_p(pn)**2+y_p(pn)**2
+          if(rp.lt.rlim2) then
+#endif
           if(dble(ran1(idum)).lt.FRANAZ) then
 ! *** store randomly moved particle list ***
             listaz(naz)=pn
@@ -1119,6 +1130,9 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
             nalist(nnap)=pn
             nnap=nnap+1
           endif
+#ifdef RANAZRLIM
+          endif
+#endif
         else if(i.lt.nagravg) then
           list(nagp)=pn
           nagp=nagp+1
@@ -1203,6 +1217,10 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
         pn=list_adm(i)
         if(SI_ranazi(0).ne.0.and. &
          (id_dm(pn).ge.SI_ranazi(1).and.id_dm(pn).le.SI_ranazi(2))) then
+#ifdef RANAZRLIM
+          rp=x_dm(pn)**2+y_dm(pn)**2
+          if(rp.lt.rlim2) then
+#endif
           if(dble(ran1(idum)).lt.FRANAZ) then
 ! *** store active az list ***
             listaz(naz)=pn
@@ -1218,6 +1236,9 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
             nalist(nnap)=pn
             nnap=nnap+1
           endif
+#ifdef RANAZRLIM
+          endif
+#endif
         else if(i.lt.nadm) then
           talist(nap)=pn
           nap=nap+1
@@ -1289,6 +1310,10 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
         pn=list_ap(i)
         if(SI_ranazi(0).eq.0.and. &
          (id_p(pn).ge.SI_ranazi(1).and.id_p(pn).le.SI_ranazi(2))) then
+#ifdef RANAZRLIM
+          rp=x_p(pn)**2+y_p(pn)**2
+          if(rp.lt.rlim2) then
+#endif
           if(dble(ran1(idum)).lt.FRANAZ) then
 ! *** store randomly moved particle list ***
             listaz(naz)=pn
@@ -1304,6 +1329,9 @@ subroutine ranazimuth(ng,ndm,ns,nag,nadm,nas,nagravg)
             nalist(nnap)=pn
             nnap=nnap+1
           endif
+#ifdef RANAZRLIM
+          endif
+#endif
         else if(i.lt.ng+nas) then
           talist(nap)=pn
           nap=nap+1

@@ -2383,27 +2383,69 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
 #ifdef RANAZ
-      open(50,file='ini/ranaz.dat',status='old')      
-      read(50,*) SI_ranazi(0),SI_ranazi(1),SI_ranazi(2)
-      read(50,*) SI_ranazt
       if(myrank.eq.0) then
+        open(50,file='ini/ranaz.dat',status='old')      
+        read(50,*) SI_ranazi(0),SI_ranazi(1),SI_ranazi(2)
+        read(50,*) SI_ranazt
         if(SI_ranazi(0).eq.0) then
           write(6,*) ' RANAZ baryon particles id between ' &
            ,SI_ranazi(1),SI_ranazi(2)
-       else
+        else
           write(6,*) ' RANAZ DM particles id between ' &
            ,SI_ranazi(1),SI_ranazi(2)
         endif
         write(6,*) ' until t (Gyr)=',SI_ranazt
-      endif
-      SI_ranazt=SI_ranazt/TMUGYR
-      if(SI_ranazi(1).gt.SI_ranazi(2)) then
-        if(myrank.eq.0) then
-          write(6,*) ' Error: id0 should be bigger than id1 RANAZ.'
+        SI_ranazt=SI_ranazt/TMUGYR
+        if(SI_ranazi(1).gt.SI_ranazi(2)) then
+          if(myrank.eq.0) then
+            write(6,*) ' Error: id0 should be bigger than id1 RANAZ.'
+          endif
+          call MPI_FINALIZE()
+          stop
         endif
-        call MPI_FINALIZE()
-        stop
+#ifdef RANAZRLIM
+        read(50,*) SI_ranazrlim
+        write(6,*) ' RANAZ: Rlim (100 kpc) =',SI_ranazrlim
+#endif
+        close(50)
       endif
+
+      nval=3
+      allocate(tivr(0:nval-1))
+
+      if(myrank.eq.0) then
+        tivr(0)=SI_ranazi(0)
+        tivr(1)=SI_ranazi(1)
+        tivr(2)=SI_ranazi(2)
+      endif
+      call MPI_BCAST(tivr,nval,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      SI_ranazi(0)=tivr(0)
+      SI_ranazi(1)=tivr(1)
+      SI_ranazi(2)=tivr(2)
+
+      deallocate(tivr)
+
+#ifdef RANAZRLIM
+      nval=2
+#else
+      nval=1
+#endif
+      allocate(tdvr(0:nval-1))
+
+      if(myrank.eq.0) then
+        tdvr(0)=SI_ranazt
+#ifdef RANAZRALIM
+        tdvr(1)=SI_ranazrlim
+#endif
+      endif
+      call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      SI_ranazt=tdvr(0)
+#ifdef RANAZRALIM
+      SI_ranazrlim=tdvr(1)
+#endif
+
+      deallocate(tdvr)
+
 #endif
 
 #ifdef ARTFDM
@@ -2685,7 +2727,15 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a25)') '   ###  BCZ_PERIOD on ###'
 #endif
 
-
+#ifdef RANAZ
+        write(60,'(a20)') '   ###  RANAZ on ###'
+        write(60,'(a6,3I3)')  ' flag=',SI_ranazi(0),SI_ranazi(1),SI_ranazi(2)
+        write(60,'(a10,1pE13.5)')  ' t (Gyr) <',SI_ranazt*TMUGYR
+#ifdef RANAZRLIM
+!                          123456789012345678901234567890123456
+        write(60,'(a30)') '   ###  RANAZRLIM on ### Rlim=',SI_ranazrlim
+#endif
+#endif
         close(60)
         write(6,*) ' end writing inipara.dat'
       endif

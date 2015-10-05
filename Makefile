@@ -24,10 +24,12 @@ MPI_DIR = /Users/dkawata/share/mpi
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
 ### legion@UCL
+# module unload compilers/intel/11.1/072
+# module unload mpi/qlogic/1.2.7/intel
 # module load compilers/gnu/4.6.3
-# module load mpi/openmpi/1.6.5-blcr/gnu.4.6.3
+# module load mpi/openmpi/1.6.5/gnu.4.6.3
 # module load fftw/3.3.1/double/openmpi/gnu.4.6.3
-# mpirun: /shared/ucl/apps/openmpi/gcc463-blcr/1.6.5/bin/mpirun
+# mpirun: /shared/ucl/apps/openmpi/gcc463/1.6.5/bin/mpirun
 #
 # MPI_DIR=/shared/ucl/apps/openmpi/gcc463-blcr/1.6.5
 # OPTIONS=-O3
@@ -112,13 +114,13 @@ LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 # CINECA/PLX
 # module load intel/cs-xe-2013--binary intelmpi
 #
-FORT=mpif90
-CPP=cpp
-FFTW_INC=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/include
-FFTW_LIB=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/lib
-OPTIONS= -O3
-FFLAGS = ${OPTIONS} -I${FFTW_INC}
-LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
+# FORT=mpif90
+# CPP=cpp
+# FFTW_INC=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/include
+# FFTW_LIB=/cineca/prod/libraries/fftw/3.3.3/intelmpi--4.1.2--binary/lib
+# OPTIONS= -O3
+# FFLAGS = ${OPTIONS} -I${FFTW_INC}
+# LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 
 .SUFFIXES : .o .F95 .f90
 

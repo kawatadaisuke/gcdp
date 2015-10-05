@@ -427,6 +427,9 @@ module gcdp_system
 #ifdef RANAZ
       integer,save :: SI_ranazi(0:2)
       double precision,save :: SI_ranazt
+#ifdef RANAZRLIM
+      double precision,save :: SI_ranazrlim
+#endif
 #endif
 #ifdef ARTFDM
       integer,save :: SI_artfdm(0:1)
