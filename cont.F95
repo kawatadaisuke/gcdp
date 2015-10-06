@@ -61,7 +61,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       integer ndbmhd
 #endif
 ! for work
-      integer ierr,irdummy
+      integer ierr,irdummy,nval
       integer,allocatable :: istatus(:)
       integer,allocatable :: npjr(:),ireqs(:),ireqr(:)
       integer,allocatable :: tivr(:)
@@ -2234,13 +2234,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
       if(myrank.eq.0) then
         tdvr(0)=SI_ranazt
-#ifdef RANAZRALIM
+#ifdef RANAZRLIM
         tdvr(1)=SI_ranazrlim
 #endif
       endif
       call MPI_BCAST(tdvr,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
       SI_ranazt=tdvr(0)
-#ifdef RANAZRALIM
+#ifdef RANAZRLIM
       SI_ranazrlim=tdvr(1)
 #endif
 
