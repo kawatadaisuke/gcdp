@@ -2471,6 +2471,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         call system("rm ./output/data/*")           
         call system("rm ./output/*anim*")
         open(60,file='./output/ana/inipara.dat',status='unknown')
+        write(60,'(a10,a11)') 'GCD+ ver. ',GCDPVDATE
         write(60,'(a34,8I10)') 'npt,ndmt,np,ng,ns,ndm,ndm1,ndm1t=' &
          ,npt,ndmt,np,ng,ns,ndm,SI_ndm1,SI_ndm1t
 #ifdef COSM
@@ -2603,137 +2604,140 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a33)') '###  influde star formation  ### '
 #endif
 #ifdef SF_EFD
-        write(60,'(a33)') '   ###  include energy feedback  ###'
+        write(60,'(a33)') '###  include energy feedback  ###'
 #ifdef DTFD
-        write(60,'(a18)') '   ### DTFD on ###'
+        write(60,'(a15)') '### DTFD on ###'
 #endif
 #endif
 #ifdef SF_ZFD
-        write(60,'(a33)') '   ###  include metal feedback  ###'
+        write(60,'(a32)') '###  include metal feedback  ###'
 #endif
 #if defined(SF_EFD) || defined(SF_ZFD)
         write(60,'(a34,I8,I8)') ' star mass group: SI_nsp, SI_snii=' &
           ,SI_nsp,SI_snii
 #endif
 #ifdef COREDW
-        write(60,'(a33)') '   ###  core dw/ds for P grad   ###'
+        write(60,'(a32)') '###  core dw/ds for P grad   ###'
 #endif
 #ifdef GEPSLIM_G
         write(60,'(a31,1pE13.5)') &
          '###  gas softening limit on FH=',FH
 #endif
 #ifdef GEPSLIM_VH
-        write(60,'(a36)') '   ###  gas no lim for smoothing ###'
+        write(60,'(a33)') '###  gas no lim for smoothing ###'
 #endif
 #ifdef UTHLIM_JM
-        write(60,'(a33)') '   ###  UTHLIM (JM) on  ###'
+        write(60,'(a24)') '###  UTHLIM (JM) on  ###'
 #endif
 #ifdef METALDIFF
-        write(60,'(a33)') '   ###  METALDIFF on ###'
+        write(60,'(a21)') '###  METALDIFF on ###'
+#endif
+#ifdef DUSTDEP_COOL1
+        write(60,'(a24)') '### DUSTDEP_COOL1 on ###'
 #endif
 #ifdef MAXR
-        write(60,'(a33)') '   ###  MAXR on ###'
+        write(60,'(a16)') '###  MAXR on ###'
 #endif
 #ifdef MEXT
-        write(60,'(a33)') '   ###  MEXT on ###'
+        write(60,'(a16)') '###  MEXT on ###'
 #endif
 #ifdef FIXEDDMEPS
-!                          12345678901234567890123456789012345
-        write(60,'(a30)') '   ###  Fixed DM softening ###'
+        write(60,'(a27)') '###  Fixed DM softening ###'
 #endif
 #ifdef RANAZ
 !                          1234567890123456789012345678901234567890
-        write(60,'(a38)') '   ###  move particles azimuthally ###'
+        write(60,'(a35)') '###  move particles azimuthally ###'
         write(60,'(a10,3I10,1pE13.5)') '   i012,t=',SI_ranazi(0) &
          ,SI_ranazi(1),SI_ranazi(2),SI_ranazt*TMUGYR
 #endif
 #ifdef QPTREEF
-        write(60,'(a24)') '   ###  QP TREE F on ###'
+        write(60,'(a21)') '###  QP TREE F on ###'
 #endif
 #ifdef FASTG
-        write(60,'(a20)') '   ###  FASTG on ###'
+        write(60,'(a17)') '###  FASTG on ###'
 #endif
 #ifdef DTDADT
 !                          123456789012345678901234567890123456
-        write(60,'(a21)') '   ###  DTDADT on ###'
+        write(60,'(a18)') '###  DTDADT on ###'
 #endif
 #ifdef MINDT_SFD
-!                          123456789012345678901234567890123456
-        write(60,'(a24)') '   ###  MINDT_SFD on ###'
+        write(60,'(a21)') '###  MINDT_SFD on ###'
 #endif
 #ifdef NOAC
-        write(60,'(a18)') '   ###  AC off ###'
+        write(60,'(a15)') '###  AC off ###'
 #endif
 #ifdef NOAVSWITCH
-        write(60,'(a25)') '   ###  AV switch off ###'
+        write(60,'(a22)') '###  AV switch off ###'
 #endif
 #ifdef RHOINI
-        write(60,'(a27)') '   ###  use initial RHO ###'
+        write(60,'(a24)') '###  use initial RHO ###'
 #endif
 #ifdef PINI
-        write(60,'(a25)') '   ###  use initial P ###'
+        write(60,'(a22)') '###  use initial P ###'
 #endif
 #ifdef GLASS
-!                          123456789012345678901234567890123456
-        write(60,'(a24,F7.4,a4)') '   ###  GLASS on FGLASS=' &
+!                                  123456789012345678901234567890123456
+        write(60,'(a21,F7.4,a4)') '###  GLASS on FGLASS=' &
         ,FGLASS,' ###'
 #endif
 #ifdef FIXEDP
-        write(60,'(a28)') '   ###  fixed particlese ###'
+        write(60,'(a25)') '###  fixed particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_fid(0),SI_fid(1)
 #endif
 #ifdef FIXEDDMP
-        write(60,'(a31)') '   ###  fixed DM particlese ###'
+        write(60,'(a28)') '###  fixed DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_fiddm(0),SI_fiddm(1)
 #endif
 #ifdef ARTFDM
-        write(60,'(a30)') '   ###  artF DM particlese ###'
+!                          123456789012345678901234567890123456
+        write(60,'(a27)') '###  artF DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_artfdm(0),SI_artfdm(1)
 #endif
 #ifdef NOLOWMSF
-        write(60,'(a30)') '   ###  NOWMSF on ###'
-        write(60,'(a30)') '   ###  Do not creat star ID>SI_snii ###'
+        write(60,'(a18)') '###  NOWMSF on ###'
+        write(60,'(a27)') '###  Do not creat star ID>SI_snii ###'
 #endif
 #ifdef HMAXNNB
-        write(60,'(a21)') '   ###  MAXNNB on ###'
+        write(60,'(a18)') '###  MAXNNB on ###'
         write(60,'(a31,I8)') '   Maximum number of neighbour=',MAXNNB
 #endif
 #ifdef TREEPM
-        write(60,'(a21)') '   ###  TREEPM on ###'
+        write(60,'(a18)') '###  TREEPM on ###'
 #endif
 #ifdef FFTW3
-        write(60,'(a19)') '   ###  FFTW on ###'
+        write(60,'(a16)') '###  FFTW on ###'
 #endif
 #ifdef FFTW3_ESTIMATE
-        write(60,'(a29)') '   ###  use FFTW_ESTIMATE ###'
+        write(60,'(a26)') '###  use FFTW_ESTIMATE ###'
 #endif
 #ifdef FFTW3_MPI
-        write(60,'(a23)') '   ###  FFTW_MPI on ###'
+        write(60,'(a20)') '###  FFTW_MPI on ###'
 #endif
 #ifdef ISOPM
-        write(60,'(a20)') '   ###  ISOPM on ###'
+        write(60,'(a17)') '###  ISOPM on ###'
 #endif
 #ifdef BOXSIM
-        write(60,'(a21)') '   ###  BOXSIM on ###'
+        write(60,'(a18)') '###  BOXSIM on ###'
 #endif
 #ifdef BCX_PERIOD
-        write(60,'(a25)') '   ###  BCX_PERIOD on ###'
+        write(60,'(a22)') '###  BCX_PERIOD on ###'
 #endif
 #ifdef BCY_PERIOD
-        write(60,'(a25)') '   ###  BCY_PERIOD on ###'
+        write(60,'(a22)') '###  BCY_PERIOD on ###'
 #endif
 #ifdef BCZ_PERIOD
 !                          123456789012345678901234567890123456
-        write(60,'(a25)') '   ###  BCZ_PERIOD on ###'
+        write(60,'(a22)') '###  BCZ_PERIOD on ###'
 #endif
 
 #ifdef RANAZ
-        write(60,'(a20)') '   ###  RANAZ on ###'
+!                          123456789012345678901234567890123456
+        write(60,'(a17)') '###  RANAZ on ###'
         write(60,'(a6,3I3)')  ' flag=',SI_ranazi(0),SI_ranazi(1),SI_ranazi(2)
         write(60,'(a10,1pE13.5)')  ' t (Gyr) <',SI_ranazt*TMUGYR
 #ifdef RANAZRLIM
 !                          123456789012345678901234567890123456
-        write(60,'(a30)') '   ###  RANAZRLIM on ### Rlim=',SI_ranazrlim
+        write(60,'(a27)') '###  RANAZRLIM on ### Rlim=',SI_ranazrlim
 #endif
 #endif
         close(60)

@@ -20,21 +20,20 @@ OPTIONS=-g -mcmodel=medium
 #FFTW_INC=/khome/dka/share/include
 #FFTW_LIB=/khome/dka/share/lib
 ### mac
-MPI_DIR = /Users/dkawata/share/mpi
+MPI_DIR = /usr/local
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
 ### legion@UCL
-# module unload compilers/intel/11.1/072
-# module unload mpi/qlogic/1.2.7/intel
-# module load compilers/gnu/4.6.3
-# module load mpi/openmpi/1.6.5/gnu.4.6.3
-# module load fftw/3.3.1/double/openmpi/gnu.4.6.3
-# mpirun: /shared/ucl/apps/openmpi/gcc463/1.6.5/bin/mpirun
+# module unload compilers/intel/2015/update2 
+# module unload mpi/intel/2015/update3/intel
+# module load compilers/gnu/4.9.2
+# module load mpi/openmpi/1.8.4/gnu-4.9.2
+# module load fftw/3.3.4-ompi/gnu-4.9.2 
 #
-# MPI_DIR=/shared/ucl/apps/openmpi/gcc463-blcr/1.6.5
+# MPI_DIR=/shared/ucl/apps/openmpi/1.8.4/gnu-4.9.2
 # OPTIONS=-O3
-# FFTW_INC=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/include
-# FFTW_LIB=/shared/ucl/apps/fftw/gcc463-openmpi/double/3.3.1/lib
+# FFTW_INC=/shared/ucl/apps/fftw/3.3.4-ompi/gnu-4.9.2/include
+# FFTW_LIB=/shared/ucl/apps/fftw/3.3.4-ompi/gnu-4.9.2/lib
 CPP = cpp
 FORT = ${MPI_DIR}/bin/mpif90
 MPI_INC = ${MPI_DIR}/include

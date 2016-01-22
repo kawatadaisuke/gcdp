@@ -4,7 +4,7 @@
 ! #define WTIMESUB
 !
 ! *** specify output time from ini/output_time.dat or output_asc.dat (for COSM)
-#define OFTIMESPEC
+! #define OFTIMESPEC
 !
 ! *** cosmological simulation
 #define COSM
@@ -133,28 +133,27 @@
 ! #define NOUVB
 
 ! *** No creation for non SNe II feedback particle, to keep gas number 
-#define NOLOWMSF
+! #define NOLOWMSF
 
 ! *** set h with maximum neighbour number
-#define HMAXNNB
+! #define HMAXNNB
 
 ! *** TreePM
-#define TREEPM
+! #define TREEPM
 ! #define PMONLY
-#define FFTW3
+! #define FFTW3
 ! use ESTIMATE (faster) for FFTW3 plan, otherwise use FFTW_MEASURE
-#define FFTW3_ESTIMATE
+! #define FFTW3_ESTIMATE
 ! use MPI and distributed 
-#define FFTW3_MPI
+! #define FFTW3_MPI
 ! *** ISOLATED BOUNDARY: MAXR will be turned on.
-#define ISOPM
+! #define ISOPM
 
 ! #define BOXSIM
 ! #define BCX_PERIOD
 ! #define BCY_PERIOD
 ! #define BCZ_PERIOD
 
-!
 ! *** integrator for cosmological simulation
 ! apply always Quinn et al. 1997 leapfrog integrator (see also Gadget-2)
 ! This option is removed on 17/02/2014
@@ -166,8 +165,8 @@
 ! #undef COSM
 !
 ! *** isolated galaxy
-#define MAXR
-! #define MEXT
+! #define MAXR
+#define MEXT
 ! #define CENTRE0
 !
 #undef COSM
@@ -343,6 +342,9 @@
 
 #define IMSL
 #undef IMSL
+
+! *** for dust cooling ***
+#define DUSTDEP_COOL1
 
 ! ***** MHD option *****
 ! *** MHD turn on ***

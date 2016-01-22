@@ -95,6 +95,21 @@ subroutine cool(np,plist,current_z,ngs,ram)
 
       do i =0,np-1
         pn = plist(i)
+! *** temperature ***
+        logTp = dlog10((p_p(pn)*myu_p(pn)/(rho_p(pn)*TPRHO*MYU))*TUK)
+        if(logTp.lt.logTlimK) then
+          logTp=logTlimK
+        endif
+! *** find temperature ***
+        it = int((logTp-t_crtb(0))/dt)
+        if(it.lt.0) then
+          it = 0
+        else if(it.ge.nt_crtb-1) then
+          it = nt_crtb-2
+        endif
+        wt1 = (t_crtb(it+1)-logTp)/dt
+        wt2 = (logTp-t_crtb(it))/dt
+
 ! *** nH ***
 #ifdef METAL
         nhp = ((m_p(pn)-((mzZ_p(pn)+mzHe_p(pn))/MUSM))/m_p(pn)) &
@@ -106,7 +121,16 @@ subroutine cool(np,plist,current_z,ngs,ram)
         Lognhp=dlog10(nhp)
 ! *** find metallicity ***
 #ifdef METAL
+#ifdef DUSTDEP_COOL1
+! if T<1e4 K, 40% of metals goes to dust
+        if(logTp.le.4.0d0) then     
+          metp = (0.6d0*mzZ_p(pn))/(m_p(pn)*MUSM*XZSOL)
+        else
+          metp = (mzZ_p(pn))/(m_p(pn)*MUSM*XZSOL)
+        endif
+#else
         metp = (mzZ_p(pn))/(m_p(pn)*MUSM*XZSOL)
+#endif
 #else
         metp =0.0d0
 #endif
@@ -159,20 +183,6 @@ subroutine cool(np,plist,current_z,ngs,ram)
         endif
 #endif
 
-! *** temperature ***
-        logTp = dlog10((p_p(pn)*myu_p(pn)/(rho_p(pn)*TPRHO*MYU))*TUK)
-        if(logTp.lt.logTlimK) then
-          logTp=logTlimK
-        endif
-! *** find temperature ***
-        it = int((logTp-t_crtb(0))/dt)
-        if(it.lt.0) then
-          it = 0
-        else if(it.ge.nt_crtb-1) then
-          it = nt_crtb-2
-        endif
-        wt1 = (t_crtb(it+1)-logTp)/dt
-        wt2 = (logTp-t_crtb(it))/dt
 ! *** get cooling rates ***
         cradp &
 ! iz-1

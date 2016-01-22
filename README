@@ -7,3 +7,12 @@ Kawata & Gibson (2003) http://adsabs.harvard.edu/abs/2003MNRAS.340..908K
 
 GCMHD+:
 Barnes, Kawata, Wu (2012) http://adsabs.harvard.edu/abs/2012MNRAS.420.3195B
+
+
+gcdp.def options
+
+22/01/2016
+DUSTDEP_COOL1
+ - simple model to take into account dust depletion effect on cooling at low temperature
+ - Assumption: at T<1e4 K, 40% of metal goes to dust, and does not contribute to the gas metallicity
+

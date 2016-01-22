@@ -1,7 +1,8 @@
 #include "gcdp.def"
 ! *************************************
-!    main.f for GCD+ ver.f03.0
-!  10 Marn. 2014    written by D.KAWATA
+!    main.f for GCD+ 
+!  22 Jan. 2016    written by D.KAWATA
+! Whenever updated: don't forget to update gcdp_cont.F95 GCDPVDATE
 ! *************************************
 !70*******************************************************************
 
@@ -64,8 +65,8 @@ program gcdp
 !      parameter (JOBTIME=604800.0d0)
 ! 120 hours
       parameter (JOBTIME=432000.0d0)
-! 60 hours
-!      parameter (JOBTIME=216000.0d0)
+! 48 hours
+!      parameter (JOBTIME=172800.0d0)
 ! 36 hours
 !      parameter (JOBTIME=129600.0d0)
 ! 12 hours
@@ -90,7 +91,7 @@ program gcdp
 
 ! *** print version ***
       if(myrank.eq.0) then
-        write(6,*) ' GCD+ ver. f03.0 05/09/14'
+        write(6,*) ' GCD+ ver.',GCDPVDATE
         print *, "Process ",myrank, " of ", nprocs, " is alive"
       endif
       if(nprocs.gt.NCPU) then
