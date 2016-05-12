@@ -2897,7 +2897,7 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
 #ifdef BBAT
 ! set listab
         do i=0,nag-1
-          listb=list_ap(i)
+          listb(i)=list_ap(i)
         enddo
 ! only for active gas
         call setchi(nag,listb,zn)
