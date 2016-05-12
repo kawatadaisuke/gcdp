@@ -138,6 +138,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 ! *** reading the data from inipara ***
         open(50,file='./output/ana/inipara.dat',status='old')
+        read(50,*)
         read(50,'(a34,8I10)') tchar,npt,ndmt,np,ng,ns,ndm,SI_ndm1,SI_ndm1t
 #ifdef COSM
         read(50,'(a19,4(1pE13.5))') tchar,SI_h0,SI_omg0,SI_lam0,Ini_OMGg

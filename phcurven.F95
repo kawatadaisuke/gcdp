@@ -4,8 +4,8 @@ subroutine phcurven(id0,id1,is,ic,ixp,iyp,izp,level)
       implicit none
 
       integer,intent(in) :: id0,id1,level
-      integer,intent(out) :: is(id0:id1+1),ic(id0:id1+1)
-      integer,intent(in) :: ixp(id0:id1+1),iyp(id0:id1+1),izp(id0:id1+1)
+      integer,intent(out) :: is(id0:id1),ic(id0:id1)
+      integer,intent(in) :: ixp(id0:id1),iyp(id0:id1),izp(id0:id1)
 
 ! *** s: state (or kind) of curve segment
 ! *** c: index in each segment from 0 to 7

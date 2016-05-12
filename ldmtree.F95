@@ -64,15 +64,15 @@ subroutine ldmtreebuild(np)
 
 ! *** Make root ***
 ! allocate list for keeping the top node id for each level
-      allocate(list(0:maxntr))
-      allocate(flag_pc(0:maxntr))
-      allocate(pare_tr(0:maxntr))
+      allocate(list(0:maxntr-1))
+      allocate(flag_pc(0:maxntr-1))
+      allocate(pare_tr(0:maxntr-1))
 ! allocate the arrays for _nfp
-      allocate(pn_nfp(0:np))
-      allocate(nd_nfp(0:np))
-      allocate(c_nfp(0:np))
-      allocate(label_nfp(0:np))
-      allocate(snfp(0:np))
+      allocate(pn_nfp(0:np-1))
+      allocate(nd_nfp(0:np-1))
+      allocate(c_nfp(0:np-1))
+      allocate(label_nfp(0:np-1))
+      allocate(snfp(0:np-1))
 
       do i=SI_ndm1,np-1
         pn_nfp(i-SI_ndm1)=i
@@ -129,9 +129,9 @@ subroutine ldmtreebuild(np)
       stsc=numdmtr
       l_sc=l_ldmtr(numtr0)*0.5d0
 
-      allocate(np_sc(0:numsc))
-      allocate(pare_sc(0:numsc))
-      allocate(c_sc(0:numsc))
+      allocate(np_sc(0:numsc-1))
+      allocate(pare_sc(0:numsc-1))
+      allocate(c_sc(0:numsc-1))
 
       do i=0,7
         np_sc(i)=0
@@ -154,7 +154,7 @@ subroutine ldmtreebuild(np)
       endif
 ! * initialization for the case np_ldmtr < 8 *
 
-      allocate(nd_sc(0:numdmtr))
+      allocate(nd_sc(0:numdmtr-1))
 
       do i=list(level),numdmtr-1
         nd_sc(i)=0
@@ -165,9 +165,9 @@ subroutine ldmtreebuild(np)
       l_sc=0.5d0*l_sc2
 ! * find out which subcell it is in *
 
-      allocate(ixp(0:numnfp))
-      allocate(iyp(0:numnfp))
-      allocate(izp(0:numnfp))
+      allocate(ixp(0:numnfp-1))
+      allocate(iyp(0:numnfp-1))
+      allocate(izp(0:numnfp-1))
 
       do i=0,numnfp-1
         pn=pn_nfp(i)
@@ -189,14 +189,15 @@ subroutine ldmtreebuild(np)
         endif 
       enddo
 
-      call phcurven(0,numnfp-1,snfp,c_nfp,ixp,iyp,izp,level)
+      call phcurven(0,numnfp-1,snfp(0:numbfp-1),c_nfp(0:numnfp-1) &
+        ,ixp,iyp,izp,level)
 
       deallocate(ixp)
       deallocate(iyp)
       deallocate(izp)
 
-      allocate(nalist(0:numnfp))
-      allocate(talist(0:numnfp))
+      allocate(nalist(0:numnfp-1))
+      allocate(talist(0:numnfp-1))
 
       npn = 0
       do i=0,numnfp-1
@@ -222,7 +223,7 @@ subroutine ldmtreebuild(np)
       deallocate(nalist)
       deallocate(talist)
 
-      allocate(s_sc(0:numsc))
+      allocate(s_sc(0:numsc-1))
 
 ! * update info of subcell *
       do i=0,numnfp-1
@@ -237,11 +238,11 @@ subroutine ldmtreebuild(np)
       endif
 
 ! *** subcell is conected to tree ***
-      allocate(talist(0:numsc))
-      allocate(nalist(0:numsc))
-      allocate(node(0:numsc))
-      allocate(clist(0:numsc))
-      allocate(slist(0:numsc))
+      allocate(talist(0:numsc-1))
+      allocate(nalist(0:numsc-1))
+      allocate(node(0:numsc-1))
+      allocate(clist(0:numsc-1))
+      allocate(slist(0:numsc-1))
 
       npn = 0
       do i=0,numsc-1
@@ -268,7 +269,7 @@ subroutine ldmtreebuild(np)
         endif
       enddo
 
-      allocate(nd_sc(0:numsc))
+      allocate(nd_sc(0:numsc-1))
 
 ! *** set up the other values for _ldmtr ***
       do i=0,npn-1
@@ -325,9 +326,9 @@ subroutine ldmtreebuild(np)
       deallocate(pare_sc)
       deallocate(c_sc)
       if(numtmp.gt.0) then
-        allocate(np_sc(0:numtmp*8))
-        allocate(pare_sc(0:numtmp*8))
-        allocate(c_sc(0:numtmp*8))
+        allocate(np_sc(0:numtmp*8-1))
+        allocate(pare_sc(0:numtmp*8-1))
+        allocate(c_sc(0:numtmp*8-1))
       endif
 
       numsc = 0
@@ -418,7 +419,7 @@ subroutine ldmtreebuild(np)
 
 ! *** compute mass ***
       allocate(lvlist(0:level))
-      allocate(paretrcm(0:numdmtr))
+      allocate(paretrcm(0:numdmtr-1))
       do i=0,level
         lvlist(i)=list(i)
       enddo
@@ -517,7 +518,7 @@ subroutine ldmtreebuild(np)
           numtrs=nodese_ldmtr-nodess_ldmtr+1
         endif
 
-        allocate(npjr(0:nprocs))
+        allocate(npjr(0:nprocs-1))
 
         do ip=0,nprocs-1
           if(ip.eq.myrank) then
@@ -526,7 +527,7 @@ subroutine ldmtreebuild(np)
           call MPI_BCAST(npjr(ip),1,MPI_INTEGER,ip,MPI_COMM_WORLD,ierr)
         enddo
 
-        allocate(nd0(0:maxntr))
+        allocate(nd0(0:maxntr-1))
 
         nvali=4
 #ifdef QPTREEF
@@ -537,8 +538,8 @@ subroutine ldmtreebuild(np)
         do ip=0,nprocs-1
           if(ip.eq.myrank) then
 
-            allocate(tivr(0:numtrs*nvali))
-            allocate(tdvr(0:numtrs*nval))
+            allocate(tivr(0:numtrs*nvali-1))
+            allocate(tdvr(0:numtrs*nval-1))
 
             do i=0,numtrs-1
               nd=nodess_ldmtr+i
@@ -573,8 +574,8 @@ subroutine ldmtreebuild(np)
             enddo
           else
 
-            allocate(tivr(0:npjr(ip)*nvali))
-            allocate(tdvr(0:npjr(ip)*nval))
+            allocate(tivr(0:npjr(ip)*nvali-1))
+            allocate(tdvr(0:npjr(ip)*nval-1))
 
           endif
           call MPI_BCAST(tivr,npjr(ip)*nvali,MPI_INTEGER,ip &

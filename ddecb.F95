@@ -110,7 +110,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! ** Make root in tree.f **	
 ! *** since ver.33. need to list pn_nfp
 
-      allocate(pn_nfp(0:np))      
+      allocate(pn_nfp(0:np-1))      
 
       if(.not.allocated(np_tr)) then
 ! allocate memory for tree, need only the np size of _tr array
@@ -127,9 +127,9 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       maxlevel=0
 
       deallocate(pn_nfp)
-      allocate(phkey(0:np))
-      allocate(c_nfp(0:np))
-      allocate(snfp(0:np))
+      allocate(phkey(0:np-1))
+      allocate(c_nfp(0:np-1))
+      allocate(snfp(0:np-1))
 
 !  initialization 
       do i=0,np-1
@@ -324,8 +324,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 !      close(60)
 
       deallocate(ord1)
-      allocate(phkeyr(0:np))
-      allocate(tivr(0:np))
+      allocate(phkeyr(0:np-1))
+      allocate(tivr(0:np-1))
 
       do i=0,np-1
         phkeyr(i)=phkey(i)
@@ -374,8 +374,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! ** Message Passing **
         isend = npj
 
-        allocate(tivs(0:npj))                
-        allocate(phkeys(0:npj))                
+        allocate(tivs(0:npj-1))
+        allocate(phkeys(0:npj-1))                
 
         do i=0,isend-1
           tivs(i) = tivr(i)
@@ -399,8 +399,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
         if(j.ne.nprocs-1) then
 
-          allocate(tivr(0:npj))
-          allocate(phkeyr(0:npj))
+          allocate(tivr(0:npj-1))
+          allocate(phkeyr(0:npj-1))
 
 ! ** for order **
           call MPI_ISEND(tivs,isend,MPI_INTEGER,srank(0),2 &
@@ -448,8 +448,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! ** send and recieve data ***
 ! ** define srank and rrank **
 
-      allocate(srank(0:nprocs))
-      allocate(rrank(0:nprocs))
+      allocate(srank(0:nprocs-1))
+      allocate(rrank(0:nprocs-1))
 
       do j=0,nprocs-1
         srank(j) = myrank+j
@@ -463,8 +463,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       enddo
 ! ** initialization **
 
-      allocate(idisp(0:nprocs))
-      allocate(jjlen(0:nprocs))
+      allocate(idisp(0:nprocs-1))
+      allocate(jjlen(0:nprocs-1))
 
       do i=0,nprocs-1
         call para_range(0,npt-1,nprocs,i,jsta,jend)
@@ -474,10 +474,10 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       enddo
       npj = np
 
-      allocate(jstap(0:nprocs))
-      allocate(jendp(0:nprocs))
-      allocate(npsp(0:nprocs))
-      allocate(nprp(0:nprocs))
+      allocate(jstap(0:nprocs-1))
+      allocate(jendp(0:nprocs-1))
+      allocate(npsp(0:nprocs-1))
+      allocate(nprp(0:nprocs-1))
 
 ! ** get start and end id, and number of particles ***
       do j = 0,nprocs-1
@@ -513,7 +513,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! *** ord ***
 
 ! size of the original particles
-      allocate(tivs(0:npj))
+      allocate(tivs(0:npj-1))
 
       do i=0,npj-1
         tivs(i)=ord(list(i))
@@ -521,7 +521,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
       deallocate(ord)
 ! size with the new set of particles
-      allocate(ord(0:np))
+      allocate(ord(0:np-1))
 
       np = 0
       do i=jstap(0),jendp(0)
@@ -552,13 +552,13 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       nval=3
 #endif
 
-      allocate(tivr(0:np*nval))
+      allocate(tivr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
         npj=0
 
-        allocate(tivs(0:npsp(ip)*nval))
+        allocate(tivs(0:npsp(ip)*nval-1))
 
         do i=jstap(ip),jendp(ip)
           tivs(npj)=flagc_p(list(i))
@@ -616,13 +616,13 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! *** dv?_p(14),ndu_p,pdu_p,alpv_p,alpu_p ***
       nval=19
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
         npj=0
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         do i=jstap(ip),jendp(ip)
           tdvs(npj)=xc_p(list(i))
@@ -721,12 +721,12 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 #endif
 #endif
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         npj=0
         do i=jstap(ip),jendp(ip)
@@ -832,12 +832,12 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       nval=1
 #endif
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         npj=0
         do i=jstap(ip),jendp(ip)
@@ -896,12 +896,12 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       nval=9
 #endif
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         npj=0
         do i=jstap(ip),jendp(ip)
@@ -972,12 +972,12 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! *** for original metal ***
       nval=9
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip = 0,nprocs-1
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         npj=0
         do i=jstap(ip),jendp(ip)
@@ -1044,12 +1044,12 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       nval=nval+4
 #endif
 
-      allocate(tdvr(0:np*nval))
+      allocate(tdvr(0:np*nval-1))
 
       np=0
       do ip=0,nprocs-1
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         npj=0
         do i=jstap(ip),jendp(ip)
@@ -1153,7 +1153,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 
       deallocate(ord)
       deallocate(list)
-      allocate(list(0:np))
+      allocate(list(0:np-1))
 
 ! ** make active particle list **
       ns=0
@@ -1179,9 +1179,9 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
         lwt =TM_lt+MGTL*TM_dt
         upt=TM_lt+MGTU*TM_dt
 
-        allocate(talist(0:np))
-        allocate(list(0:np))
-        allocate(nalist(0:np))
+        allocate(talist(0:np-1))
+        allocate(list(0:np-1))
+        allocate(nalist(0:np-1))
 
         do i=0,np-1
           talist(i)=list_ap(i)
@@ -1310,8 +1310,8 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 #ifdef FIXEDP
 ! *** change nag and nagravg
 
-        allocate(nalist(0:ng))
-        allocate(list(0:ng))
+        allocate(nalist(0:ng-1))
+        allocate(list(0:ng-1))
 
         nag=0
         nc=0
@@ -1386,6 +1386,7 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
         tmzZ_p(i)=0.0d0
       enddo
 
+! array size match with the ones in dtyields()
       allocate(tmej_sn(0:np))
       allocate(tnsn_sn(0:np))
       allocate(tmzHe_sn(0:np))
@@ -1398,7 +1399,6 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       allocate(tmzFe_sn(0:np))
       allocate(tmzZ_sn(0:np))
       allocate(nsw_sn(0:np))
-
 
 ! *** use TM_dt, allow TMsf_dt is different from TM_dt ***
       call dtyields(np,ng,ns,tmej_sn,tnsn_sn,tmzHe_sn &

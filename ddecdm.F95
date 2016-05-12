@@ -66,18 +66,18 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** mergin of tree level to make a key for the particles ***
       level_mergin = 1
 
-      allocate(ord(0:ndm))
+      allocate(ord(0:ndm-1))
       allocate(istatus(MPI_STATUS_SIZE))
       allocate(istatusr(MPI_STATUS_SIZE))
 
 #ifdef MULTI_LEV
 
-      allocate(pnord(0:ndm,0:1))
+      allocate(pnord(0:ndm-1,0:1))
 
       do it=0,1
 #else
 
-      allocate(pnord(0:ndm,0:0))
+      allocate(pnord(0:ndm-1,0:0))
 
       do it=0,0
 #endif
@@ -113,12 +113,12 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         endif
         maxlevel = 0
 ! * initialization *
-        allocate(phkey(idmr(0):idmr(1)+1))
-        allocate(c_nfp(idmr(0):idmr(1)+1))
-        allocate(snfp(idmr(0):idmr(1)+1))
-        allocate(cx0p(idmr(0):idmr(1)+1))
-        allocate(cy0p(idmr(0):idmr(1)+1))
-        allocate(cz0p(idmr(0):idmr(1)+1))
+        allocate(phkey(idmr(0):idmr(1)))
+        allocate(c_nfp(idmr(0):idmr(1)))
+        allocate(snfp(idmr(0):idmr(1)))
+        allocate(cx0p(idmr(0):idmr(1)))
+        allocate(cy0p(idmr(0):idmr(1)))
+        allocate(cz0p(idmr(0):idmr(1)))
 
 ! time
 !        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -137,8 +137,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! allocate daughter subcell
         numsc=NDTREE
 
-        allocate(npsc(0:numsc))
-        allocate(dpsc(0:numsc))
+        allocate(npsc(0:numsc-1))
+        allocate(dpsc(0:numsc-1))
 
         do i=0,NDTREE-1
           npsc(i)=0
@@ -147,7 +147,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
 ! record current subcell for particles
         
-        allocate(scp(idmr(0):idmr(1)+1))
+        allocate(scp(idmr(0):idmr(1)))
 
         do i=idmr(0),idmr(1)
           scp(i)=0
@@ -165,9 +165,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         endif
 ! * find out which subcell it is in *
 
-        allocate(ixp(idmr(0):idmr(1)+1))
-        allocate(iyp(idmr(0):idmr(1)+1))
-        allocate(izp(idmr(0):idmr(1)+1))
+        allocate(ixp(idmr(0):idmr(1)))
+        allocate(iyp(idmr(0):idmr(1)))
+        allocate(izp(idmr(0):idmr(1)))
 
         do i=idmr(0),idmr(1)
           if(x_dm(i)-cx0p(i).ge.0.0d0) then
@@ -228,7 +228,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           endif
         enddo
 
-        allocate(nppsc(0:pnumsc))
+        allocate(nppsc(0:pnumsc-1))
 
         do i=0,pnumsc-1
           nppsc(i)=npsc(i)
@@ -237,8 +237,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         deallocate(dpsc)
         deallocate(npsc)
 
-        allocate(dpsc(0:pnumsc))
-        allocate(npsc(0:numsc))
+        allocate(dpsc(0:pnumsc-1))
+        allocate(npsc(0:numsc-1))
 
         numsc=0
         do i=0,pnumsc-1
@@ -282,8 +282,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** ordering with indexxl ***
         npnord = idmr(1)-idmr(0)+1
 
-        allocate(phkey1(1:npnord+1))
-        allocate(ord1(1:npnord+1))
+        allocate(phkey1(1:npnord))
+        allocate(ord1(1:npnord))
 
 
 ! time
@@ -329,8 +329,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 !        ntime=ctime
 
         deallocate(ord1)
-        allocate(phkeyr(idmr(0):idmr(1)+1))
-        allocate(tivr(idmr(0):idmr(1)+1))
+        allocate(phkeyr(idmr(0):idmr(1)))
+        allocate(tivr(idmr(0):idmr(1)))
    
         do i=idmr(0),idmr(1)
           phkeyr(i)=phkey(i)
@@ -376,8 +376,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
             enddo
           endif
 
-          allocate(tivs(idmrjr(0):idmrjr(1)+1))
-          allocate(phkeys(idmrjr(0):idmrjr(1)+1))
+          allocate(tivs(idmrjr(0):idmrjr(1)))
+          allocate(phkeys(idmrjr(0):idmrjr(1)))
 
 ! *** Message Passing ***
           do i=idmrjr(0),idmrjr(1)
@@ -403,8 +403,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
             call MPI_WAIT(ireqs(0),istatus,ierr)
             call MPI_WAIT(ireqr(0),istatusr,ierr)
 
-            allocate(tivr(idmrjr(0):idmrjr(1)+1))
-            allocate(phkeyr(idmrjr(0):idmrjr(1)+1))
+            allocate(tivr(idmrjr(0):idmrjr(1)))
+            allocate(phkeyr(idmrjr(0):idmrjr(1)))
 
 ! *** for order ***
             call MPI_ISEND(tivs(idmrjs(0)),idmrjs(1)-idmrjs(0)+1 &
@@ -435,8 +435,8 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** finish ordering for both high and low reso particles ***
 ! *** define srank and rrank ***
 
-      allocate(srank(0:nprocs))
-      allocate(rrank(0:nprocs))
+      allocate(srank(0:nprocs-1))
+      allocate(rrank(0:nprocs-1))
 
 ! time
 !      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -463,11 +463,11 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 ! *** sort talist for sending proc ***
 
-      allocate(talist(0:ndm))
-      allocate(jstap(0:nprocs))
-      allocate(jendp(0:nprocs))
-      allocate(npsp(0:nprocs))
-      allocate(nprp(0:nprocs))
+      allocate(talist(0:ndm-1))
+      allocate(jstap(0:nprocs-1))
+      allocate(jendp(0:nprocs-1))
+      allocate(npsp(0:nprocs-1))
+      allocate(nprp(0:nprocs-1))
 
       na=0
       do ip=0,nprocs-1
@@ -545,14 +545,14 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
 ! *** ord ***
 
-      allocate(tivs(0:npnord))
+      allocate(tivs(0:npnord-1))
 
       do i=0,npnord-1
         tivs(i)=ord(pnord(i,0))
       enddo
 
       deallocate(ord)
-      allocate(ord(0:ndm))
+      allocate(ord(0:ndm-1))
 
       ndm = 0
       do i=jstap(0),jendp(0)
@@ -597,13 +597,13 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** integer values ***  
       nval=2
 
-      allocate(tivr(0:ndm*nval))
+      allocate(tivr(0:ndm*nval-1))
 
       ndm=0
       do ip=0,nprocs-1
         ndmj=0
 
-        allocate(tivs(0:npsp(ip)*nval))
+        allocate(tivs(0:npsp(ip)*nval-1))
 
         do i=jstap(ip),jendp(ip)
           tivs(ndmj)=flagt_dm(pnord(i,0))
@@ -650,13 +650,13 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** x?_dm,vn?_dm
       nval=6
 
-      allocate(tdvr(0:ndm*nval))
+      allocate(tdvr(0:ndm*nval-1))
 
       ndm=0
       do ip=0,nprocs-1
         ndmj=0
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         do i=jstap(ip),jendp(ip)
           tdvs(ndmj)=xc_dm(pnord(i,0))
@@ -716,13 +716,13 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** m_dm,h_dm,dv?_dm,dt_dm,lt_dm
       nval=7
 
-      allocate(tdvr(0:ndm*nval))
+      allocate(tdvr(0:ndm*nval-1))
 
       ndm=0
       do ip=0,nprocs-1
         ndmj=0
 
-        allocate(tdvs(0:npsp(ip)*nval))
+        allocate(tdvs(0:npsp(ip)*nval-1))
 
         do i=jstap(ip),jendp(ip)
           tdvs(ndmj)=m_dm(pnord(i,0))
@@ -789,13 +789,13 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       nval=5
 #endif
 
-      allocate(tdvr(0:ndm*nval))
+      allocate(tdvr(0:ndm*nval-1))
 
       ndm=0
       do ip=0,nprocs-1
         ndmj=0
 
-        allocate(tdvs(0:npsp(ip)*nval)) 
+        allocate(tdvs(0:npsp(ip)*nval-1)) 
 
         do i=jstap(ip),jendp(ip)
           tdvs(ndmj)=rho_dm(pnord(i,0))
@@ -862,10 +862,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
 ! *** change the order to set high-reso particle first ***
 
-      allocate(talist(0:ndm))
-      allocate(nalist(0:ndm))
-      allocate(tivr(0:ndm))
-      allocate(tdvr(0:ndm))
+      allocate(talist(0:ndm-1))
+      allocate(nalist(0:ndm-1))
+      allocate(tivr(0:ndm-1))
+      allocate(tdvr(0:ndm-1))
 
       na = 0
       nanp = 0
@@ -1048,7 +1048,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** make active particle list ***
       if(step.ge.0) then
 
-        allocate(nalist(0:ndm))
+        allocate(nalist(0:ndm-1))
 
 ! *** find active particles ***
         lwt =TM_lt+MGTL*TM_dt
@@ -1104,7 +1104,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 #ifdef FIXEDDMP
 ! *** change nag and nagravg
 
-        allocate(nalist(0:ndm))
+        allocate(nalist(0:ndm-1))
 
         nadm=0
         nc=0
