@@ -684,7 +684,7 @@ subroutine gtreebuild(ng,ns)
             next_gtr(0)=numtr0
           endif
 ! *** set end of tree ***
-          do i=numtr0,numgtr-1
+          do i=numtri,numgtr-1
 ! *** set next_tr ***
             if(next_gtr(i).eq.numgtr) then
               next_gtr(i)=-1
