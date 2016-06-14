@@ -632,6 +632,7 @@ subroutine gtreebuild(ng,ns)
             do i=0,npjr(ip)-1
 ! even if numgtr=0, it should work.
               np_gtr(numgtr)=tivr(i)
+              pn_gtr(numgtr)=0
 ! *** set the other parameter for node ***
               proc_gtr(numgtr)=ip
               next_gtr(numgtr)=tivr(i+nrnd)

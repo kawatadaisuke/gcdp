@@ -622,6 +622,7 @@ subroutine treebuild(np)
             numtri=num_tr
             do i=0,nrnd-1
               np_tr(num_tr)=tivr(i)
+              pn_tr(num_tr)=0
 ! *** set the other parameter for node ***
               proc_tr(num_tr)=ip
               next_tr(num_tr)=tivr(i+nrnd)

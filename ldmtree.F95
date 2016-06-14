@@ -589,6 +589,7 @@ subroutine ldmtreebuild(np)
             numtri=numdmtr
             do i=0,nrnd-1
               np_ldmtr(numdmtr)=tivr(i)
+              pn_ldmtr(numdmtr)=0
 ! *** set the other parameter for node ***
               proc_ldmtr(numdmtr)=ip
               next_ldmtr(numdmtr)=tivr(i+nrnd)

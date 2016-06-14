@@ -7,7 +7,7 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        atfunc.o esolve.o setcool.o \
        ddecb.o ddecdm.o indexxl.o boundary.o\
        set_valuedm.o set_chi.o\
-       setslgtr.o setsldmtr.o kernel.o setmext.o allocate.o\
+       setsldmtr.o kernel.o setmext.o allocate.o\
        mesh_gen.o mesh_setrho.o fftw3_init.o mesh_fftf.o mesh_setfp.o erfcc.o\
        phcurve.o phcurven.o mesh_isogpot.o
 INIOBJ = set_ini.o

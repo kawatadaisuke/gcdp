@@ -605,6 +605,7 @@ subroutine dmtreebuild(np)
             numtri=numdmtr
             do i=0,nrnd-1
               np_dmtr(numdmtr)=tivr(i)
+              pn_dmtr(numdmtr)=0
 ! *** set the other parameter for node ***
               proc_dmtr(numdmtr)=ip
               next_dmtr(numdmtr)=tivr(i+nrnd)
