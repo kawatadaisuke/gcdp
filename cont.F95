@@ -64,7 +64,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       integer ierr,irdummy,nval
       integer,allocatable :: istatus(:)
       integer,allocatable :: npjr(:),ireqs(:),ireqr(:)
-      integer,allocatable :: tivr(:)
+      integer,allocatable :: tivr(:),list(:),nalist(:)
       double precision,allocatable :: tdvr(:)
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! work
@@ -2119,6 +2119,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** change nag and nagravg
       nag=0
       nc=0
+
+      allocate(nalist(0:ng-1))
+      allocate(list(0:ng-1))
+
       do i=0,ng-1
         pn=list_ap(i)
         if(id_p(pn).ge.SI_fid(0).and.id_p(pn).le.SI_fid(1)) then
@@ -2143,6 +2147,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       do i=0,nc-1
         list_ap(nag+i)=nalist(i)
       enddo
+
+      deallocate(nalist)
+      deallocate(list)
+
 #endif
 
 #ifdef FIXEDDMP
@@ -2159,6 +2167,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         stop
       endif
 ! *** change nag and nagravg
+
+      allocate(list(0:ndm-1))
+      allocate(nalist(0:ndm-1))
+
       nadm=0
       nc=0
       do i=0,ndm-1
@@ -2181,6 +2193,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       do i=0,nc-1
         list_adm(nadm+i)=nalist(i)
       enddo
+
+      deallocate(list)
+      deallocate(nalist)
+
 #endif
 
 #ifdef RANAZ

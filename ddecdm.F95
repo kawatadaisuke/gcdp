@@ -1030,6 +1030,22 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       do i=0,ndm-1
         dtr_dm(i)=tdvr(talist(i))
       enddo
+#if defined(COSM) && defined(BOXSIM)
+! *** asc_dm ***
+      do i=0,ndm-1
+        tdvr(i)=asc_dm(i)
+      enddo
+      do i=0,ndm-1
+        asc_dm(i)=tdvr(talist(i))
+      enddo
+! *** tc_dm ***
+      do i=0,ndm-1
+        tdvr(i)=tc_dm(i)
+      enddo
+      do i=0,ndm-1
+        tc_dm(i)=tdvr(talist(i))
+      enddo
+#endif
 
       deallocate(talist)
       deallocate(nalist)
@@ -1104,6 +1120,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 #ifdef FIXEDDMP
 ! *** change nag and nagravg
 
+        allocate(list(0:ndm-1))
         allocate(nalist(0:ndm-1))
 
         nadm=0
@@ -1126,6 +1143,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         enddo
 
         deallocate(nalist)
+        deallocate(list)
 
 #endif
 

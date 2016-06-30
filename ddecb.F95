@@ -50,8 +50,6 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
 ! *** to find active particles ***
       integer pn,na,nanp
       double precision lwt,upt
-! *** for check ***
-      integer nptc
 ! *** for test ***
       character fileo*60
 ! for work
