@@ -996,6 +996,21 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         deallocate(tdvr)
 
       endif
+
+#ifdef DEL_DMPART
+      if(myrank.eq.0) then
+        open(60,file='output/data/del_dmpartcon.dat',status='unknown' &
+          ,form='unformatted')   
+        write(60) SI_dmdelci(0),SI_dmdelci(1)
+        write(60) SI_deldmdt
+        write(60) SI_mdmp0
+        write(60) SI_mtdmdc0
+        write(60) SI_ndmtdc
+        write(60) SI_ndm1t
+        close(60)
+      endif
+#endif
+
 ! end for DM
 #endif
 

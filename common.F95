@@ -1,7 +1,7 @@
 #include "gcdp.def"
 !************************************************
 !     common.F95 for GCD+
-!  22 Jan. 2013   written by D.KAWATA
+!  30 June 2016   written by D.KAWATA
 ! ************************************************
 
 #if defined(GAS) || defined(STAR)
@@ -433,6 +433,14 @@ module gcdp_system
 #endif
 #ifdef ARTFDM
       integer,save :: SI_artfdm(0:1)
+#endif
+#ifdef DEL_DMPART
+! number of particles in the component where the particles are deleted
+      integer,save :: SI_ndmtdc
+! delete particle ID range
+      integer,save :: SI_dmdelci(0:1)
+! mass of deleting component, delete rate, and particle mass
+      double precision,save :: SI_mtdmdc0,SI_deldmdt,SI_mdmp0
 #endif
 
 #ifdef BCX_FIX

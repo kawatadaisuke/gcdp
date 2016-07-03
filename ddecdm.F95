@@ -869,6 +869,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
       na = 0
       nanp = 0
+#ifdef MULTI_LEV
       do i=0,ndm-1
         if(id_dm(i).lt.SI_ndm1t) then
           talist(na)=i
@@ -878,6 +879,13 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           nanp=nanp+1
         endif
       enddo
+#else
+      na=ndm
+      nanp=0
+      do i=0,ndm-1
+        talist(i)=i
+      enddo
+#endif
       SI_ndm1=na
 !      write(6,*) 'rank',myrank,'ndm,ndm1=',ndm,SI_ndm1
       if(ndm.ne.na+nanp) then

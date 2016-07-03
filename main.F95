@@ -905,6 +905,10 @@ program gcdp
 #endif
 #endif
 
+#ifdef DEL_DMPART
+      call del_dmpart(ndm,ndmt)
+#endif
+
 ! **************************
 !  Update Virtual Position 
 ! **************************
@@ -920,7 +924,10 @@ program gcdp
 !   Domain Decomposition
 !  **********************
 !      if(nprocs.gt.1.and.totstep.ne.0) then
+#ifndef DEL_DMPART
+! if DEL_DMPART is on, always need domation decomposition
       if(totstep.ne.0) then
+#endif
 #ifdef COOL
 !        if(SI_flagrad.ge.-1.or.SI_flagrad.eq.-10) then
 #endif
@@ -976,7 +983,9 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_update=WTM_update+ectime-ntime
 #endif
+#ifndef DEL_DMPART
       endif
+#endif
 
 ! ************************
 !  Update Time and Step

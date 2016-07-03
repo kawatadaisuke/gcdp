@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! ***************************************
 !      set_ini.F95 for GCD+ ver. f03.0
-!  26 Jun., 2014    produced by D.KAWATA
+!  30 June 2014    produced by D.KAWATA
 ! *************************************** 
 
 subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
@@ -68,6 +68,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** Ini_hyd: 0: N-body only, 1: include gas in high reso region ***
 ! *** Ini_mul: 0: only level0, 1: level 0 and 1 ***
       integer Ini_hyd,Ini_mul
+#ifdef DEL_DMPART
+      double precision mdmdc
+#endif
 ! work
       integer jsta,jend,ierr,rrank
       integer,allocatable :: jstap(:),jendp(:)
@@ -2480,6 +2483,44 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       endif
 #endif
 
+#ifdef DEL_DMPART
+      if(myrank.eq.0) then
+        write(6,*) ' reading del_dmpart.dat for DEL_DMPART'
+        open(50,file='ini/del_dmpart.dat',status='old')
+        read(50,*) SI_dmdelci(0),SI_dmdelci(1)
+        read(50,*) SI_deldmdt
+        close(50)
+        write(6,*) 'deleting DM part whose ID range=',SI_dmdelci(0) &
+         ,SI_dmdelci(1)
+        write(6,*) 'mass loss rate (Msun/yr)=',SI_deldmdt
+        SI_deldmdt=SI_deldmdt*TMUYR/MUSM
+      endif
+      call MPI_BCAST(SI_dmdelci,2,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)      
+      call MPI_BCAST(SI_deldmdt,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      SI_ndmtdc=SI_dmdelci(1)-SI_dmdelci(0)+1
+      SI_mdmp0=0.0d0
+      mdmdc=0.0d0
+      do i=0,ndm-1
+        if(id_dm(i).ge.SI_dmdelci(0).and.id_dm(i).le.SI_dmdelci(1)) then
+          mdmdc=mdmdc+m_dm(i)
+          SI_mdmp0=m_dm(i)
+        endif
+      enddo
+
+      allocate(tdvr(0:0))
+
+      SI_mtdmdc0=0.0d0
+      call MPI_ALLREDUCE(SI_mdmp0,tdvr,1,MPI_DOUBLE_PRECISION &
+       ,MPI_MAX,MPI_COMM_WORLD,ierr)
+      call MPI_ALLREDUCE(mdmdc,SI_mtdmdc0,1,MPI_DOUBLE_PRECISION &
+       ,MPI_SUM,MPI_COMM_WORLD,ierr)
+      if(myrank.eq.0) then
+        write(6,*) 'Mini deleting component=',SI_mtdmdc0
+        write(6,*) 'mass of DM particle=',SI_mdmp0
+      endif
+
+#endif
+
 ! *** output initial parameters ***
       if(myrank.eq.0) then
 ! ****** Initialzation for output file *****
@@ -2752,12 +2793,32 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a6,3I3)')  ' flag=',SI_ranazi(0),SI_ranazi(1),SI_ranazi(2)
         write(60,'(a10,1pE13.5)')  ' t (Gyr) <',SI_ranazt*TMUGYR
 #ifdef RANAZRLIM
-!                          123456789012345678901234567890123456
         write(60,'(a27)') '###  RANAZRLIM on ### Rlim=',SI_ranazrlim
 #endif
 #endif
+#ifdef DEL_DMPART
+        write(60,'(a22)') '###  DEL_DMPART on ###'
+        write(60,'(a9,2I10)')  'ID range=',SI_dmdelci(0),SI_dmdelci(1)
+        write(60,'(a22,1pE13.5)')  'Mass loss rate (GCD+)=',SI_deldmdt
+        write(60,'(a21,1pE13.5)') 'M deleting component=',SI_mtdmdc0
+!                                  123456789012345678901234567890123456
+        write(60,'(a20,1pE13.5)') 'mass of DM particle=',SI_mdmp0
+
+#endif
         close(60)
         write(6,*) ' end writing inipara.dat'
+
+#ifdef DEL_DMPART
+        write(6,*) ' write output/ana/del_dmpart.dat'
+! creat file for del_dmpart
+        open(60,file='./output/ana/del_dmpart.dat',status='unknown')
+        write(60,'(a11,2(I10))') '# ID range=',SI_dmdelci(0),SI_dmdelci(1)
+        write(60,'(a12,1pE13.5)') '# dMloss/dt=',SI_deldmdt
+        write(60,'(a7,1pE13.5)') '# mdm0=',SI_mdmp0
+        write(60,'(a16,1pE13.5)') '# Mini del comp=',SI_mtdmdc0
+        close(60)
+#endif
+
       endif
 
 !#ifdef GAS

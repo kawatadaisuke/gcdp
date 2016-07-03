@@ -78,6 +78,9 @@
 ! #define RANAZRLIM
 ! #endif
 !
+! delete DM particles, del_dmpart.F95
+#define DEL_DMPART
+!
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
 ! should be off for TREEPM, because tree force truncation is only for monopole
@@ -171,18 +174,18 @@
 !
 #undef COSM
 #undef MULTI_LEV
-#undef DM
-! #undef GAS
+! #undef DM
+#undef GAS
 ! *** adiabatic! ***
-! #undef COOL
-! #undef STAR
-! #undef SF
-! #undef METAL
-! #undef SF_EFD
-! #undef SF_ZFD
-! #undef METALDIFF
-! #undef UTHLIM_JM
-! #undef UTHLIM_POLY
+#undef COOL
+#undef STAR
+#undef SF
+#undef METAL
+#undef SF_EFD
+#undef SF_ZFD
+#undef METALDIFF
+#undef UTHLIM_JM
+#undef UTHLIM_POLY
 
 ! *** for test simulation ****
 ! *** no individual timestep
@@ -448,6 +451,11 @@
 
 #ifndef DM
 #undef FIXEDDMP
+#undef DEL_DMPART
+#endif
+! DEL_DMPART does not work with multi-vel
+#ifdef MULTI_LEV
+#undef DEL_DMPART
 #endif
 
 #ifdef PINI

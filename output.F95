@@ -29,7 +29,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       integer flagascii
       integer i,pn
       integer ngt,nst
-      double precision mg,ms,mgt,mst,mmet,tnsn,mfdg,mfdgt,maxrhog
+      double precision mg,ms,mgt,mst,mmet,tnsn,mfdg,mfdgt,maxrhog,mdm
       integer nfdg,nfdgt
 ! * for file *
       character sname*6,filename*60
@@ -189,6 +189,12 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #endif
       enddo
 #endif
+      mdm=0.0d0
+#ifdef DM
+      do i=0,ndm-1
+        mdm=mdm+m_dm(i)
+      enddo
+#endif
 ! allocate work space
       allocate(tdvs(0:4))
       allocate(tdvr(0:4))
@@ -204,16 +210,19 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       tdvs(1)=ms
       tdvs(2)=mmet
       tdvs(3)=mfdg
+      tdvs(4)=mdm
       tdvr(0)=0.0d0
       tdvr(1)=0.0d0
       tdvr(2)=0.0d0
       tdvr(3)=0.0d0
-      call MPI_ALLREDUCE(tdvs,tdvr,4,MPI_DOUBLE_PRECISION &
+      tdvr(4)=0.0d0
+      call MPI_ALLREDUCE(tdvs,tdvr,5,MPI_DOUBLE_PRECISION &
        ,MPI_SUM,MPI_COMM_WORLD,ierr)
       mgt=tdvr(0)
       mst=tdvr(1)
       mmet=tdvr(2)
       mfdgt=tdvr(3)
+      mdm=tdvr(4)
 ! *** for total number of star particles ***
       allocate(tivs(0:2))
       allocate(tivr(0:2))
@@ -223,6 +232,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       tivr(0)=0
       tivr(1)=0
       tivr(2)=0
+      tivr(3)=0
       call MPI_ALLREDUCE(tivs,tivr,3,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,ierr)
       ngt=tivr(0)
       nst=tivr(1)-tivr(2)
@@ -333,6 +343,17 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #endif
 #endif
         close(60)
+#ifdef DEL_DMPART
+! output mass and particle number history
+        open(60,file='./output/ana/del_dmpart.dat',status='old')
+        do i=0,step+4-1
+          read(60,*)
+        enddo
+        write(60,170) TM_tot,mdm,SI_ndmtdc,ndmt
+  170   format(2(1pE13.5),2I10)
+        close(60)
+#endif
+
       endif
 
       if(step.eq.0.or.SI_flagout.ne.0) then

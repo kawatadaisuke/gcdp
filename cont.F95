@@ -39,7 +39,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       integer nivalb,nivaldm,ndvaldm,ndvalc,nivalc
       integer ndbval,ndbhyd,ndbsf,ndbmet,ndbcon,nddmcon,nibcon,nidmcon
       integer invali,invald
-      integer ngt
+      integer ngt,itmp,nc
       double precision dtmp(0:3)
       double precision mgt,mst,mbt,mms,mmet,tnsn
       character tchar*60
@@ -94,6 +94,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #else
       SI_flagrad=1
 #endif
+
+      nag=0
+      nas=0
+      nadm=0
+      nagravg=0
 
       if(myrank.eq.0) then
         open(50,file='ini/input.dat',status='old')
@@ -655,11 +660,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             stop
           endif
 ! check consistency
+#ifdef DEL_DMPART
+          ndmt=indmt
+          SI_ndm1t=indm1t
+#else
           if(inpt.ne.npt.or.(indmt.ne.ndmt.or.indm1t.ne.SI_ndm1t)) then
             write(6,*) ' Error in cont.f: # of particles is inconsistent'
             write(6,*) ' npt,ndmt(inipara,output/data)',npt,ndmt,inpt,indmt
             stop
           endif
+#endif
           if(inprocs.ne.nprocs.or.inof.ne.SI_nof) then
             write(6,*) ' Error in cont.f :'
             write(6,*) '  nprocs or SI_nof should not be changed.'
@@ -1379,11 +1389,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             write(6,*) ' in file, cont.F=',invald,ndvaldm
             stop
           endif
+#ifdef DEL_DMPART
+          ndmt=indmt
+          SI_ndm1t=indm1t
+#else
           if(inpt.ne.npt.or.(indmt.ne.ndmt.or.indm1t.ne.SI_ndm1t)) then
             write(6,*) ' Error in cont.f: # of particles is inconsistent'
             write(6,*) ' npt,ndmt(inipara,output/data/dm)',npt,ndmt,inpt,indmt
             stop
           endif
+#endif
           if(inprocs.ne.nprocs.or.inof.ne.SI_nof) then
             write(6,*) ' Error in cont.f :'
             write(6,*) '  nprocs or SI_nof should not be changed.'
@@ -2279,6 +2294,50 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         stop
       endif
 #endif
+
+#ifdef DEL_DMPART
+      if(myrank.eq.0) then
+        if(Ini_flagcop.eq.0) then
+          open(50,file='output/data/del_dmpartcon.dat',status='old' &
+            ,form='unformatted')   
+          read(50) SI_dmdelci(0),SI_dmdelci(1)
+          read(50) SI_deldmdt
+          read(50) SI_mdmp0
+          read(50) SI_mtdmdc0
+          read(50) SI_ndmtdc
+          close(50)
+        else
+! read from output/ana/del_dmpart.dat
+          open(50,file='output/ana/del_dmpart.dat',status='old')
+          read(50,'(a11,2(I10))') tchar,SI_dmdelci(0),SI_dmdelci(1)
+          read(50,'(a12,1pE13.5)') tchar,SI_deldmdt
+          read(50,'(a7,1pE13.5)') tchar,SI_mdmp0
+          read(50,'(a16,1pE13.5)') tchar,SI_mtdmdc0
+          do i=0,step-1
+            read(50,*)
+          enddo
+          read(50,'(2(1pE13.5),3I10)') dtmp(0),dtmp(1),SI_ndmtdc,itmp
+        endif
+        write(6,'(a11,2(I10))') '  ID range=',SI_dmdelci(0),SI_dmdelci(1)
+        write(6,'(a12,1pE13.5)') '  dMloss/dt=',SI_deldmdt
+        write(6,'(a7,1pE13.5)') '  mdm0=',SI_mdmp0
+        write(6,'(a16,1pE13.5)') '  Mini del comp=',SI_mtdmdc0
+        write(6,'(a14,I10)') '  Np del comp=',SI_ndmtdc
+    
+      endif
+      call MPI_BCAST(SI_dmdelci,2,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)      
+      call MPI_BCAST(SI_deldmdt,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(SI_mdmp0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(SI_mtdmdc0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(SI_ndmtdc,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+! SI_ndm1t is read from bdvals 
+      call MPI_BCAST(SI_ndm1t,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      ndmt=SI_ndm1t
+
+!      write(6,*) 'myrank,SI_ndmt,ndm,ndmt,ndm=',myrank,SI_ndm1t,SI_ndm1,ndmt,ndm
+
+#endif
+
 
       deallocate(istatus)
       deallocate(npjr)

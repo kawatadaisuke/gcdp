@@ -11,6 +11,9 @@ term
 
 ### update log ###
 
+25/05/2016
+delete setslgtr.F95 which was not used and from Makefile 
+
 forcont.F95, cont.F95
  save OF_time,OF_nof,OF_iof
 
@@ -27,7 +30,6 @@ endif
 
 common.F95
  add OF_nof, OF_iof, OF_time()
-
 
 specify output time. 
 ### OFTIMESPEC 21/08/2014
