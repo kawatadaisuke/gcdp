@@ -79,7 +79,7 @@
 ! #endif
 !
 ! delete DM particles, del_dmpart.F95
-#define DEL_DMPART
+! #define DEL_DMPART
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
@@ -115,6 +115,11 @@
 ! *** fix DM particles withing input id range
 ! #define FIXEDDMP
 ! #undef FIXEDDMP
+!
+! *** test particle mode, use star particle
+#define TESTP
+! # undef TESTP
+!
 !
 ! *** accelerate particle to the opposite direction
 ! #define GLASS
@@ -470,4 +475,11 @@
 #endif
 #ifdef ISOPM
 #define MAXR
+#endif
+
+#ifdef TESTP
+#define DM
+#undef GAS
+#undef STAR
+#undef DEL_DMPART
 #endif

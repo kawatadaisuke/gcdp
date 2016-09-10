@@ -59,6 +59,53 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
       dtolim=DTLIMIT*10.0d0
       dtu=INF
       dtc=INF
+
+! setting TM_k, TM_dt, TM_ldtmin, TM_sdt, dt_* vdt_*
+
+#ifdef TESTP
+
+! constant timestep
+      TM_k=0
+
+! *** Update local Time Interval ***
+      TM_dt = TM_cdt
+      TM_ldtmin = TM_cdt
+      TM_sdt = TM_cdt
+      dtmin=TM_cdt
+      dtmax=TM_cdt
+
+! ***  Check Output time ***
+      if(dtmin+TM_tot.gt.OF_todt) then
+        dtmin = OF_todt-TM_tot
+        dtmax = dtmin
+        TM_k=0
+        SI_flagout = 1
+      endif
+! ***  Check end time ***
+      if(dtmin+TM_tot.gt.TM_t0) then
+        dtmin=TM_t0-TM_tot
+        dtmax = dtmin
+        TM_k = 0
+        SI_flagout = 1        
+      endif
+
+#ifdef DM
+! *** DM Particles ***
+      do i=0,ndm-1
+        dt_dm(i)=TM_cdt
+        vdt_dm(i)=TM_cdt
+      enddo
+! *** Set Individual Time ***
+      do i=0,ndm-1
+        lt_dm(i) = 0.0d0
+        flagt_dm(i)=0
+        dtr_dm(i)=0.0d0
+        dtmnb_dm(i)=INF
+      enddo        
+#endif
+
+#else
+
 #if defined(GAS) || defined(STAR)
       allocate(dti(0:np))
 #endif
@@ -530,6 +577,7 @@ subroutine systime(np,ng,ndm,ns,step,flagdtg)
         dtmnb_dm(i)=INF
       enddo        
       deallocate(dtdmi)
+#endif
 #endif
 
 end subroutine

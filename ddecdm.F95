@@ -852,13 +852,79 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 
       deallocate(tdvr)
-      deallocate(istatus)
-      deallocate(istatusr)
 
       if(ndm.ne.ndmj) then
-        write(6,*) ' Error in ddecdm ndm,ndmj=',ndm,ndmj,'myrank=',myrank
+        write(6,*) ' Error after dm d3: ddecdm ndm,ndmj=' &
+        ,ndm,ndmj,'myrank=',myrank
         stop
       endif
+
+#ifdef TESTP
+! *** for test particle sim
+      nval=3
+
+      allocate(tdvr(0:ndm*nval-1))
+
+      ndm=0
+      do ip=0,nprocs-1
+        ndmj=0
+
+        allocate(tdvs(0:npsp(ip)*nval-1)) 
+
+        do i=jstap(ip),jendp(ip)
+          tdvs(ndmj)=rperi_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip))=rapo_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip)*2)=zmax_dm(pnord(i,0))
+          ndmj=ndmj+1
+        enddo
+        if(ip.gt.0) then
+          call MPI_ISEND(tdvs,npsp(ip)*nval,MPI_DOUBLE_PRECISION &
+           ,srank(ip),1,MPI_COMM_WORLD,ireqs(1),ierr)
+          call MPI_IRECV(tdvr(ndm*nval),nprp(ip)*nval,MPI_DOUBLE_PRECISION &
+           ,rrank(ip),1,MPI_COMM_WORLD,ireqr(1),ierr)
+          call MPI_WAIT(ireqs(1),istatus,ierr)
+          call MPI_WAIT(ireqr(1),istatusr,ierr)
+        else
+          nprp(ip)=npsp(ip)
+          do j=0,nval-1         
+            do i=0,nprp(ip)-1
+              tdvr(i+nprp(ip)*j)=tdvs(i+npsp(ip)*j)
+            enddo
+          enddo
+        endif
+
+        deallocate(tdvs)
+
+        ndm=ndm+nprp(ip)
+      enddo
+
+! reallocate DM variables
+      call reallocate_dm_testp(ndm)
+
+      ndmj=0
+      ndm=0
+      do ip=0,nprocs-1
+        do i=ndm*nval,ndm*nval+nprp(ip)-1
+          rperi_dm(ord(ndmj))=tdvr(i)
+          rapo_dm(ord(ndmj))=tdvr(i+nprp(ip))
+          zmax_dm(ord(ndmj))=tdvr(i+nprp(ip)*2)
+          ndmj=ndmj+1
+        enddo
+        ndm=ndm+nprp(ip)
+      enddo
+
+      if(ndm.ne.ndmj) then
+        write(6,*) ' Error after dm testp ddecdm ndm,ndmj=' &
+        ,ndm,ndmj,'myrank=',myrank
+        stop
+      endif
+
+      deallocate(tdvr)
+
+#endif
+
+      deallocate(istatus)
+      deallocate(istatusr)
 
 ! *** change the order to set high-reso particle first ***
 

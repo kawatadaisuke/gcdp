@@ -31,6 +31,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       integer ngt,nst
       double precision mg,ms,mgt,mst,mmet,tnsn,mfdg,mfdgt,maxrhog,mdm
       integer nfdg,nfdgt
+#ifdef TESTP
+      integer idtps,pntps
+#endif
 ! * for file *
       character sname*6,filename*60
       integer logs,slogs
@@ -52,6 +55,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #ifdef OUT_TEST
       integer nval
       double precision ene(0:1),etot(0:1),momt(0:2)
+#endif
+#ifdef TESTP
+      double precision rp
 #endif
 ! *** for work ***
       integer ierr,npjrmax
@@ -129,7 +135,11 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! *** for DM ***
       nivaldm=2
+#ifdef TESTP
       ndvaldm=9
+#else
+      ndvaldm=12
+#endif
 ! #ifdef OUT_TEST
 !      ndvaldm=12
 ! #endif
@@ -328,8 +338,8 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** assuming NYEL=9
   169   format((1pE13.5),6I10,7(1pE13.5),11(1pE13.5),3I10,9(1pE13.5))
 #else
-         ,etot(0)+etot(1),etot(0),etot(1),momt(0),momt(1),momt(2)
-  169   format((1pE13.5),6I10,13(1pE13.5))
+         ,etot(0)+etot(1),etot(0),etot(1),momt(0),momt(1),momt(2),TM_dt
+  169   format((1pE13.5),6I10,14(1pE13.5))
 #endif
 #else
 #ifdef STAR
@@ -356,6 +366,42 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
       endif
 
+#ifdef TESTP
+
+! update rperi, rapo and zmax
+      do i=SI_ntpdm,ndm-1
+        rp=dsqrt(x_dm(i)**2+y_dm(i)**2)
+        if(rp.lt.rperi_dm(i)) then
+          rperi_dm(i)=rp
+        endif
+        if(rp.gt.rapo_dm(i)) then
+          rapo_dm(i)=rp 
+        endif
+        if(dabs(z_dm(i)).gt.zmax_dm(i)) then
+          zmax_dm(i)=dabs(z_dm(i))
+        endif
+      enddo
+
+! starting (unique) ID of test particle
+      idtps=ndmt-SI_nttpdm
+      do i=SI_ntpdm,ndm-1
+        if(id_dm(i).ge.idtps.and.id_dm(i).lt.idtps+OF_nporb) then
+          write(filename,'(a16,i6.6)') './output/data/id',id_dm(i)-idtps
+          if(step.eq.0) then
+            open(70,file=filename,status='unknown')
+          else
+            open(70,file=filename,status='old',access='append')
+          endif
+          write(70,'(6(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+           ,rperi_dm(i),rapo_dm(i),zmax_dm(i)
+          close(70)
+        endif
+      enddo
+!      write(6,*) ' id output range=',idtps,idtps+OF_nporb
+!      stop
+
+#endif
+
       if(step.eq.0.or.SI_flagout.ne.0) then
         if(myrank.eq.0) then
           if(step.eq.0) then
@@ -366,6 +412,185 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
           write(70,'(I8)') step
           close(70)
         endif
+
+#ifdef TESTP
+
+        allocate(istatus(MPI_STATUS_SIZE))
+
+! *** for binary output ***
+! allocate array for MPI
+        allocate(npjr(0:nprocs))
+        allocate(ireqs(0:nprocs))
+        allocate(ireqr(0:nprocs))
+
+        do i=0,nprocs-1
+          npjr(i)=0.0d0
+        enddo
+        ip=myrank
+
+! starting (unique) ID of test particle
+        idtps=ndmt-SI_nttpdm
+! starting position in array (pn) in each proc
+        pntps=ndm-SI_ntpdm
+! *** output DM data ***
+        do i=0,nprocs-1
+          npjr(i)=0
+        enddo
+        ip=myrank
+        if(myrank.lt.SI_nof) then
+          write(filename,'(a20,i6.6,a1,i4.4)') &
+           './output/data/bdvals',step,'n',myrank
+          open(62,file=filename,status='unknown' &
+            ,form='unformatted')
+          write(62) npt,SI_nttpdm,SI_nttpdm,SI_a,TM_tot
+          write(62) nprocs,SI_nof,nivaldm,ndvaldm
+        endif
+          
+        allocate(tivs(0:6))
+        allocate(tivr(0:6))
+
+! output only test particles
+        tivs(0)=ng
+        tivs(1)=SI_ntpdm
+        tivs(2)=ns
+        tivs(3)=SI_ntpdm
+        tivs(4)=nag
+        tivs(5)=SI_ntpdm
+        tivs(6)=nas
+        npj=tivs(1)
+        if(myrank.lt.SI_nof) then
+          write(62) (tivs(i),i=0,6)
+          npjr(myrank)=tivs(1)
+          do ip=ipsta,ipend,ipd
+            call MPI_IRECV(tivr,7,MPI_INTEGER,ip,1,MPI_COMM_WORLD &
+              ,ireqr(ip),ierr)
+            call MPI_WAIT(ireqr(ip),istatus,ierr)
+            write(62) (tivr(i),i=0,6)
+            npjr(ip)=tivr(1)
+          enddo
+        else
+          call MPI_ISEND(tivs,7,MPI_INTEGER,srank,1 &
+            ,MPI_COMM_WORLD,ireqs(ip),ierr)
+          call MPI_WAIT(ireqs(ip),istatus,ierr)
+        endif
+
+! *** output integer values ***
+        npjrmax=0
+        do ip=0,nprocs-1
+          if(npjrmax.lt.npjr(ip)) then
+            npjrmax=npjr(ip)
+          endif
+        enddo
+
+        deallocate(tivs)
+        deallocate(tivr)
+        allocate(tivs(0:npj-1))
+        allocate(tivr(0:npjrmax-1))
+
+        do iv=0,nivaldm-1
+          if(iv.eq.0) then
+            do i=0,npj-1
+! ID=0 starts from test particles
+              tivs(i)=id_dm(i+pntps)-idtps
+            enddo
+          else if(iv.eq.1) then
+            do i=0,npj-1
+              tivs(i)=list_adm(i)-pntps
+            enddo
+          endif
+          if(myrank.lt.SI_nof) then
+            write(62) (tivs(i),i=0,npj-1)
+            do ip=ipsta,ipend,ipd
+              call MPI_IRECV(tivr,npjr(ip),MPI_INTEGER,ip,iv &
+                ,MPI_COMM_WORLD,ireqr(ip),ierr)
+              call MPI_WAIT(ireqr(ip),istatus,ierr)
+              write(62) (tivr(i),i=0,npjr(ip)-1)
+            enddo
+          else
+            call MPI_ISEND(tivs,npj,MPI_INTEGER,srank,iv &
+              ,MPI_COMM_WORLD,ireqs(ip),ierr)
+            call MPI_WAIT(ireqs(ip),istatus,ierr)
+          endif
+        enddo
+
+! *** output double values ***
+        allocate(tdvs(0:npj-1))
+        allocate(tdvr(0:npjrmax-1))
+
+        do iv=0,ndvaldm-1
+          if(iv.eq.0) then
+            do i=0,npj-1
+              tdvs(i)=xc_dm(i+pntps)
+            enddo
+          else if(iv.eq.1) then
+            do i=0,npj-1 
+              tdvs(i)=yc_dm(i+pntps)
+            enddo
+          else if(iv.eq.2) then
+            do i=0,npj-1 
+              tdvs(i)=zc_dm(i+pntps)
+            enddo
+          else if(iv.eq.3) then
+            do i=0,npj-1 
+              tdvs(i)=vnx_dm(i+pntps)
+            enddo
+          else if(iv.eq.4) then
+            do i=0,npj-1 
+              tdvs(i)=vny_dm(i+pntps)
+            enddo
+          else if(iv.eq.5) then
+            do i=0,npj-1 
+              tdvs(i)=vnz_dm(i+pntps)
+            enddo
+          else if(iv.eq.6) then
+            do i=0,npj-1 
+              tdvs(i)=m_dm(i+pntps)
+            enddo
+          else if(iv.eq.7) then
+            do i=0,npj-1 
+              tdvs(i)=rho_dm(i+pntps)
+            enddo
+          else if(iv.eq.8) then
+            do i=0,npj-1 
+              tdvs(i)=h_dm(i+pntps)
+            enddo
+          else if(iv.eq.9) then
+            do i=0,npj-1 
+              tdvs(i)=rperi_dm(i+pntps)
+            enddo
+          else if(iv.eq.10) then
+            do i=0,npj-1 
+              tdvs(i)=rapo_dm(i+pntps)
+            enddo
+          else if(iv.eq.11) then
+            do i=0,npj-1 
+              tdvs(i)=zmax_dm(i+pntps)
+            enddo
+          endif
+          if(myrank.lt.SI_nof) then
+            write(62) (tdvs(i),i=0,npj-1)
+            do ip=ipsta,ipend,ipd
+              call MPI_IRECV(tdvr,npjr(ip),MPI_DOUBLE_PRECISION &
+               ,ip,iv,MPI_COMM_WORLD,ireqr(ip),ierr)
+              call MPI_WAIT(ireqr(ip),istatus,ierr)
+              write(62) (tdvr(i),i=0,npjr(ip)-1)
+            enddo
+          else
+            call MPI_ISEND(tdvs,npj,MPI_DOUBLE_PRECISION,srank &
+              ,iv,MPI_COMM_WORLD,ireqs(ip),ierr)
+            call MPI_WAIT(ireqs(ip),istatus,ierr)
+          endif
+        enddo
+        if(myrank.lt.SI_nof) then     
+          close(62)
+        endif
+
+       deallocate(npjr)
+       deallocate(ireqs)
+       deallocate(ireqr)
+       deallocate(istatus)
+
+#else
 
 ! *** Open Output File ***
         if(flagascii.eq.0) then
@@ -1316,6 +1541,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! *** end for if(flagascii.eq.0) then
         endif
+
+! endif for TESTP
+#endif
+
         if(step.ne.0) then
 #ifdef OFTIMESPEC
           OF_iof=OF_iof+1
@@ -1344,6 +1573,8 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #endif
           SI_flagout = 0
         endif
+
+
       endif
 
 #if defined(COSM) && defined(BOXSIM)

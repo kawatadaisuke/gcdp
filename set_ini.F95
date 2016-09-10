@@ -65,6 +65,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       double precision kmmp
       double precision hmin,hmint,etahmax
 ! *** Initial parameter ***
+#ifdef TESTP
+      integer Ini_ncdt
+#endif
 ! *** Ini_hyd: 0: N-body only, 1: include gas in high reso region ***
 ! *** Ini_mul: 0: only level0, 1: level 0 and 1 ***
       integer Ini_hyd,Ini_mul
@@ -142,6 +145,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           call MPI_FINALIZE(ierr)
           stop
         endif
+#endif
+#ifdef TESTP
+        read(50,*) Ini_ncdt
+        read(50,*) OF_nporb
 #endif
         close(50)
       endif
@@ -965,6 +972,33 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       Ini_OMGg=0.0d0
 #ifdef DM
       if(flagfdm.eq.0) then
+
+#ifdef TESTP
+! add testp
+        if(myrank.eq.0) then
+! *** read DM data only with rank 0 
+          write(6,*) ' reading testp.dat'
+          open(51,file='ini/testp.dat',status='old',form='unformatted')
+          read(51) SI_nttpdm
+          write(6,*) ' ntestpdm=',SI_nttpdm
+          close(51)
+        endif
+        call MPI_BCAST(SI_nttpdm,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        call para_range(0,SI_nttpdm-1,nprocs,myrank,jsta,jend)
+! set number of test particles in each proc
+        SI_ntpdm=jend-jsta+1
+
+! pass number of timestep
+        call MPI_BCAST(Ini_ncdt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        TM_cdt=(TM_t0-TM_tot)/dble(Ini_ncdt)
+        call MPI_BCAST(OF_nporb,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        if(myrank.eq.0) then
+          write(6,*) ' N Timestep and dt (Gyr) =',Ini_ncdt,TM_cdt*TMUGYR
+          write(6,*) ' Number of particles orbit output =',OF_nporb
+        endif
+
+#endif
+
         if(myrank.eq.0) then
 ! *** read DM data only with rank 0 
           write(6,*) ' reading dm.dat'
@@ -980,6 +1014,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         endif
         call MPI_BCAST(ndmt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         call para_range(0,ndmt-1,nprocs,myrank,jsta,jend)
+
 ! allocate DM variables
         ndm=jend-jsta+1
         call allocate_dm_all(ndm)
@@ -1065,6 +1100,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' DM data not read, but DM is on in gcdp.def.'
         write(6,*) ' This likely causes a problem.'
       endif
+
 #endif
 
 ! *** for Gas particles
@@ -2733,7 +2769,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a22)') '###  use initial P ###'
 #endif
 #ifdef GLASS
-!                                  123456789012345678901234567890123456
         write(60,'(a21,F7.4,a4)') '###  GLASS on FGLASS=' &
         ,FGLASS,' ###'
 #endif
@@ -2744,6 +2779,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef FIXEDDMP
         write(60,'(a28)') '###  fixed DM particlese ###'
         write(60,'(a12,2I10)') '   ID range=',SI_fiddm(0),SI_fiddm(1)
+#endif
+#ifdef TESTP
+        write(60,'(a32)') '###  TEST particle SIMULAION ###'
+!                             123456789012345678901234567890123456
+        write(60,'(a8,I10)') ' Ntestp=',SI_nttpdm
+        write(60,'(a17,I10)') ' Np output orbit=',OF_nporb
+        write(60,'(a13,1pE13.5)') ' timestep dt=',TM_cdt
 #endif
 #ifdef ARTFDM
 !                          123456789012345678901234567890123456

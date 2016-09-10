@@ -509,6 +509,11 @@ subroutine allocate_dm_all(ndm)
       allocate(asc_dm(0:ndm))
       allocate(tc_dm(0:ndm))
 #endif
+#ifdef TESTP
+      allocate(rperi_dm(0:ndm-1))
+      allocate(rapo_dm(0:ndm-1))
+      allocate(zmax_dm(0:ndm-1))
+#endif
 
 end subroutine
 
@@ -639,6 +644,28 @@ subroutine reallocate_dm_d3(ndm)
 #endif
 
 end subroutine
+
+#ifdef TESTP
+! reallocate DM double for testp
+subroutine reallocate_dm_testp(ndm)
+      use gcdp_dm
+
+      implicit none
+      integer,intent(in) :: ndm
+
+! deallocate
+      deallocate(rperi_dm)
+      deallocate(rapo_dm)
+      deallocate(zmax_dm)
+
+! allocate
+      allocate(rperi_dm(0:ndm-1))
+      allocate(rapo_dm(0:ndm-1))
+      allocate(zmax_dm(0:ndm))
+
+end subroutine
+#endif TESTP
+
 
 ! endif for DM
 #endif

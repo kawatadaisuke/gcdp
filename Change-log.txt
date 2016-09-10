@@ -11,6 +11,16 @@ term
 
 ### update log ###
 
+17/08/2016
+TESTP: test particle mode
+ use DM particle. Fix the other particles, and calculate gravity only for test partiles
+ read testp.dat after initial dm decomposition. no more decomposition after that.
+ counting the number of testp particle in each proc (ntpdm) in set_ini.F95
+ set test particle with set_testpdm.F95
+ fix the tree structure
+ constant timestep: TM_cdt set in set_ini.F95, set in ststime(), skip lctime()
+ update rperi,rpao,zmax in output.F95
+
 25/05/2016
 delete setslgtr.F95 which was not used and from Makefile 
 

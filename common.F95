@@ -183,7 +183,13 @@ module gcdp_dm
        double precision,allocatable,save :: asc_dm(:),tc_dm(:)
 #endif
 
+#ifdef TESTP
+! define variables for Test particle simulation
+       double precision,allocatable,save :: rperi_dm(:),rapo_dm(:),zmax_dm(:)
+#endif
+
 end module gcdp_dm
+
 #endif
 
 #if defined(GAS) || defined(STAR)
@@ -423,6 +429,14 @@ module gcdp_system
 #endif
 #ifdef FIXEDDMP
       integer,save :: SI_fiddm(0:1)
+#endif
+#ifdef TESTP
+! test particle ID range, total number and number within proc
+      integer,save :: SI_nttpdm,SI_ntpdm
+! number of orbit particle output
+      integer,save :: OF_nporb
+! constant timestep
+      double precision,save :: TM_cdt
 #endif
 #ifdef RANAZ
       integer,save :: SI_ranazi(0:2)

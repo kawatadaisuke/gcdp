@@ -8,7 +8,7 @@ module gcdp_const
       implicit none      
 
 ! GCD+ version
-      character*11,parameter :: GCDPVDATE='04/07/2016 '
+      character*11,parameter :: GCDPVDATE='10/09/2016 '
 
       double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***

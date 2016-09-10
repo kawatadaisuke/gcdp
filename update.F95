@@ -14,6 +14,9 @@ subroutine updatev(np,ndm)
 #ifdef DM
       use gcdp_dm
 #endif
+#ifdef TESTP
+      use gcdp_system
+#endif
       implicit none
 
       integer,intent(in) :: np,ndm
@@ -72,7 +75,11 @@ subroutine updatev(np,ndm)
       call integrate1oa(ndm,t0,t1,int1oa)
 #endif
 ! *** DM Particle ***
+#ifdef TESTP
+      do i=ndm-SI_ntpdm,ndm-1
+#else
       do i=0,ndm-1
+#endif
 #if defined(COSM) && defined(BOXSIM)
 ! store a^2 vpec at n+1/2
         vx_dm(i)=vnx_dm(i)+(asc_dm(i)**2)*dvx_dm(i)*int1oa(i)
@@ -350,7 +357,7 @@ subroutine updatev_pos(np,ndm)
 #ifdef DM
       use gcdp_dm
 #endif
-#if defined(BOXSIM) || defined(FIXEDP) || defined(FIXEDDMP)
+#if defined(BOXSIM) || defined(FIXEDP) || defined(FIXEDDMP) || defined(TESTP)
       use gcdp_system
 #endif
 #ifdef MAXR
@@ -533,7 +540,11 @@ subroutine updatev_pos(np,ndm)
       call integrate1oa2(ndm,t0,t1,int1oa2)
 #endif
 
+#ifdef TESTP
+      do i=ndm-SI_ntpdm,ndm-1
+#else
       do i=0,ndm-1
+#endif
 #ifdef FIXEDDMP
         if(id_dm(i).lt.SI_fiddm(0).or.id_dm(i).gt.SI_fiddm(1)) then
 #endif

@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! *************************************
 !    main.f for GCD+ 
-!  22 Jan. 2016    written by D.KAWATA
+!  10 Sep. 2016    written by D.KAWATA
 ! Whenever updated: don't forget to update gcdp_cont.F95 GCDPVDATE
 ! *************************************
 !70*******************************************************************
@@ -351,6 +351,9 @@ program gcdp
 #elif defined(SIM2D)
         write(6,*) ' 2 D simulation'
 #endif
+#ifdef TESTP
+        write(6,*) ' Test particle simulation Ntestp=',SI_nttpdm
+#endif
         write(6,*) '**********************************************'
       endif
 
@@ -476,6 +479,13 @@ program gcdp
 #endif
 #endif
 #endif
+
+#ifdef TESTP
+! *****************************
+!  Set up test particle
+! *****************************
+        call set_testpdm(ndm,ndmt,nadm,nadmt)
+#endif
      
 ! ****************************************
 !   Set Value of rho, |div(v)|, |rot(v)|
@@ -544,11 +554,13 @@ program gcdp
 #if defined(GAS) || defined(STAR)
         call treebuild(np)
 #endif
+#ifndef TESTP
 #ifdef DM
 #ifndef FIXEDDMEPS
         call dmtreebuild(SI_ndm1)
 #ifdef MULTI_LEV
         call ldmtreebuild(ndm)
+#endif
 #endif
 #endif
 #endif
@@ -749,7 +761,7 @@ program gcdp
         goto 9999
       endif
 
-
+#ifndef TESTP
 ! ***********************
 !  Calculate local time
 !  ***********************
@@ -762,7 +774,6 @@ program gcdp
 ! *** use pax_p read in set_ini ***
         flagdtg=1
       endif
-
 
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -819,6 +830,9 @@ program gcdp
 #endif
 #endif
 
+!endif for TESTP
+#endif
+
 ! *** this is necessary ***
       tivs(0)=nag
       tivs(1)=nadm
@@ -830,6 +844,7 @@ program gcdp
       nast=tivr(2)
       nagravgt=tivr(3)
 
+#ifndef TESTP
       if(0.eq.0) then
         tivs(0)=ng
         tivs(1)=ns
@@ -905,6 +920,9 @@ program gcdp
 #endif
 #endif
 
+!endif for TESTP
+#endif
+
 #ifdef DEL_DMPART
       call del_dmpart(ndm,ndmt)
 #endif
@@ -919,7 +937,8 @@ program gcdp
       WTM_update=WTM_update+ectime-ntime
 #endif
 
-
+! no domain decomposition for TESTP simulation
+#ifndef TESTP
 ! **********************
 !   Domain Decomposition
 !  **********************
@@ -961,7 +980,7 @@ program gcdp
 #endif
 #endif
           endif
-
+#endif
 
 ! ***********************************************
 !  Update Virtual Position after ddecb and ddecdm
@@ -983,8 +1002,10 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_update=WTM_update+ectime-ntime
 #endif
+#ifndef TESTP
 #ifndef DEL_DMPART
       endif
+#endif
 #endif
 
 ! ************************
@@ -1014,6 +1035,9 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_update=WTM_update+ectime-ntime
 #endif
+
+! no tree build for TESTP sim
+#ifndef TESTP
 ! *********************************
 !   Gas and DM Tree Building & Compute Mass
 ! *********************************
@@ -1041,6 +1065,8 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_tree=WTM_tree+ectime-ntime
 #endif
+! endif for not TESTP
+#endif
 
 ! *************************************************
 !  Set New Value of rhon+1,|div(v)|n+1,|rho(v)|n+1
@@ -1061,6 +1087,8 @@ program gcdp
 #endif
 #endif
 
+! no update for TESTP sim
+#ifndef TESTP
 ! ********************
 !  set values for DM 
 ! ********************
@@ -1076,7 +1104,11 @@ program gcdp
       WTM_setvaldm=WTM_setvaldm+ectime-ntime
 #endif
 #endif
+! endif for no TESTP
+#endif
 
+! no tree build for TESTP sim
+#ifndef TESTP
 ! **********************************************
 !   Tree Building & Compute Mass after set h_p
 ! **********************************************
@@ -1115,6 +1147,8 @@ program gcdp
       endif
 #endif
 #endif
+#endif
+! endif for no TESTP
 #endif
 
 #ifdef GAS
