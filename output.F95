@@ -136,9 +136,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** for DM ***
       nivaldm=2
 #ifdef TESTP
-      ndvaldm=9
-#else
       ndvaldm=12
+#else
+      ndvaldm=9
 #endif
 ! #ifdef OUT_TEST
 !      ndvaldm=12
