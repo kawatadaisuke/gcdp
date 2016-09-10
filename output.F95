@@ -57,7 +57,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       double precision ene(0:1),etot(0:1),momt(0:2)
 #endif
 #ifdef TESTP
-      double precision rp
+      double precision rp,rmp,eccp
 #endif
 ! *** for work ***
       integer ierr,npjrmax
@@ -392,8 +392,11 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
           else
             open(70,file=filename,status='old',access='append')
           endif
-          write(70,'(6(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
-           ,rperi_dm(i),rapo_dm(i),zmax_dm(i)
+          rp=dsqrt(x_dm(i)**2+y_dm(i)**2)
+          rmp=0.5d0*(rperi_dm(i)+rapo_dm(i))
+          eccp=(rapo_dm(i)-rperi_dm(i))/(rperi_dm(i)+rapo_dm(i))
+          write(70,'(10(1pE13.5))') x_dm(i),y_dm(i),z_dm(i) &
+           ,rperi_dm(i),rapo_dm(i),zmax_dm(i),rmp,eccp,rp,TM_tot
           close(70)
         endif
       enddo
