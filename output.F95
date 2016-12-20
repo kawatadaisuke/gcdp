@@ -384,7 +384,6 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! starting (unique) ID of test particle
       idtps=ndmt-SI_nttpdm
-      write(6,*) ' idtps,ndmt=',idtps,ndmt,SI_nttpdm,SI_ntpdm,OF_nporb,id_dm(i)
       do i=ndm-SI_ntpdm,ndm-1
         if(id_dm(i).ge.idtps.and.id_dm(i).lt.idtps+OF_nporb) then
           write(filename,'(a16,i6.6)') './output/data/id',id_dm(i)-idtps
