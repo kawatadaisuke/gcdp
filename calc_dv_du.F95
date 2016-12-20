@@ -369,6 +369,17 @@ subroutine calc_dv_du(np,ng,ndm,nag,nadm,nas,nagravg,nagt &
             dvz_dm(pn)=dvz_dm(pn)-z_dm(pn)*pot
           enddo
 #endif
+
+#ifdef EXTF_Miyamoto_Nagai
+        call Miyamoto_Nagai_extf(ndm,nadm)
+#endif
+#ifdef EXTF_NFW
+        call NFW_extf(ndm,nadm)
+#endif
+#ifdef EXTF_Hernquist
+        call Hernquist_extf(ndm,nadm)
+#endif
+
 #ifdef B85TEST
           do i=0,nadm-1
             pn=list_adm(i)

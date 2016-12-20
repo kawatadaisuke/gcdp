@@ -116,9 +116,18 @@
 ! #define FIXEDDMP
 ! #undef FIXEDDMP
 !
-! *** test particle mode, use star particle
+! *** test particle mode
 #define TESTP
-! # undef TESTP
+! #undef TESTP
+! *** test particle mode, use dm.dat potential and additional DM particle
+#define TESTPDMF
+# undef TESTPDMF
+! *** test particle mode, use external potential and use dm particle
+#define TESTPEXTF
+! #undef TESTPEXTF
+#ifdef TESTPEXTF
+#undef SGRAV
+#endif
 !
 !
 ! *** accelerate particle to the opposite direction
@@ -172,9 +181,16 @@
 ! #undef GAS
 ! #undef COSM
 !
+! *** External Force
+#define EXTF
+#define EXTF_Miyamoto_Nagai
+#define EXTF_NFW
+#define EXTF_Hernquist
+
+
 ! *** isolated galaxy
 ! #define MAXR
-#define MEXT
+! #define MEXT
 ! #define CENTRE0
 !
 #undef COSM

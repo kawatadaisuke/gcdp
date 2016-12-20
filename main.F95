@@ -177,6 +177,10 @@ program gcdp
 ! set up the external potential
       call setmext()
 #endif
+#ifdef EXTF
+!  Initialise external potential parameters
+      call extf_paramset()
+#endif
 
 #ifdef GAS
 ! estimate of dynamical time in the softening limit
@@ -351,9 +355,30 @@ program gcdp
 #elif defined(SIM2D)
         write(6,*) ' 2 D simulation'
 #endif
+
 #ifdef TESTP
         write(6,*) ' Test particle simulation Ntestp=',SI_nttpdm
+#ifdef TESTPDMF
+        write(6,*) ' Use DM particle potential'
 #endif
+#ifdef TESTPEXTF
+        write(6,*) ' Use external potential'
+#endif
+#endif
+
+#ifdef EXTF
+        write(6,*) ' External force on'
+#ifdef EXTF_Miyamoto_Nagai
+        write(6,*) '   Miyamoto Nagai disk on'
+#endif
+#ifdef EXTF_NFW
+        write(6,*) '   NFW halo on'
+#endif
+#ifdef EXTF_Hernquist
+        write(6,*) '   Hernquist bulge on'
+#endif
+#endif
+
         write(6,*) '**********************************************'
       endif
 
@@ -373,6 +398,8 @@ program gcdp
       WTM_ini=WTM_ini+ectime-ntime
 #endif
 
+! no domain decomposition for test particle sim with external potentials.
+#ifndef TESTPEXTF
 ! **********************
 !   Domain Decomposition
 !  **********************
@@ -445,6 +472,9 @@ program gcdp
 #endif
       endif
 
+! end: no domain decomposition for test particle sim with external potentials.
+#endif
+
 ! ***********************************
 !   Gas Tree Building for set_value
 ! ***********************************
@@ -480,7 +510,7 @@ program gcdp
 #endif
 #endif
 
-#ifdef TESTP
+#ifdef TESTPDMF
 ! *****************************
 !  Set up test particle
 ! *****************************
@@ -598,7 +628,7 @@ program gcdp
         ectime=MPI_WTIME()
         if(myrank.eq.0) then
           write(6,*) ' initial calc_dv_du time=',ectime-ntime
-          write(6,*) ' treeforce time baryon,DM=',WTM_bf,WTM_dmf
+          write(6,*) ' force calc time baryon,DM=',WTM_bf,WTM_dmf
         endif
 
 #ifdef TREEPM
@@ -1065,8 +1095,6 @@ program gcdp
       ectime=MPI_WTIME()
       WTM_tree=WTM_tree+ectime-ntime
 #endif
-! endif for not TESTP
-#endif
 
 ! *************************************************
 !  Set New Value of rhon+1,|div(v)|n+1,|rho(v)|n+1
@@ -1087,8 +1115,6 @@ program gcdp
 #endif
 #endif
 
-! no update for TESTP sim
-#ifndef TESTP
 ! ********************
 !  set values for DM 
 ! ********************
@@ -1147,8 +1173,6 @@ program gcdp
       endif
 #endif
 #endif
-#endif
-! endif for no TESTP
 #endif
 
 #ifdef GAS
@@ -1225,6 +1249,10 @@ program gcdp
 ! update B for active particles
       call updatebn(nag)
 #endif
+
+! endif for no TESTP
+#endif
+
 
 ! ************************
 !  Calculate (du/dt)n+1 

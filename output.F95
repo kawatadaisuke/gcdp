@@ -369,7 +369,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 #ifdef TESTP
 
 ! update rperi, rapo and zmax
-      do i=SI_ntpdm,ndm-1
+      do i=ndm-SI_ntpdm,ndm-1
         rp=dsqrt(x_dm(i)**2+y_dm(i)**2)
         if(rp.lt.rperi_dm(i)) then
           rperi_dm(i)=rp
@@ -384,7 +384,8 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! starting (unique) ID of test particle
       idtps=ndmt-SI_nttpdm
-      do i=SI_ntpdm,ndm-1
+      write(6,*) ' idtps,ndmt=',idtps,ndmt,SI_nttpdm,SI_ntpdm,OF_nporb,id_dm(i)
+      do i=ndm-SI_ntpdm,ndm-1
         if(id_dm(i).ge.idtps.and.id_dm(i).lt.idtps+OF_nporb) then
           write(filename,'(a16,i6.6)') './output/data/id',id_dm(i)-idtps
           if(step.eq.0) then

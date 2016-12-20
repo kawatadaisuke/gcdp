@@ -632,7 +632,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 
 ! reallocate DM variables
-#ifdef TESTP
+#ifdef TESTPDMF
       call reallocate_dm_int(ndm+SI_ntpdm)
 #else
       call reallocate_dm_int(ndm)
@@ -693,7 +693,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 
 ! reallocate DM variables
-#ifdef TESTP
+#ifdef TESTPDMF
       call reallocate_dm_d1(ndm+SI_ntpdm)
 #else
       call reallocate_dm_d1(ndm)
@@ -843,7 +843,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 
 ! reallocate DM variables
-#ifdef TESTP
+#ifdef TESTPDMF
       call reallocate_dm_d3(ndm+SI_ntpdm)
 #else
       call reallocate_dm_d3(ndm)
@@ -915,7 +915,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
       enddo
 
 ! reallocate DM variables
-#ifdef TESTP
+#ifdef TESTPDMF
       call reallocate_dm_testp(ndm+SI_ntpdm)
 #else
       call reallocate_dm_testp(ndm)

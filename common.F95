@@ -486,6 +486,23 @@ module gcdp_system
 ! ***** for MPI *****
       integer,save :: nprocs,myrank
 
+#ifdef EXTF
+! for external potential
+#ifdef EXTF_Miyamoto_Nagai
+! Miyamoto Nagai parameter
+      double precision,save :: MN_mdisk,MN_a,MN_b
+#endif
+#ifdef EXTF_NFW
+! NFW halo parameters
+      double precision,save :: NFW_rho0,NFW_rs
+#endif
+#ifdef EXTF_Hernquist
+! Hernquist bulge parameter
+      double precision,save :: HQ_mtot,HQ_ra
+#endif
+#endif
+
+
 end module gcdp_system
 
 module gcdp_kernel

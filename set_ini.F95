@@ -973,7 +973,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DM
       if(flagfdm.eq.0) then
 
-#ifdef TESTP
+#ifdef TESTPDMF
 ! add testp
         if(myrank.eq.0) then
 ! *** read DM data only with rank 0 
@@ -987,7 +987,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         call para_range(0,SI_nttpdm-1,nprocs,myrank,jsta,jend)
 ! set number of test particles in each proc
         SI_ntpdm=jend-jsta+1
+#endif
 
+#ifdef TESTP
 ! pass number of timestep
         call MPI_BCAST(Ini_ncdt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         TM_cdt=(TM_t0-TM_tot)/dble(Ini_ncdt)
@@ -996,7 +998,6 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           write(6,*) ' N Timestep and dt (Gyr) =',Ini_ncdt,TM_cdt*TMUGYR
           write(6,*) ' Number of particles orbit output =',OF_nporb
         endif
-
 #endif
 
         if(myrank.eq.0) then
@@ -1018,6 +1019,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! allocate DM variables
         ndm=jend-jsta+1
         call allocate_dm_all(ndm)
+#ifdef TESTPEXTF
+! test particle case, set ndm=ntest particle
+        SI_ntpdm=ndm
+        SI_nttpdm=ndmt
+#endif
 
         nc=0
         nval=8
