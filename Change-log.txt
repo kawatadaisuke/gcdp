@@ -47,6 +47,12 @@ endif
 common.F95
  add OF_nof, OF_iof, OF_time()
 
+22/01/2016
+DUSTDEP_COOL1
+ - simple model to take into account dust depletion effect on cooling at low temperature
+ - Assumption: at T<1e4 K, 40% of metal goes to dust, and does not contribute to the gas metallicity
+
+
 specify output time. 
 ### OFTIMESPEC 21/08/2014
 
