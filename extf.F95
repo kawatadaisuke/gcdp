@@ -111,6 +111,8 @@ subroutine Miyamoto_Nagai_extf(ndm,nadm)
       integer i,ir,pn
       double precision rxyp,frad,fx,fy,fz,abz,bz
 
+!      open(60,file='mnforce.dat',status='unknown')
+
       do i=0,nadm-1
          pn=list_adm(i)
          rxyp=dsqrt(x_dm(pn)**2+y_dm(pn)**2)
@@ -125,17 +127,20 @@ subroutine Miyamoto_Nagai_extf(ndm,nadm)
            fx=0.0d0
            fy=0.0d0
          endif
-         if(z_dm(pn).gt.0.0d0) then
+         if(z_dm(pn).ne.0.0d0) then
 ! z force
            fz=G*MN_mdisk*z_dm(pn)*abz &
-             *(bz*((rxyp**2+abz**2)**(-1.5d0)))
+             /(bz*((rxyp**2+abz**2)**(1.5d0)))
          else
            fz=0.0d0
          endif
          dvx_dm(pn)=dvx_dm(pn)-fx
          dvy_dm(pn)=dvy_dm(pn)-fy
          dvz_dm(pn)=dvz_dm(pn)-fz
+
+!         write(60,'(4(1pE13.5))') rxyp,z_dm(pn),frad,fz
       enddo
+!      close(60)
 
 end subroutine
 
@@ -156,6 +161,8 @@ subroutine NFW_extf(ndm,nadm)
       integer i,ir,pn
       double precision rp,fr,fx,fy,fz,massr
 
+!      open(60,file='nfwforce.dat',status='unknown')
+
       do i=0,nadm-1
          pn=list_adm(i)
          rp=dsqrt(x_dm(pn)**2+y_dm(pn)**2+z_dm(pn)**2)
@@ -169,8 +176,16 @@ subroutine NFW_extf(ndm,nadm)
            dvx_dm(pn)=dvx_dm(pn)-x_dm(pn)*fr
            dvy_dm(pn)=dvy_dm(pn)-y_dm(pn)*fr
            dvz_dm(pn)=dvz_dm(pn)-z_dm(pn)*fr
+
+!           write(60,'(4(1pE13.5))') dsqrt(x_dm(pn)**2+y_dm(pn)**2) &
+!            ,z_dm(pn),(fr*x_dm(pn)**2+fr*y_dm(pn)**2) &
+!            /dsqrt(x_dm(pn)**2+y_dm(pn)**2) &
+!            ,z_dm(pn)*fr
+
         endif
       enddo
+
+!      close(60)
 
 end subroutine
 
@@ -191,6 +206,8 @@ subroutine Hernquist_extf(ndm,nadm)
       integer i,ir,pn
       double precision rp,fr,fx,fy,fz,massr
 
+!      open(60,file='hqforce.dat',status='unknown')
+
       do i=0,nadm-1
          pn=list_adm(i)
          rp=dsqrt(x_dm(pn)**2+y_dm(pn)**2+z_dm(pn)**2)
@@ -203,8 +220,17 @@ subroutine Hernquist_extf(ndm,nadm)
            dvx_dm(pn)=dvx_dm(pn)-x_dm(pn)*fr
            dvy_dm(pn)=dvy_dm(pn)-y_dm(pn)*fr
            dvz_dm(pn)=dvz_dm(pn)-z_dm(pn)*fr
+
+!           write(60,'(4(1pE13.5))') dsqrt(x_dm(pn)**2+y_dm(pn)**2) &
+!            ,z_dm(pn),(fr*x_dm(pn)**2+fr*y_dm(pn)**2) &
+!            /dsqrt(x_dm(pn)**2+y_dm(pn)**2) &
+!            ,z_dm(pn)*fr
+
         endif
       enddo
+
+!      close(60)
+!      stop
 
 end subroutine
 
