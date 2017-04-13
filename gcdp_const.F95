@@ -8,6 +8,7 @@ module gcdp_const
       implicit none      
 
 ! GCD+ version
+! please also copy .git/refs/heads/master to track the version
       character*11,parameter :: GCDPVDATE='05/01/2017 '
 
       double precision,parameter :: M_PI=3.141592653589793238d0

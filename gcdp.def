@@ -368,7 +368,7 @@
 #undef IMSL
 
 ! *** for dust cooling ***
-#define DUSTDEP_COOL1
+! #define DUSTDEP_COOL1
 
 ! ***** MHD option *****
 ! *** MHD turn on ***

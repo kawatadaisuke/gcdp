@@ -23,23 +23,15 @@ OPTIONS=-g -mcmodel=medium
 MPI_DIR = /usr/local
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
-### legion@UCL
-# module unload compilers/intel/2015/update2 
-# module unload mpi/intel/2015/update3/intel
-# module load compilers/gnu/4.9.2
-# module load mpi/openmpi/1.8.4/gnu-4.9.2
-# module load fftw/3.3.4-ompi/gnu-4.9.2 
+### grace, legion@UCL
+# no FFT
+# CPP = cpp
+# FORT = mpif90
+# FFLAGS = -O3 -xHost
+# LIBS = ${MLIBS} ${OPTIONS}
 #
-# MPI_DIR=/shared/ucl/apps/openmpi/1.8.4/gnu-4.9.2
-# OPTIONS=-O3
-# FFTW_INC=/shared/ucl/apps/fftw/3.3.4-ompi/gnu-4.9.2/include
-# FFTW_LIB=/shared/ucl/apps/fftw/3.3.4-ompi/gnu-4.9.2/lib
-CPP = cpp
-FORT = ${MPI_DIR}/bin/mpif90
-MPI_INC = ${MPI_DIR}/include
-MPI_LIB = ${MPI_DIR}/lib 
-FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
-LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3 
+# FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
+# LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3 
 ### for XT4
 # FORT=ftn
 # CPP=cpp
