@@ -1,7 +1,7 @@
 
 # GCD+
 
- N-body/Smoothed Particle Hydrodynamics (SPH)  Galactic Chemo-dynamics code
+ N-body/Smoothed Particle Magneto-Hydrodynamics (SPMHD)  Galactic Chemo-dynamics code
 
 ## References:
 

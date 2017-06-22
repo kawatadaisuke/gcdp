@@ -1,4 +1,4 @@
-!
+
 ! *** TIME in subroutine
 #define WTIME
 ! #define WTIMESUB
@@ -78,8 +78,15 @@
 ! #define RANAZRLIM
 ! #endif
 !
-! delete DM particles, del_dmpart.F95
+! *** delete DM particles, del_dmpart.F95
 ! #define DEL_DMPART
+!
+! *****  adding particles *****
+! *** add DM particles,
+#define ADD_DMPART
+!
+! *** add particles using exponential disk
+#define ADD_EXPDISK
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
@@ -115,21 +122,27 @@
 ! *** fix DM particles withing input id range
 ! #define FIXEDDMP
 ! #undef FIXEDDMP
-!
-! *** test particle mode
-#define TESTP
+
+! ###### test particle disk simulation options #####
+! #define TESTP
 ! #undef TESTP
 ! *** test particle mode, use dm.dat potential and additional DM particle
-#define TESTPDMF
-# undef TESTPDMF
+! #define TESTPDMF
+! # undef TESTPDMF
 ! *** test particle mode, use external potential and use dm particle
-#define TESTPEXTF
+! #define TESTPEXTF
 ! #undef TESTPEXTF
+!
+! *** turn off self-gravity if text particle sim with an external potential
 #ifdef TESTPEXTF
 #undef SGRAV
 #endif
-!
-!
+! *** External Force
+! #define EXTF
+! #define EXTF_Miyamoto_Nagai
+! #define EXTF_NFW
+! #define EXTF_Hernquist
+
 ! *** accelerate particle to the opposite direction
 ! #define GLASS
 ! set FGLASS in define.F
@@ -155,7 +168,7 @@
 ! *** set h with maximum neighbour number
 ! #define HMAXNNB
 
-! *** TreePM
+! *** TreePM : *** under-development ***
 ! #define TREEPM
 ! #define PMONLY
 ! #define FFTW3
@@ -180,18 +193,11 @@
 ! #undef DM
 ! #undef GAS
 ! #undef COSM
-!
-! *** External Force
-#define EXTF
-#define EXTF_Miyamoto_Nagai
-#define EXTF_NFW
-#define EXTF_Hernquist
 
-
-! *** isolated galaxy
+! ##### isolated galaxy simulation options #####
 ! #define MAXR
-! #define MEXT
-! #define CENTRE0
+#define MEXT
+#define CENTRE0
 !
 #undef COSM
 #undef MULTI_LEV
@@ -239,7 +245,7 @@
 ! *** 1D Wave test
 ! #define WAVE1D
 
-! *** definitions of test simulations ***
+! ##### options of test simulations #####
 
 ! *** Feedback test without gravity
 #ifdef SFDNOGRAV
@@ -367,10 +373,10 @@
 #define IMSL
 #undef IMSL
 
-! *** for dust cooling ***
+! ##### for dust cooling #####
 ! #define DUSTDEP_COOL1
 
-! ***** MHD option *****
+! ##### MHD option #####
 ! *** MHD turn on ***
 #define MHD
 #undef MHD
@@ -430,7 +436,7 @@
 
 #endif
 
-! *** for consistency ***
+! ##### for consistency #####
 #ifndef GAS
 #undef COOL
 #undef STAR

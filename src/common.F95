@@ -1,7 +1,7 @@
 #include "gcdp.def"
 !************************************************
 !     common.F95 for GCD+
-!  30 June 2016   written by D.KAWATA
+!  08 June 2017   written by D.KAWATA
 ! ************************************************
 
 #if defined(GAS) || defined(STAR)
@@ -456,6 +456,20 @@ module gcdp_system
 ! mass of deleting component, delete rate, and particle mass
       double precision,save :: SI_mtdmdc0,SI_deldmdt,SI_mdmp0
 #endif
+#ifdef ADD_DMPART
+! number of particles will be added, and added already
+      integer,save :: SI_tndmtadd,SI_ndmtadded
+! total mass added component, mass of DM particles added
+      double precision,save :: SI_mdmpadd
+! mass addition rate
+      double precisoin,save :: SI_dmdtadd
+! adding component, radial scale length (constant) 
+      double precision,save :: SI_hradd
+! velocity disperion, scale length, sig_0, for vR, vth, vz
+      double precision,save :: SI_sigr0add,SI_hsigradd
+      double precision,save :: SI_sigth0add,SI_hsigthadd
+      double precision,save :: SI_sigz0add,SI_hsigzadd
+#endif
 
 #ifdef BCX_FIX
       integer,save :: BCX_ndx
@@ -501,7 +515,6 @@ module gcdp_system
       double precision,save :: HQ_mtot,HQ_ra
 #endif
 #endif
-
 
 end module gcdp_system
 
@@ -554,6 +567,17 @@ module gcdp_cool
        ,myu_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB) &
        ,ne_crtb(0:MNT_CRTB,0:MNMET_CRTB,0:MNNH_CRTB,0:MNZ_CRTB)
 end module gcdp_cool
+#endif
+
+! look up table for mass profiles for adding particles.
+#ifdef ADD_EXPDISK
+module gcdp_expdisk
+      use gcdp_const
+      implicit none
+! scale length, delta ln x, ln minimum x point
+      double precision,save :: hd_expd,dlx_expd,lxmin_expd
+      double precision,save :: x_expd(0:NEXPDTAB-1),mx_expd(0:NEXTPTAB-1)
+end module gcdp_expdisk
 #endif
 
 ! ***** MHD modules ***
