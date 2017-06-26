@@ -2240,7 +2240,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 ! *** star formation time ***
       TMsf_t=TM_tot
 #endif
-      idum = -111      
+      idum = -111+myrank
 
 #ifdef SGRAV
 ! *** set softening length limit ***

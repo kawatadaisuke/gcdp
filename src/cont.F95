@@ -2091,7 +2091,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 !      stop
 
 ! *** random sequence cannot be preserved anyway ***
-      idum = -111
+      idum = -111+myrank
 #ifdef SGRAV
       if(myrank.eq.0) then
         write(6,*) ' softening limit = mp^(1/3) x',SI_eps
