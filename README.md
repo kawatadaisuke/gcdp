@@ -15,3 +15,6 @@ GCMHD+:
 
 Barnes, Kawata, Wu (2012) http://adsabs.harvard.edu/abs/2012MNRAS.420.3195B
 
+## Requirements:
+
+GCD+ uses RAN1.FOR, GASDEV.FOR, indexxl.FOR and ERFCC.FOR from Numerical Recipes in Fortran 77.

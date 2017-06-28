@@ -9,7 +9,7 @@ module gcdp_const
 
 ! GCD+ version
 ! please also copy .git/refs/heads/master to track the version
-      character*11,parameter :: GCDPVDATE='05/01/2017 '
+      character*11,parameter :: GCDPVDATE='08/06/2017 '
 
       double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***
@@ -81,6 +81,10 @@ module gcdp_const
       integer,parameter :: NATTABLE=50000
 ! *** for kernel tables ***
       integer,parameter :: NKTAB=100000
+#ifdef ADD_EXPDISK
+! *** for exponential disk profile
+      integer,parameter :: NEXPDTAB=10000
+#endif
 
 ! *****   For system value   *****
 ! *** DT limit ***

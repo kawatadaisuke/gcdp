@@ -3,7 +3,7 @@
 !   03  Feb.  2013    written by D.KAWATA
 ! *****************************************************
 
- subroutine para_range(n1,n2,np,irank,ista,iend)
+  subroutine para_range(n1,n2,np,irank,ista,iend)
       integer,intent(in) :: n1,n2,np,irank
       integer,intent(out) :: ista,iend	  
       integer iwork1,iwork2
