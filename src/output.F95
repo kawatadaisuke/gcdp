@@ -363,6 +363,15 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
   170   format(2(1pE13.5),2I10)
         close(60)
 #endif
+#ifdef ADD_DMPART
+        open(60,file='./output/ana/add_dmpart.dat',status='old')
+        do i=0,step+6-1
+          read(60,172)
+
+        enddo
+        write(60,172) TM_tot,mdm,SI_ndmtadded,ndmt
+  172   format(2(1pE13.5),2I10)
+#endif
 
       endif
 

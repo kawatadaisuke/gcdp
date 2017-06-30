@@ -9,12 +9,13 @@ OBJS = gcdp_const.o common.o main.o set_value.o calc_dv_du.o\
        set_valuedm.o set_chi.o\
        setsldmtr.o kernel.o setmext.o allocate.o\
        mesh_gen.o mesh_setrho.o fftw3_init.o mesh_fftf.o mesh_setfp.o erfcc.o\
-       phcurve.o phcurven.o mesh_isogpot.o del_dmpart.o set_testpdm.o extf.o gasdev.o
+       phcurve.o phcurven.o mesh_isogpot.o del_dmpart.o set_testpdm.o extf.o \
+       add_dmpart.o setprof.o gasdev.o
 INIOBJ = set_ini.o
 CONTOBJ = cont.o
 DEFFILE = gcdp.def gcdp_const.F95 common.F95
 ###  for MPICH 
-OPTIONS=-g -mcmodel=medium
+OPTIONS=-g
 ### kepler 
 #MPI_DIR=/cluster/mpich2_3.0
 #FFTW_INC=/khome/dka/share/include
@@ -23,6 +24,13 @@ OPTIONS=-g -mcmodel=medium
 MPI_DIR = /usr/local
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
+# default library and compiler
+CPP = cpp
+FORT = ${MPI_DIR}/bin/mpif90
+MPI_INC = ${MPI_DIR}/include
+MPI_LIB = ${MPI_DIR}/lib
+FFLAGS = ${OPTIONS} -I${MPI_INC} -I${FFTW_INC}
+LIBS = ${MLIBS} -L${MPI_LIB} ${OPTIONS} -L${FFTW_LIB} -lfftw3_mpi -lfftw3
 ### grace, legion@UCL
 # no FFT
 # CPP = cpp

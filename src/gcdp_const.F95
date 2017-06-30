@@ -84,6 +84,8 @@ module gcdp_const
 #ifdef ADD_EXPDISK
 ! *** for exponential disk profile
       integer,parameter :: NEXPDTAB=10000
+! *** rmin=FRMIN_EXPDISK*rmax
+      double precision,parameter :: FRMIN_EXPDISK=0.00001d0
 #endif
 
 ! *****   For system value   *****

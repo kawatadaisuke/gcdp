@@ -26,6 +26,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef TREEPM
       use gcdp_pm
 #endif
+#ifdef ADD_EXPDISK
+      use gcdp_expdisk
+#endif
      
       implicit none
       include 'mpif.h'
@@ -80,7 +83,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       integer,allocatable :: istatus(:)
       integer,allocatable :: ireqs(:),ireqr(:)
       integer,allocatable :: tivr(:),nalist(:),list(:)
-      double precision,allocatable :: tdvr(:)
+      double precision,allocatable :: tdvs(:),tdvr(:)
 #if defined(SF_EFD) || defined(SF_ZFD)
 ! work
       double precision,allocatable :: mfd(:)
@@ -2563,6 +2566,73 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 #endif
 
+#ifdef ADD_DMPART
+#ifdef ADD_EXPDISK
+      nval=11
+
+      allocate(tdvs(0:nval-1))
+
+      if(myrank.eq.0) then
+        write(6,*) ' reading add_dmpart.dat for DEL_DMPART'
+        open(50,file='ini/add_dmpart.dat',status='old')
+        read(50,*) SI_dmdtadd
+        read(50,*) SI_hradd,SI_rmaxadd
+        read(50,*) SI_sigr0add,SI_hsigradd
+        read(50,*) SI_sigph0add,SI_hsigphadd
+        read(50,*) SI_sigz0add,SI_hsigzadd
+        close(50)
+        write(6,*) 'mass addition rate (Msun/yr)=',SI_dmdtadd
+        SI_dmdtadd=SI_dmdtadd*TMUYR/MUSM
+        write(6,*) 'mass profile exp h, rmax (kpc)=',SI_hradd,SI_rmaxadd
+        SI_hradd=SI_hradd/LUKPC
+        SI_rmaxadd=SI_hradd/LUKPC
+        write(6,*) ' velocity dispersion sig0 exp(-R/hsig)'
+        write(6,*) ' radial sig0 (km/s), hsig (kpc)=',SI_sigr0add,SI_hsigradd
+        write(6,*) ' azimuthal =',SI_sigph0add,SI_hsigphadd
+        write(6,*) ' vertical =',SI_sigz0add,SI_hsigzadd
+        SI_sigr0add=SI_sigr0add/VUKMS
+        SI_hsigradd=SI_hsigradd/LUKPC
+        SI_sigph0add=SI_sigph0add/VUKMS
+        SI_hsigphadd=SI_hsigphadd/LUKPC
+        SI_sigz0add=SI_sigph0add/VUKMS
+        SI_hsigzadd=SI_hsigzadd/LUKPC
+! set particle mass in myrank=0
+        SI_mdmp0=m_dm(0)
+        SI_hdmp0=h_dm(0)
+! set tdvs
+        tdvs(0)=SI_dmdtadd
+        tdvs(1)=SI_hradd
+        tdvs(2)=SI_rmaxadd
+        tdvs(3)=SI_sigr0add
+        tdvs(4)=SI_hsigradd
+        tdvs(5)=SI_sigph0add
+        tdvs(6)=SI_hsigphadd
+        tdvs(7)=SI_sigz0add
+        tdvs(8)=SI_hsigzadd
+        tdvs(9)=SI_mdmp0
+        tdvs(10)=SI_hdmp0
+      endif
+      call MPI_BCAST(tdvs,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      SI_dmdtadd=tdvs(0)
+      SI_hradd=tdvs(1)
+      SI_rmaxadd=tdvs(2)
+      SI_sigr0add=tdvs(3)
+      SI_hsigradd=tdvs(4)
+      SI_sigph0add=tdvs(5)
+      SI_hsigphadd=tdvs(6)
+      SI_sigz0add=tdvs(7)
+      SI_hsigzadd=tdvs(8)
+      SI_mdmp0=tdvs(9)
+      SI_hdmp0=tdvs(10)
+
+      deallocate(tdvs)
+
+! set exponential profile
+      call set_mxexpd(SI_hradd,FRMIN_EXPDISK*SI_rmaxadd,SI_rmaxadd)
+#endif
+#endif
+
+
 ! *** output initial parameters ***
       if(myrank.eq.0) then
 ! ****** Initialzation for output file *****
@@ -2849,9 +2919,25 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a9,2I10)')  'ID range=',SI_dmdelci(0),SI_dmdelci(1)
         write(60,'(a22,1pE13.5)')  'Mass loss rate (GCD+)=',SI_deldmdt
         write(60,'(a21,1pE13.5)') 'M deleting component=',SI_mtdmdc0
-!                                  123456789012345678901234567890123456
         write(60,'(a20,1pE13.5)') 'mass of DM particle=',SI_mdmp0
 
+#endif
+#ifdef ADD_DMPART
+        write(60,'(a22)') '###  ADD_DMPART on ###'
+        write(60,'(a29,1pE13.5)')  'mass addition rate (Msun/yr)=' &
+          ,SI_dmdtadd*MUSM/TMUYR
+        write(60,'(a31,2(1pE13.5))') 'mass profile exp h, rmax (kpc)=' &
+          ,SI_hradd*LUKPC,SI_rmaxadd*LUKPC
+        write(60,'(a29,1pE13.5)') '(rmin= rmax x) FRMIN_EXPDISK=' &
+          ,FRMIN_EXPDISK
+        write(60,'(a38,2(1pE13.5))') ' velocity dispersion sig0 exp(-R/hsig)'
+        write(60,'(a32,2(1pE13.5))') ' radial sig0 (km/s), hsig (kpc)=' &
+          ,SI_sigr0add*VUKMS,SI_hsigradd*LUKPC
+        write(60,'(a12,2(1pE13.5))') ' azimuthal =' &
+          ,SI_sigph0add*VUKMS,SI_hsigphadd*LUKPC
+!                                     12345678901234567890123456789012345678
+        write(60,'(a11,2(1pE13.5))') ' vertical =',SI_sigz0add*VUKMS &
+          ,SI_hsigzadd*LUKPC
 #endif
         close(60)
         write(6,*) ' end writing inipara.dat'
@@ -2864,6 +2950,23 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(60,'(a12,1pE13.5)') '# dMloss/dt=',SI_deldmdt
         write(60,'(a7,1pE13.5)') '# mdm0=',SI_mdmp0
         write(60,'(a16,1pE13.5)') '# Mini del comp=',SI_mtdmdc0
+        close(60)
+#endif
+#ifdef ADD_DMPART
+        write(6,*) ' write output/ana/add_dmpart.dat'
+! creat file for add_dmpart
+        open(60,file='./output/ana/add_dmpart.dat',status='unknown')
+        write(60,'(a31,1pE13.5)')  '# mass addition rate (Msun/yr)=' &
+          ,SI_dmdtadd*MUSM/TMUYR
+        write(60,'(a33,2(1pE13.5))') '# mass profile exp h, rmax (kpc)=' &
+          ,SI_hradd*LUKPC,SI_rmaxadd*LUKPC
+        write(60,'(a39,2(1pE13.5))') '# velocity dispersion sig0 exp(-R/hsig)'
+        write(60,'(a33,2(1pE13.5))') '# radial sig0 (km/s), hsig (kpc)=' &
+          ,SI_sigr0add*VUKMS,SI_hsigradd*LUKPC
+        write(60,'(a13,2(1pE13.5))') '# azimuthal =' &
+          ,SI_sigph0add*VUKMS,SI_hsigphadd*LUKPC
+        write(60,'(a12,2(1pE13.5))') '# vertical =',SI_sigz0add*VUKMS &
+          ,SI_hsigzadd*LUKPC
         close(60)
 #endif
 

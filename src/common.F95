@@ -458,17 +458,19 @@ module gcdp_system
 #endif
 #ifdef ADD_DMPART
 ! number of particles will be added, and added already
-      integer,save :: SI_tndmtadd,SI_ndmtadded
+      integer,save :: SI_ndmtadded
 ! total mass added component, mass of DM particles added
       double precision,save :: SI_mdmpadd
 ! mass addition rate
-      double precisoin,save :: SI_dmdtadd
+      double precision,save :: SI_dmdtadd
 ! adding component, radial scale length (constant) 
-      double precision,save :: SI_hradd
+      double precision,save :: SI_hradd,SI_rmaxadd
 ! velocity disperion, scale length, sig_0, for vR, vth, vz
       double precision,save :: SI_sigr0add,SI_hsigradd
-      double precision,save :: SI_sigth0add,SI_hsigthadd
+      double precision,save :: SI_sigph0add,SI_hsigphadd
       double precision,save :: SI_sigz0add,SI_hsigzadd
+! particle mass and scale length
+      double precision,save :: SI_mdmp0,SI_hdmp0
 #endif
 
 #ifdef BCX_FIX
@@ -576,7 +578,7 @@ module gcdp_expdisk
       implicit none
 ! scale length, delta ln x, ln minimum x point
       double precision,save :: hd_expd,dlx_expd,lxmin_expd
-      double precision,save :: lx_expd(0:NEXPDTAB-1),mx_expd(0:NEXTPTAB-1)
+      double precision,save :: lx_expd(0:NEXPDTAB-1),mx_expd(0:NEXPDTAB-1)
 end module gcdp_expdisk
 #endif
 

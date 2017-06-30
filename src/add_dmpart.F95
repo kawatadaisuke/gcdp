@@ -11,6 +11,7 @@ subroutine add_dmpart(ndm,ndmt)
       use gcdp_const
       use gcdp_dm
       use gcdp_system
+      use gcdp_expdisk
  
       implicit none
       include 'mpif.h'
@@ -22,10 +23,10 @@ subroutine add_dmpart(ndm,ndmt)
       double precision,allocatable :: xadd0(:),yadd0(:),zadd0(:) &
         ,xaddp(:),yaddp(:),zaddp(:)
       double precision pfr,rp,ph
-      double precision raddp,vsigrp,vsigphp,vsigzp,vrotp,vradp,rp
+      double precision rxyp,vrotp,vradp
 ! for work
       integer nval,rrank,nc
-      integer jsta,jend,ipsta,ipend,nprp
+      integer jsta,jend,ipsta,ipend,nprp,ierr
       integer,allocatable :: jstap(:),jendp(:)
       integer,allocatable :: istatus(:)
       integer,allocatable :: ireqs(:),ireqr(:)
@@ -38,14 +39,14 @@ subroutine add_dmpart(ndm,ndmt)
 ! original number of DM particle
       ndm0=ndm
 ! target number at the next step
-      dndmtadd=int(SI_dmdtadd*(TM_tot+TM_dt))/SI_mdmp0)-SI_ndmtadded
+      dndmtadd=int(SI_dmdtadd*(TM_tot+TM_dt)/SI_mdmp0)-SI_ndmtadded
 ! use the value at myrank=0
       call MPI_BCAST(dndmtadd,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       if(dndmtadd.lt.0) then
         if(myrank.eq.0) then
           write(6,*) 'Error in add_dmpart: naddp is negative=',dndmtadd
           write(6,*) 'ndm target, already added=' &
-            ,int(SI_dmdtadd*(TM_tot+TM_dt))/SI_mdmp0),SI_ndmtadded
+            ,int(SI_dmdtadd*(TM_tot+TM_dt)/SI_mdmp0),SI_ndmtadded
         endif
         stop
       endif
@@ -61,12 +62,6 @@ subroutine add_dmpart(ndm,ndmt)
         allocate(ireqr(0:nprocs))
         allocate(jstap(0:nprocs-1))
         allocate(jendp(0:nprocs-1))
-
-
-!  number of particles for the component adding the particle in each proc
-        do ip=0,nprocs-1
-          ndmdcproc(ip)=0
-        enddo
 
 ! calculate the position of added particles only in myrank=-
         if(myrank.eq.0) then
@@ -109,10 +104,10 @@ subroutine add_dmpart(ndm,ndmt)
         dnaddp=jend-jsta+1
 
 ! allocate xadd
-        if(dnaddp.gt.0) the
-          allocate(xadd(0:dnaddp-1))
-          allocate(yadd(0:dnaddp-1))
-          allocate(zadd(0:dnaddp-1))
+        if(dnaddp.gt.0) then
+          allocate(xaddp(0:dnaddp-1))
+          allocate(yaddp(0:dnaddp-1))
+          allocate(zaddp(0:dnaddp-1))
         endif
 
 ! distribute new particle position from myrank 0 to the other proc
@@ -132,7 +127,7 @@ subroutine add_dmpart(ndm,ndmt)
 
             if(nprp.gt.0) then
 
-              allocate(tdvr(0:nprp*nval-1)
+              allocate(tdvr(0:nprp*nval-1))
 
               do i=0,nprp-1
                 tdvr(i)=xadd0(jstap(ip)+i)
@@ -147,9 +142,9 @@ subroutine add_dmpart(ndm,ndmt)
             endif
           else if(dnaddp.gt.0) then
       
-            allocate(tdvr(0:dnaddp*nval-1)    
+            allocate(tdvr(0:dnaddp*nval-1))
 
-            call MPI_IRECV(tdvr,ndaddp*nval,MPI_DOUBLE_PRECISION &
+            call MPI_IRECV(tdvr,dnaddp*nval,MPI_DOUBLE_PRECISION &
                ,rrank,0,MPI_COMM_WORLD,ireqr(ip),ierr)
             call MPI_WAIT(ireqr(ip),istatus,ierr)
           endif
@@ -180,7 +175,7 @@ subroutine add_dmpart(ndm,ndmt)
 
         if(dnaddp.gt.0) then
 ! new list of particles from old list pn
-          ndm=ndm0+ndmdel
+          ndm=ndm0+dnaddp
 
 ! add new particle. 
 ! integer 
@@ -235,221 +230,165 @@ subroutine add_dmpart(ndm,ndmt)
           call reallocate_dm_d1(ndm)
 #endif
 
-           do i=0,ndm0-1
+          do i=0,ndm0-1
             xc_dm(i)=tdvr(i)
             yc_dm(i)=tdvr(i+ndm0)
             zc_dm(i)=tdvr(i+ndm0*2)
             vnx_dm(i)=tdvr(i+ndm0*3)
             vny_dm(i)=tdvr(i+ndm0*4)
             vnz_dm(i)=tdvr(i+ndm0*5)
-           enddo
+          enddo
 ! new values
-           nc=0
-           do i=ndm0,ndm-1
-             xc_dm(i)=xaddp(nc)
-             yc_dm(i)=yaddp(nc)
-             zc_dm(i)=zaddp(nc)
-             raddp=dsqrt(xc_dm(i)**2+y_dm(i)**2+z_dm(i))
-             vsigrp20.0d0/VUKMS
-             vsigphp=20.0d0/VUKMS
-             vrotp=220.0/VUKMS+gasdev(idum)*vsigphp
-             vradp=gasdev(idum)*vsigrp
-             vsigzp=20.0d0/VUKMS
+          nc=0
+          do i=ndm0,ndm-1
+            xc_dm(i)=xaddp(nc)
+            yc_dm(i)=yaddp(nc)
+            zc_dm(i)=zaddp(nc)
+            vrotp=220.0/VUKMS+gasdev(idum)*SI_sigph0add
+            vradp=gasdev(idum)*SI_sigr0add
+            rxyp=dsqrt(xc_dm(i)**2+y_dm(i)**2)
 ! positive = clock-wise 
-             vnx_dm(i)=vrotp*yc_dm(i)/raddp+vradp*xc_dm(i)/raddp
-             vny_dm(i)=-vrotp*xc_dm(i)/raddp+vradp*yc_dm(i)/raddp
-             vnz_dm(i)=dble(gasdev)*vsigzp
-           enddo
-
-! put the reallocate the DM data using pnold
-! integer
-  
-          allocate(tivr(0:ndm-1))
-
-! flagt
-          do i=0,ndm-1
-            tivr(i)=flagt_dm(pnold(i))
+            vnx_dm(i)=vrotp*yc_dm(i)/rxyp+vradp*xc_dm(i)/rxyp
+            vny_dm(i)=-vrotp*xc_dm(i)/rxyp+vradp*yc_dm(i)/rxyp
+            vnz_dm(i)=dble(gasdev(idum))*SI_sigz0add
+            nc=nc+1
           enddo
-          do i=0,ndm-1
-            flagt_dm(i)=tivr(i)
-          enddo
-! id
-          do i=0,ndm-1
-            tivr(i)=id_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            id_dm(i)=tivr(i)
-          enddo
-
-          deallocate(tivr)
-          allocate(tdvr(0:ndm-1))
-
-! double
-! xc
-          do i=0,ndm-1
-            tdvr(i)=xc_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            xc_dm(i)=tdvr(i)
-          enddo
-! yc
-          do i=0,ndm-1
-            tdvr(i)=yc_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            yc_dm(i)=tdvr(i)
-          enddo
-! zc
-          do i=0,ndm-1
-            tdvr(i)=zc_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            zc_dm(i)=tdvr(i)
-          enddo
-! vnx
-          do i=0,ndm-1
-            tdvr(i)=vnx_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            vnx_dm(i)=tdvr(i)
-          enddo
-! vny
-          do i=0,ndm-1
-            tdvr(i)=vny_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            vny_dm(i)=tdvr(i)
-          enddo
-! vnz
-          do i=0,ndm-1
-            tdvr(i)=vnz_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            vnz_dm(i)=tdvr(i)
-          enddo
-! m
-          do i=0,ndm-1
-            tdvr(i)=m_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            m_dm(i)=tdvr(i)
-          enddo
-! h
-          do i=0,ndm-1
-            tdvr(i)=h_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            h_dm(i)=tdvr(i)
-          enddo
-! dvx
-          do i=0,ndm-1
-            tdvr(i)=dvx_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            dvx_dm(i)=tdvr(i)
-          enddo
-! dvy
-          do i=0,ndm-1
-            tdvr(i)=dvy_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            dvy_dm(i)=tdvr(i)
-          enddo
-! dvz
-          do i=0,ndm-1
-            tdvr(i)=dvz_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            dvz_dm(i)=tdvr(i)
-          enddo
-! dt
-          do i=0,ndm-1
-            tdvr(i)=dt_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            dt_dm(i)=tdvr(i)
-          enddo
-! vdt
-          do i=0,ndm-1
-            tdvr(i)=vdt_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            vdt_dm(i)=tdvr(i)
-          enddo
-! lt
-          do i=0,ndm-1
-            tdvr(i)=lt_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            lt_dm(i)=tdvr(i)
-          enddo
-! rho
-          do i=0,ndm-1
-            tdvr(i)=rho_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            rho_dm(i)=tdvr(i)
-          enddo
-! zetah
-          do i=0,ndm-1
-            tdvr(i)=zetah_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            zetah_dm(i)=tdvr(i)
-          enddo
-! omgh
-          do i=0,ndm-1
-            tdvr(i)=omgh_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            omgh_dm(i)=tdvr(i)
-          enddo
-! div_v_dm
-          do i=0,ndm-1
-            tdvr(i)=div_v_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            div_v_dm(i)=tdvr(i)
-          enddo
-! dtr
-          do i=0,ndm-1
-            tdvr(i)=dtr_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            dtr_dm(i)=tdvr(i)
-          enddo
-#if defined(COSM) && defined(BOXSIM)
-! asc
-          do i=0,ndm-1
-            tdvr(i)=asc_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            asc_dm(i)=tdvr(i)
-          enddo
-! tc
-          do i=0,ndm-1
-            tdvr(i)=tc_dm(pnold(i))
-          enddo
-          do i=0,ndm-1
-            tc_dm(i)=tdvr(i)
-          enddo
-#endif
 
           deallocate(tdvr)
-          deallocate(pnold)
 
-! list_adm will be reset at ddecdm
-          do i=0,ndm-1
-            list_adm(i)=i
-          enddo   
+! m, h, dvx, dt, lt
+          nval=7
 
-          deallocate(listdmdel)
+          allocate(tdvr(0:ndm0*nval-1))
 
+          do i=0,ndm0-1
+            tdvr(i)=m_dm(i)
+            tdvr(i+ndm0)=h_dm(i)
+            tdvr(i+ndm0*2)=dvx_dm(i)
+            tdvr(i+ndm0*3)=dvy_dm(i)
+            tdvr(i+ndm0*4)=dvz_dm(i)
+            tdvr(i+ndm0*5)=dt_dm(i)
+            tdvr(i+ndm0*6)=lt_dm(i)
+          enddo
+
+! reallocate DM variables 2
+#ifdef TESTP
+          call reallocate_dm_d2(ndm+SI_ntpdm)
+#else
+          call reallocate_dm_d2(ndm)
+#endif
+
+          do i=0,ndm0-1
+            m_dm(i)=tdvr(i)
+            h_dm(i)=tdvr(i+ndm0)
+            dvx_dm(i)=tdvr(i+ndm0*2)
+            dvy_dm(i)=tdvr(i+ndm0*3)
+            dvz_dm(i)=tdvr(i+ndm0*4)
+            dt_dm(i)=tdvr(i+ndm0*5)
+            lt_dm(i)=tdvr(i+ndm0*6)
+          enddo
+! new particles
+          do i=ndm0,ndm-1
+! set the same mass with the other prticles
+            m_dm(i)=SI_mdmp0
+            h_dm(i)=SI_hdmp0
+            dvx_dm(i)=0.0d0
+            dvy_dm(i)=0.0d0
+            dvz_dm(i)=0.0d0
+! this routine is called before updating TM_lt
+            dt_dm(i)=TM_dt
+            lt_dm(i)=TM_lt
+          enddo
+
+          deallocate(tdvr)
+
+! rho,zeta,omgh,div_v, dtr
+! no cosmo or box sim
+          nval=5 
+
+          allocate(tdvr(0:ndm0*nval-1))
+
+          do i=0,ndm0-1
+            tdvr(i)=rho_dm(i)
+            tdvr(i+ndm0)=zetah_dm(i)
+            tdvr(i+ndm0*2)=omgh_dm(i)
+            tdvr(i+ndm0*3)=div_v_dm(i)
+            tdvr(i+ndm0*4)=dtr_dm(i)
+          enddo
+
+! reallocate DM variables 3
+#ifdef TESTPDMF
+      call reallocate_dm_d3(ndm+SI_ntpdm)
+#else
+      call reallocate_dm_d3(ndm)
+#endif
+
+          do i=0,ndm0-1
+            rho_dm(i)=tdvr(i)
+            zetah_dm(i)=tdvr(i+ndm0)
+            omgh_dm(i)=tdvr(i+ndm0*2)
+            div_v_dm(i)=tdvr(i+ndm0*3)
+            dtr_dm(i)=tdvr(i+ndm0*4)
+          enddo
+! new particles
+          if(ndm0.gt.0) then
+            do i=ndm0,ndm-1
+              rho_dm(i)=rho_dm(0)
+            enddo
+          else
+            do i=ndm0,ndm-1
+! set an arbitrary number 
+              rho_dm(i)=0.1d0
+            enddo
+          endif
+          do i=ndm0,ndm-1
+            zetah_dm(i)=0.0d0
+            omgh_dm(i)=1.0d0
+            div_v_dm(i)=0.0d0
+            dtr_dm(i)=TM_dt
+          enddo
+
+          deallocate(tdvr)
+
+#ifdef TESTP
+          nval=3
+
+          allocate(tdvr(0:ndm0*nval-1))
+
+          do i=0,ndm0-1
+            tdvr(i)=rperi_dm(i)
+            tdvr(i+ndm0)=rapo_dm(i)
+            tdvr(i+ndm0*2)=zmax_dm(i)
+          enddo
+
+! reallocate DM variables
+#ifdef TESTPDMF
+          call reallocate_dm_testp(ndm+SI_ntpdm)
+#else
+          call reallocate_dm_testp(ndm)
+#endif
+
+          do i=0,ndm0-1
+            rperi_dm(i)=tdvr(i)
+            rapo_dm(i)=tdvr(i+ndm0)
+            zmax_dm(i)=tdvr(i+ndm0*2)
+          enddo
+! for new particles
+          do i=ndm0,ndm-1
+            rxyp=dsqrt(xc_dm(i)**2+y_dm(i)**2)
+            rperi_dm(i)=rxyp
+            rapo_dm(i)=rxyp
+            zmax_dm(i)=dabs(zc_dm(i))
+          enddo
+   
+          deallocate(tdvr)
+
+#endif
         endif
 
+        SI_ndmtadded=SI_ndmtadded+dndmtadd
         SI_ndm1=ndm
-        SI_ndmtdc=SI_ndmtdc-dndmtdc
-        ndmt=ndmt-dndmtdc
+        ndmt=ndmt+dndmtadd
         SI_ndm1t=ndmt
 
 ! allocate array for MPI
@@ -459,10 +398,7 @@ subroutine add_dmpart(ndm,ndmt)
         deallocate(jstap)
         deallocate(jendp)
 
-
       endif
-
-      deallocate(ndmdcproc)
 
 end subroutine
 
