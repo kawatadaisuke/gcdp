@@ -578,7 +578,8 @@ module gcdp_expdisk
       implicit none
 ! scale length, delta ln x, ln minimum x point
       double precision,save :: hd_expd,dlx_expd,lxmin_expd
-      double precision,save :: lx_expd(0:NEXPDTAB-1),mx_expd(0:NEXPDTAB-1)
+      double precision,save :: lx_expd(0:NEXPDTAB-1),lmx_expd(0:NEXPDTAB-1) &
+        ,mx_expd(0:NEXPDTAB-1)
 end module gcdp_expdisk
 #endif
 

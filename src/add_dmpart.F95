@@ -21,7 +21,7 @@ subroutine add_dmpart(ndm,ndmt)
       integer ndmadd,ndm0
       integer dndmtadd,dnaddp
       double precision,allocatable :: xadd0(:),yadd0(:),zadd0(:) &
-        ,xaddp(:),yaddp(:),zaddp(:)
+        ,xaddp(:),yaddp(:),zaddp(:),radd0(:)
       double precision pfr,rp,ph
       double precision rxyp,vrotp,vradp
 ! for work
@@ -40,6 +40,10 @@ subroutine add_dmpart(ndm,ndmt)
       ndm0=ndm
 ! target number at the next step
       dndmtadd=int(SI_dmdtadd*(TM_tot+TM_dt)/SI_mdmp0)-SI_ndmtadded
+!      if(myrank.eq.0) then
+!        write(6,*) ' dn,SI_dmdtadd,T,SI_mdmp0=',dndmtadd,SI_dmdtadd &
+!         ,TM_tot+TM_dt,SI_mdmp0,SI_ndmtadded
+!      endif
 ! use the value at myrank=0
       call MPI_BCAST(dndmtadd,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       if(dndmtadd.lt.0) then
@@ -69,29 +73,36 @@ subroutine add_dmpart(ndm,ndmt)
           allocate(xadd0(0:dndmtadd-1))
           allocate(yadd0(0:dndmtadd-1))
           allocate(zadd0(0:dndmtadd-1))
+          allocate(radd0(0:dndmtadd-1))
 
 #ifdef ADD_EXPDISK
           do i=0,dndmtadd-1
-! calculate the position of 
+! calculate the radius
    69       pfr=ran1(idum)
             do j=1,NEXPDTAB-1
               if(mx_expd(j).gt.pfr) then
                 goto 71
               endif
             enddo
+            write(6,*) ' Warining in add_dmpart: Radd not found. pfr=',pfr
             goto 69
  71         if(j.eq.0) then
               j=1
             endif
-            rp=10.0d0**(lx_expd(j-1)+(lx_expd(j)-lx_expd(j-1)) &
-              /(dlog10(mx_expd(j))-dlog10(mx_expd(j-1))))
+            radd0(i)=10.0d0**(lx_expd(j-1)+(lx_expd(j)-lx_expd(j-1)) &
+              *(dlog10(pfr)-lmx_expd(j-1))/(lmx_expd(j)-lmx_expd(j-1)))
+          enddo
+          do i=0,dndmtadd-1
+! calculate x,y,z position
             ph=2.0d0*M_PI*dble(ran1(idum))
-            xadd0(i)=rp*dcos(ph)
-            yadd0(i)=rp*dsin(ph)
+            xadd0(i)=radd0(i)*dcos(ph)
+            yadd0(i)=radd0(i)*dsin(ph)
             zadd0(i)=0.0d0
           enddo          
-#endif
 
+          deallocate(radd0)
+
+#endif
 ! number of new particles allocated in each proc
           do ip=0,nprocs-1
             call para_range(0,dndmtadd-1,nprocs,ip,jstap(ip),jendp(ip))
@@ -99,7 +110,7 @@ subroutine add_dmpart(ndm,ndmt)
 
         endif
 ! distribute new particles position to the other proc
-        call para_range(0,dndmtadd-1,nprocs,ip,jsta,jend)
+        call para_range(0,dndmtadd-1,nprocs,myrank,jsta,jend)
 ! number of particles added
         dnaddp=jend-jsta+1
 
@@ -152,8 +163,8 @@ subroutine add_dmpart(ndm,ndmt)
             nc=0
             do i=0,dnaddp-1
               xaddp(nc)=tdvr(i)
-              yaddp(nc)=tdvr(i+nval)
-              zaddp(nc)=tdvr(i+nval*2)
+              yaddp(nc)=tdvr(i+dnaddp)
+              zaddp(nc)=tdvr(i+dnaddp*2)
               nc=nc+1
             enddo
           endif
@@ -199,12 +210,16 @@ subroutine add_dmpart(ndm,ndmt)
           do i=0,ndm0-1
             flagt_dm(i)=tivr(i)
             id_dm(i)=tivr(i+ndm0)
+            list_adm(i)=i
           enddo            
 ! new valuse
+          nc=0
           do i=ndm0,ndm-1
 ! active particle (similar to RANAZRLIM in update.F95
             flagt_dm(i)=1
-            id_dm(i)=ndmt+jsta+i
+            id_dm(i)=ndmt+jsta+nc
+            list_adm(i)=i
+            nc=nc+1
           enddo
 
           deallocate(tivr)
@@ -246,7 +261,7 @@ subroutine add_dmpart(ndm,ndmt)
             zc_dm(i)=zaddp(nc)
             vrotp=220.0/VUKMS+gasdev(idum)*SI_sigph0add
             vradp=gasdev(idum)*SI_sigr0add
-            rxyp=dsqrt(xc_dm(i)**2+y_dm(i)**2)
+            rxyp=dsqrt(xc_dm(i)**2+yc_dm(i)**2)
 ! positive = clock-wise 
             vnx_dm(i)=vrotp*yc_dm(i)/rxyp+vradp*xc_dm(i)/rxyp
             vny_dm(i)=-vrotp*xc_dm(i)/rxyp+vradp*yc_dm(i)/rxyp
@@ -390,6 +405,13 @@ subroutine add_dmpart(ndm,ndmt)
         SI_ndm1=ndm
         ndmt=ndmt+dndmtadd
         SI_ndm1t=ndmt
+
+!        open(60,file='addp.dat',status='unknown')
+!        do i=ndm0,ndm-1
+!          write(60,'(6(1pE13.5),I10)') xc_dm(i),yc_dm(i),zc_dm(i) &
+!            ,vnx_dm(i),vny_dm(i),vnz_dm(i),id_dm(i)
+!        enddo
+!        close(60)
 
 ! allocate array for MPI
         deallocate(istatus)

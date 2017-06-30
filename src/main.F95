@@ -956,6 +956,18 @@ program gcdp
 #ifdef DEL_DMPART
       call del_dmpart(ndm,ndmt)
 #endif
+#ifdef ADD_DMPART
+      call add_dmpart(ndm,ndmt)
+! test output
+!      write(fileo,'(a3,i3.3,a1,i3.3)') 'dmp',myrank,'-',totstep
+!      open(60,file=fileo,status='unknown')
+!      do i=0,ndm-1
+!        pn=list_adm(i)
+!        write(60,'(6(1pE13.5),I10)') xc_dm(pn),yc_dm(pn),zc_dm(pn) &
+!         ,vnx_dm(pn),vny_dm(pn),vnz_dm(pn),id_dm(pn)
+!      enddo
+!      close(60)
+#endif
 
 ! **************************
 !  Update Virtual Position 
@@ -972,70 +984,67 @@ program gcdp
 ! **********************
 !   Domain Decomposition
 !  **********************
-!      if(nprocs.gt.1.and.totstep.ne.0) then
-#ifndef DEL_DMPART
-! if DEL_DMPART is on, always need domation decomposition
-      if(totstep.ne.0) then
-#endif
-#ifdef COOL
-!        if(SI_flagrad.ge.-1.or.SI_flagrad.eq.-10) then
-#endif
-          if(mod(totstep,NDSTEPDDEC).eq.0) then
+! always do
+      if(mod(totstep,NDSTEPDDEC).eq.0) then
 #ifdef GAS
 ! *** for baryon ***
 #ifdef WTIME
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ntime=MPI_WTIME()
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ntime=MPI_WTIME()
 #endif
 
-            call ddecb(npt,np,ng,ns,nag,nas,nagravg,totstep,flagcont)
+        call ddecb(npt,np,ng,ns,nag,nas,nagravg,totstep,flagcont)
 
 #ifdef WTIME
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ectime=MPI_WTIME()
-            WTM_ddecb=WTM_ddecb+ectime-ntime
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ectime=MPI_WTIME()
+        WTM_ddecb=WTM_ddecb+ectime-ntime
 #endif
 #endif
 #ifdef DM
 ! *** for DM ***
 #ifdef WTIME
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ntime=MPI_WTIME()
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ntime=MPI_WTIME()
 #endif
-            call ddecdm(ndmt,ndm,nadm,totstep)
+        call ddecdm(ndmt,ndm,nadm,totstep)
+! test output
+!        write(fileo,'(a8,i3.3,a1,i3.3)') 'dmp_ddec',myrank,'-',totstep
+!        open(60,file=fileo,status='unknown')
+!        do i=0,ndm-1
+!          pn=list_adm(i)
+!          write(60,'(6(1pE13.5),I10)') xc_dm(pn),yc_dm(pn),zc_dm(pn) &
+!           ,vnx_dm(pn),vny_dm(pn),vnz_dm(pn),id_dm(pn)
+!        enddo
+!        close(60)
 #ifdef WTIME
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-            ectime=MPI_WTIME()
-            WTM_ddecdm=WTM_ddecdm+ectime-ntime
+        call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+        ectime=MPI_WTIME()
+        WTM_ddecdm=WTM_ddecdm+ectime-ntime
 #endif
 #endif
-          endif
+      endif
 #endif
 
 ! ***********************************************
 !  Update Virtual Position after ddecb and ddecdm
 ! ***********************************************
 #ifdef WTIME
-          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-          ntime=MPI_WTIME()
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+      ntime=MPI_WTIME()
 #endif
 ! ***************************
 !  Update Velocity V(n+1/2)
 !  ***************************
-          call updatev(np,ndm)
+      call updatev(np,ndm)
 ! **************************
 !  Update Virtual Position 
 ! **************************
-          call updatev_pos(np,ndm)
+      call updatev_pos(np,ndm)
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       ectime=MPI_WTIME()
       WTM_update=WTM_update+ectime-ntime
-#endif
-#ifndef TESTP
-#ifndef DEL_DMPART
-      endif
-#endif
 #endif
 
 ! ************************

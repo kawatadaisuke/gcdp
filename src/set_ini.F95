@@ -2529,6 +2529,14 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
 #ifdef DEL_DMPART
+      if(NDSTEPDDEC.ne.1) then
+        if(myrank.eq.0) then
+          write(6,*) ' Error: NDSTEPDDEC has to be 1 with DEL_DMPART.'
+          write(6,*) ' NDSTEPDDEC=',NDSTEPDDEC
+        endif
+        stop
+      endif
+
       if(myrank.eq.0) then
         write(6,*) ' reading del_dmpart.dat for DEL_DMPART'
         open(50,file='ini/del_dmpart.dat',status='old')
@@ -2567,6 +2575,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 
 #ifdef ADD_DMPART
+      if(NDSTEPDDEC.ne.1) then
+        if(myrank.eq.0) then
+          write(6,*) ' Error: NDSTEPDDEC has to be 1 with ADD_DMPART.'
+          write(6,*) ' NDSTEPDDEC=',NDSTEPDDEC
+        endif
+        stop
+      endif
 #ifdef ADD_EXPDISK
       nval=11
 
@@ -2585,7 +2600,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         SI_dmdtadd=SI_dmdtadd*TMUYR/MUSM
         write(6,*) 'mass profile exp h, rmax (kpc)=',SI_hradd,SI_rmaxadd
         SI_hradd=SI_hradd/LUKPC
-        SI_rmaxadd=SI_hradd/LUKPC
+        SI_rmaxadd=SI_rmaxadd/LUKPC
         write(6,*) ' velocity dispersion sig0 exp(-R/hsig)'
         write(6,*) ' radial sig0 (km/s), hsig (kpc)=',SI_sigr0add,SI_hsigradd
         write(6,*) ' azimuthal =',SI_sigph0add,SI_hsigphadd
@@ -2594,7 +2609,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         SI_hsigradd=SI_hsigradd/LUKPC
         SI_sigph0add=SI_sigph0add/VUKMS
         SI_hsigphadd=SI_hsigphadd/LUKPC
-        SI_sigz0add=SI_sigph0add/VUKMS
+        SI_sigz0add=SI_sigz0add/VUKMS
         SI_hsigzadd=SI_hsigzadd/LUKPC
 ! set particle mass in myrank=0
         SI_mdmp0=m_dm(0)
@@ -2629,6 +2644,8 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 ! set exponential profile
       call set_mxexpd(SI_hradd,FRMIN_EXPDISK*SI_rmaxadd,SI_rmaxadd)
+! set initially 0 for ndmtadded
+      SI_ndmtadded=0
 #endif
 #endif
 

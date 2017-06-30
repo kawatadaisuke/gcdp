@@ -25,8 +25,11 @@ subroutine set_mxexpd(hd,xmin,xmax)
       external mxexpdfunc
   
       hd_expd=hd
-      lxmin_expd=dlog(xmin)
-      dlx_expd=(dlog(xmax)-lxmin_expd)/dble(NEXPDTAB-1)
+      lxmin_expd=dlog10(xmin)
+      dlx_expd=(dlog10(xmax)-lxmin_expd)/dble(NEXPDTAB-1)
+!      if(myrank.eq.0) then
+!        write(6,*) ' xmin,xmax,lxin,dlx=',xmin,xmax,lxmin_expd,dlx_expd
+!      endif
       do i=0,NEXPDTAB-1
         lx_expd(i)=lxmin_expd+dlx_expd*dble(i)
         mx_expd(i)=mxexpdfunc(10.0d0**lx_expd(i),hd_expd)
@@ -35,12 +38,13 @@ subroutine set_mxexpd(hd,xmin,xmax)
       mtot=mxexpdfunc(xmax,hd_expd)
       do i=0,NEXPDTAB-1
         mx_expd(i)=mx_expd(i)/mtot
+        lmx_expd(i)=dlog10(mx_expd(i))
       enddo
 ! for check
       if(myrank.eq.0) then
         open(60,file='mxexpd.asc',status='unknown')
         do i=0,NEXPDTAB-1
-          write(60,'(2(1pE13.5))') 10.0d0**(lx_expd(i)),mx_expd(i)
+          write(60,'(3(1pE13.5))') 10.0d0**(lx_expd(i)),mx_expd(i),lmx_expd(i)
         enddo
         close(60)
       endif
