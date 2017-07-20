@@ -1437,9 +1437,9 @@ subroutine ddecb(npt,np,ng,ns,nag,nas,nagravg,step,flagcont)
       deallocate(tmzZ_sn)
       deallocate(nsw_sn)
 
-      if(flagcont.eq.1.or.step.le.0) then
-        TM_dt=INF
-      endif
+!      if(flagcont.eq.1.or.step.le.0) then
+!        TM_dt=INF
+!      endif
 #endif
 
 ! gas
