@@ -1,4 +1,4 @@
-#include "gcdp.def"
+include "gcdp.def"
 ! ***********************************************
 !    output.f for gcd+ ver. f03.0
 !  27  Jan. 2013    written by D.KAWATA
@@ -136,9 +136,9 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 ! *** for DM ***
       nivaldm=2
 #ifdef TESTP
-      ndvaldm=12
+      ndvaldm=13
 #else
-      ndvaldm=9
+      ndvaldm=10
 #endif
 ! #ifdef OUT_TEST
 !      ndvaldm=12
@@ -568,13 +568,17 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
             enddo
           else if(iv.eq.9) then
             do i=0,npj-1 
-              tdvs(i)=rperi_dm(i+pntps)
+              tdvs(i)=tadd_dm(i+pntps)
             enddo
           else if(iv.eq.10) then
             do i=0,npj-1 
-              tdvs(i)=rapo_dm(i+pntps)
+              tdvs(i)=rperi_dm(i+pntps)
             enddo
           else if(iv.eq.11) then
+            do i=0,npj-1 
+              tdvs(i)=rapo_dm(i+pntps)
+            enddo
+          else if(iv.eq.12) then
             do i=0,npj-1 
               tdvs(i)=zmax_dm(i+pntps)
             enddo
@@ -621,8 +625,8 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
                ,dabs(dvx_dm(i)*xc_dm(i)+dvy_dm(i)*yc_dm(i) &
                +dvz_dm(i)*zc_dm(i))/dsqrt(xc_dm(i)**2+yc_dm(i)**2+zc_dm(i)**2) &
 ! 17-20
-               ,dvx_dm(i),dvy_dm(i),dvz_dm(i),dt_dm(i)
-  161         format(7(1pE13.5),2I10,11(1pE13.5))
+               ,dvx_dm(i),dvy_dm(i),dvz_dm(i),dt_dm(i),tadd_dm(i)
+  161         format(7(1pE13.5),2I10,12(1pE13.5))
             enddo
             close(61)
           endif
@@ -1482,6 +1486,10 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
               else if(iv.eq.8) then
                 do i=0,npj-1 
                   tdvs(i)=h_dm(i)
+                enddo
+              else if(iv.eq.9) then
+                do i=0,npj-1 
+                  tdvs(i)=tadd_dm(i)
                 enddo
               endif
               if(myrank.lt.SI_nof) then

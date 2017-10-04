@@ -518,7 +518,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       nivalb=3
 #endif
       nivaldm=2
-      ndvaldm=9
+      ndvaldm=10
 #ifdef GAS
       ndbval=9
 ! since pv33.17.6
@@ -1529,6 +1529,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
               else if(iv.eq.8) then
                 do i=0,npjr(ip)-1 
                   h_dm(i)=tdvr(i)
+                enddo
+              else if(iv.eq.9) then
+                do i=0,npjr(ip)-1 
+                  tadd_dm(i)=tdvr(i)
                 enddo
               endif
             endif

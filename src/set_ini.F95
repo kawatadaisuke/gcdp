@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! ***************************************
 !      set_ini.F95 for GCD+ ver. f03.0
-!  30 June 2014    produced by D.KAWATA
+!  3 Oct. 2017    produced by D.KAWATA
 ! *************************************** 
 
 subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
@@ -2155,6 +2155,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         dtr_dm(i)=INF
         dt_dm(i)=0.0d0
         dtmnb_dm(i)=INF
+        tadd_dm(i)=TM_tot
       enddo
 #endif
 #ifdef GAS

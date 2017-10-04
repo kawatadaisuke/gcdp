@@ -1,7 +1,7 @@
 #include "gcdp.def"
 ! *****************************************************
 !    add_dmpart.F95 for gcd+ 
-!  26 June 2017  written by D.KAWATA
+!  3 Oct. 2017  written by D.KAWATA
 ! ***************************************************** 
 
 #ifdef DM
@@ -319,7 +319,7 @@ subroutine add_dmpart(ndm,ndmt)
 
 ! rho,zeta,omgh,div_v, dtr
 ! no cosmo or box sim
-          nval=5 
+          nval=6
 
           allocate(tdvr(0:ndm0*nval-1))
 
@@ -329,6 +329,7 @@ subroutine add_dmpart(ndm,ndmt)
             tdvr(i+ndm0*2)=omgh_dm(i)
             tdvr(i+ndm0*3)=div_v_dm(i)
             tdvr(i+ndm0*4)=dtr_dm(i)
+            tdvr(i+ndm0*5)=tadd_dm(i)
           enddo
 
 ! reallocate DM variables 3
@@ -344,6 +345,7 @@ subroutine add_dmpart(ndm,ndmt)
             omgh_dm(i)=tdvr(i+ndm0*2)
             div_v_dm(i)=tdvr(i+ndm0*3)
             dtr_dm(i)=tdvr(i+ndm0*4)
+            tadd_dm(i)=tdvr(i+ndm0*5)
           enddo
 ! new particles
           if(ndm0.gt.0) then
@@ -361,6 +363,7 @@ subroutine add_dmpart(ndm,ndmt)
             omgh_dm(i)=1.0d0
             div_v_dm(i)=0.0d0
             dtr_dm(i)=TM_dt
+            tadd_dm(i)=TM_tot
           enddo
 
           deallocate(tdvr)

@@ -86,7 +86,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       nivalb=3
 #endif
       nivaldm=2
-      ndvaldm=9
+      ndvaldm=10
 #if defined(COSM) && defined(BOXSIM)
       nddmcon=14
 #else
@@ -862,6 +862,10 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
           else if(iv.eq.8) then
             do i=0,npj-1 
               tdvs(i)=h_dm(i)
+            enddo
+          else if(iv.eq.9) then
+            do i=0,npj-1 
+              tdvs(i)=tadd_dm(i)
             enddo
           endif
           if(myrank.lt.SI_nof) then

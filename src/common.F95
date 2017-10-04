@@ -174,6 +174,8 @@ module gcdp_dm
 ! *** for adaptive softening ***
       double precision,allocatable,save :: h_dm(:),omgh_dm(:),zetah_dm(:) &
        ,rho_dm(:),div_v_dm(:)
+! added time
+      double precision,allocatable,save :: tadd_dm(:) 
 ! * list of active particles for DM *      
       integer,allocatable,save :: list_adm(:)
 ! * flag for time step changed 0: no change, otherwise changed *

@@ -796,9 +796,9 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! *** rho_dm,zetah_dm,omgh_dm,div_v_dm,dtr_dm
 ! *** because only active particles will update these values.
 #if defined(COSM) && defined(BOXSIM)
-      nval=7
+      nval=8
 #else
-      nval=5
+      nval=6
 #endif
 
       allocate(tdvr(0:ndm*nval-1))
@@ -815,9 +815,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           tdvs(ndmj+npsp(ip)*2)=omgh_dm(pnord(i,0))
           tdvs(ndmj+npsp(ip)*3)=div_v_dm(pnord(i,0))
           tdvs(ndmj+npsp(ip)*4)=dtr_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip)*5)=tadd_dm(pnord(i,0))
 #if defined(COSM) && defined(BOXSIM)
-          tdvs(ndmj+npsp(ip)*5)=asc_dm(pnord(i,0))
-          tdvs(ndmj+npsp(ip)*6)=tc_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip)*6)=asc_dm(pnord(i,0))
+          tdvs(ndmj+npsp(ip)*7)=tc_dm(pnord(i,0))
 #endif
           ndmj=ndmj+1
         enddo
@@ -858,9 +859,10 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
           omgh_dm(ord(ndmj))=tdvr(i+nprp(ip)*2)
           div_v_dm(ord(ndmj))=tdvr(i+nprp(ip)*3)
           dtr_dm(ord(ndmj))=tdvr(i+nprp(ip)*4)
+          tadd_dm(ord(ndmj))=tdvr(i+nprp(ip)*5)
 #if defined(COSM) && defined(BOXSIM)
-          asc_dm(ord(ndmj))=tdvr(i+nprp(ip)*5)
-          tc_dm(ord(ndmj))=tdvr(i+nprp(ip)*6)
+          asc_dm(ord(ndmj))=tdvr(i+nprp(ip)*6)
+          tc_dm(ord(ndmj))=tdvr(i+nprp(ip)*7)
 #endif
           ndmj=ndmj+1
         enddo
