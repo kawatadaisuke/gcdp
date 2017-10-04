@@ -1,4 +1,4 @@
-include "gcdp.def"
+#include "gcdp.def"
 ! ***********************************************
 !    output.f for gcd+ ver. f03.0
 !  27  Jan. 2013    written by D.KAWATA
