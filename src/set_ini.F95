@@ -2584,21 +2584,30 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         stop
       endif
 #ifdef ADD_EXPDISK
-      nval=11
+      nval=14
 
       allocate(tdvs(0:nval-1))
 
       if(myrank.eq.0) then
         write(6,*) ' reading add_dmpart.dat for DEL_DMPART'
         open(50,file='ini/add_dmpart.dat',status='old')
-        read(50,*) SI_dmdtadd
+        read(50,*) SI_mtotdmadd
+        read(50,*) SI_tinidmadd,SI_tfindmadd
+        read(50,*) SI_tsfrdmadd     
         read(50,*) SI_hradd,SI_rmaxadd
         read(50,*) SI_sigr0add,SI_hsigradd
         read(50,*) SI_sigph0add,SI_hsigphadd
         read(50,*) SI_sigz0add,SI_hsigzadd
         close(50)
-        write(6,*) 'mass addition rate (Msun/yr)=',SI_dmdtadd
-        SI_dmdtadd=SI_dmdtadd*TMUYR/MUSM
+        write(6,*) 'Total mass will be added between tini and tfin (Msun)=' &
+          ,SI_mtotdmadd
+        write(6,*) ' tini and tfin (Gyr)=',SI_tinidmadd,SI_tfindmadd
+        write(6,*) ' SFR timescale =',SI_tsfrdmadd
+! convert units to GCD+ unit
+        SI_mtotdmadd=SI_mtotdmadd/MUSM
+        SI_tinidmadd=SI_tinidmadd/TMUGYR
+        SI_tfindmadd=SI_tfindmadd/TMUGYR
+        SI_tsfrdmadd=SI_tsfrdmadd/TMUGYR
         write(6,*) 'mass profile exp h, rmax (kpc)=',SI_hradd,SI_rmaxadd
         SI_hradd=SI_hradd/LUKPC
         SI_rmaxadd=SI_rmaxadd/LUKPC
@@ -2616,33 +2625,46 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         SI_mdmp0=m_dm(0)
         SI_hdmp0=h_dm(0)
 ! set tdvs
-        tdvs(0)=SI_dmdtadd
-        tdvs(1)=SI_hradd
-        tdvs(2)=SI_rmaxadd
-        tdvs(3)=SI_sigr0add
-        tdvs(4)=SI_hsigradd
-        tdvs(5)=SI_sigph0add
-        tdvs(6)=SI_hsigphadd
-        tdvs(7)=SI_sigz0add
-        tdvs(8)=SI_hsigzadd
-        tdvs(9)=SI_mdmp0
-        tdvs(10)=SI_hdmp0
+        tdvs(0)=SI_mtotdmadd
+        tdvs(1)=SI_tinidmadd
+        tdvs(2)=SI_tfindmadd
+        tdvs(3)=SI_tsfrdmadd
+        tdvs(4)=SI_hradd
+        tdvs(5)=SI_rmaxadd
+        tdvs(6)=SI_sigr0add
+        tdvs(7)=SI_hsigradd
+        tdvs(8)=SI_sigph0add
+        tdvs(9)=SI_hsigphadd
+        tdvs(10)=SI_sigz0add
+        tdvs(11)=SI_hsigzadd
+        tdvs(12)=SI_mdmp0
+        tdvs(13)=SI_hdmp0
+! ***** editing
       endif
       call MPI_BCAST(tdvs,nval,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-      SI_dmdtadd=tdvs(0)
-      SI_hradd=tdvs(1)
-      SI_rmaxadd=tdvs(2)
-      SI_sigr0add=tdvs(3)
-      SI_hsigradd=tdvs(4)
-      SI_sigph0add=tdvs(5)
-      SI_hsigphadd=tdvs(6)
-      SI_sigz0add=tdvs(7)
-      SI_hsigzadd=tdvs(8)
-      SI_mdmp0=tdvs(9)
-      SI_hdmp0=tdvs(10)
+      SI_mtotdmadd=tdvs(0)
+      SI_tinidmadd=tdvs(1)
+      SI_tfindmadd=tdvs(2)
+      SI_tsfrdmadd=tdvs(3)
+      SI_hradd=tdvs(4)
+      SI_rmaxadd=tdvs(5)
+      SI_sigr0add=tdvs(6)
+      SI_hsigradd=tdvs(7)
+      SI_sigph0add=tdvs(8)
+      SI_hsigphadd=tdvs(9)
+      SI_sigz0add=tdvs(10)
+      SI_hsigzadd=tdvs(11)
+      SI_mdmp0=tdvs(12)
+      SI_hdmp0=tdvs(13)
 
       deallocate(tdvs)
 
+! SFR0 
+      SI_sfr0dmadd=SI_mtotdmadd/(SI_tsfrdmadd/dexp(SI_tinidmadd/SI_tsfrdmadd) &
+        -SI_tsfrdmadd/dexp(SI_tfindmadd/SI_tsfrdmadd))
+      if(myrank.eq.0) then
+        write(6,*) ' SFR0 (Msun/yr)=',SI_sfr0dmadd*(MUSM/TMUYR)
+      endif
 ! set exponential profile
       call set_mxexpd(SI_hradd,FRMIN_EXPDISK*SI_rmaxadd,SI_rmaxadd)
 ! set initially 0 for ndmtadded
@@ -2942,8 +2964,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #ifdef ADD_DMPART
         write(60,'(a22)') '###  ADD_DMPART on ###'
-        write(60,'(a29,1pE13.5)')  'mass addition rate (Msun/yr)=' &
-          ,SI_dmdtadd*MUSM/TMUYR
+        write(60,'(a39,1pE13.5)')  'Total mass added between tini and tfin=' &
+          ,SI_mtotdmadd*MUSM
+        write(60,'(a20,2(1pE13.5))') 'tini and tfin (Gyr)=' &
+          ,SI_tinidmadd*TMUGYR,SI_tfindmadd*TMUGYR
+!                                  1234567890123456789012345678901234567890
+        write(60,'(a25,1pE13.5)') 'star formation timescale=' &
+          ,SI_tsfrdmadd*TMUGYR
         write(60,'(a31,2(1pE13.5))') 'mass profile exp h, rmax (kpc)=' &
           ,SI_hradd*LUKPC,SI_rmaxadd*LUKPC
         write(60,'(a29,1pE13.5)') '(rmin= rmax x) FRMIN_EXPDISK=' &
@@ -2974,8 +3001,13 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         write(6,*) ' write output/ana/add_dmpart.dat'
 ! creat file for add_dmpart
         open(60,file='./output/ana/add_dmpart.dat',status='unknown')
-        write(60,'(a31,1pE13.5)')  '# mass addition rate (Msun/yr)=' &
-          ,SI_dmdtadd*MUSM/TMUYR
+        write(60,'(a41,1pE13.5)')  '# Total mass added between tini and tfin=' &
+          ,SI_mtotdmadd*MUSM
+        write(60,'(a22,2(1pE13.5))') '# tini and tfin (Gyr)=' &
+          ,SI_tinidmadd*TMUGYR,SI_tfindmadd*TMUGYR
+!                                  1234567890123456789012345678901234567890
+        write(60,'(a27,1pE13.5)') '# star formation timescale=' &
+          ,SI_tsfrdmadd*TMUGYR
         write(60,'(a33,2(1pE13.5))') '# mass profile exp h, rmax (kpc)=' &
           ,SI_hradd*LUKPC,SI_rmaxadd*LUKPC
         write(60,'(a39,2(1pE13.5))') '# velocity dispersion sig0 exp(-R/hsig)'

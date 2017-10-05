@@ -461,8 +461,13 @@ module gcdp_system
 #ifdef ADD_DMPART
 ! number of particles will be added, and added already
       integer,save :: SI_ndmtadded
-! total mass added component, mass of DM particles added
-      double precision,save :: SI_mdmpadd
+! total mass added component, mass of DM particles added from tini up to tfin
+      double precision,save :: SI_mtotdmadd
+      double precision,save :: SI_tinidmadd
+      double precision,save :: SI_tfindmadd
+! exponential SFR constants, SFR0, t_SFR
+      double precision,save :: SI_sfr0dmadd
+      double precision,save :: SI_tsfrdmadd      
 ! mass addition rate
       double precision,save :: SI_dmdtadd
 ! adding component, radial scale length (constant) 

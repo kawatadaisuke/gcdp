@@ -20,6 +20,7 @@ subroutine add_dmpart(ndm,ndmt)
       integer i,j,ip
       integer ndmadd,ndm0
       integer dndmtadd,dnaddp
+      double precision mtotaddtn
       double precision,allocatable :: xadd0(:),yadd0(:),zadd0(:) &
         ,xaddp(:),yaddp(:),zaddp(:),radd0(:)
       double precision pfr,rp,ph
@@ -38,8 +39,11 @@ subroutine add_dmpart(ndm,ndmt)
 
 ! original number of DM particle
       ndm0=ndm
+! total mass added by the next step
+      mtotaddtn=SI_sfr0dmadd*(SI_tsfrdmadd/exp(SI_tinidmadd/SI_tsfrdmadd) &
+       -(SI_tsfrdmadd/exp((TM_tot+TM_dt)/SI_tsfrdmadd)))
 ! target number at the next step
-      dndmtadd=int(SI_dmdtadd*(TM_tot+TM_dt)/SI_mdmp0)-SI_ndmtadded
+      dndmtadd=int(mtotaddtn/SI_mdmp0)-SI_ndmtadded
 !      if(myrank.eq.0) then
 !        write(6,*) ' dn,SI_dmdtadd,T,SI_mdmp0=',dndmtadd,SI_dmdtadd &
 !         ,TM_tot+TM_dt,SI_mdmp0,SI_ndmtadded
@@ -55,7 +59,8 @@ subroutine add_dmpart(ndm,ndmt)
         stop
       endif
       if(myrank.eq.0) then
-        write(6,*) 'N particles added =',dndmtadd
+        write(6,*) 'N particles added =',dndmtadd,' SFR=',SI_sfr0dmadd &
+         *dexp(-(TM_tot+TM_dt)/SI_tsfrdmadd)
       endif
 
       if(dndmtadd.gt.0) then

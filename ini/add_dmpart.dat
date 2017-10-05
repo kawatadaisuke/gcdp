@@ -1,4 +1,6 @@
-10.0
+1.0e10                 ! Total mass added (Msun) between tini and tend
+0.0  5.0               ! tini and tend (Gyr)
+0.1                    ! SFR timescale (Gyr)
 3.0 30.0
 20.0 30.0
 20.0 30.0
