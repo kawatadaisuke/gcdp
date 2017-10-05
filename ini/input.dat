@@ -1,0 +1,26 @@
+-1                ! fmul
+100               ! noutput
+1                ! number of output files
+0.0              ! zini <- non-cosmological simulation case
+1                ! if not 0, unit of tend is Gyr.
+0.0 5.0         ! tini, tend <- non-cosmological simulation case
+1 0 1            ! flag for gas,dm,star file
+0                ! if not 0, re-start from step in the next line
+42               ! step to continue from
+
+
+! cosmological simulation
+1                ! fmul
+30               ! noutput
+1                ! number of output files
+0.042            ! omgb <- for cosmological simulations
+2.0              ! z_end
+0
+
+! non-cosmological simulations
+0.0              ! zini <- non-cosmological simulation case
+0                ! if not 0, unit of tend is Gyr.
+0.12 6.0         ! tini, tend <- non-cosmological simulation case
+0 0 1            ! flag for gas,dm,star file
+0                ! if not 0, re-start from step in the next line
+25               ! step to continue from
