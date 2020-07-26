@@ -21,7 +21,7 @@ OPTIONS=-g
 #FFTW_INC=/khome/dka/share/include
 #FFTW_LIB=/khome/dka/share/lib
 ### mac
-MPI_DIR = /usr/local
+MPI_DIR = /Users/dkawata/anaconda3
 FFTW_INC=/usr/local/include
 FFTW_LIB=/usr/local/lib
 # default library and compiler

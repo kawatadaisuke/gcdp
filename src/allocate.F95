@@ -510,7 +510,7 @@ subroutine allocate_dm_all(ndm)
       allocate(asc_dm(0:ndm))
       allocate(tc_dm(0:ndm))
 #endif
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
       allocate(rperi_dm(0:ndm-1))
       allocate(rapo_dm(0:ndm-1))
       allocate(zmax_dm(0:ndm-1))
@@ -648,7 +648,7 @@ subroutine reallocate_dm_d3(ndm)
 
 end subroutine
 
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
 ! reallocate DM double for testp
 subroutine reallocate_dm_testp(ndm)
       use gcdp_dm

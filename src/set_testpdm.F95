@@ -4,7 +4,7 @@
 !  9 September 2016    produced by D.KAWATA
 ! *************************************** 
 
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
 subroutine set_testpdm(ndm,ndmt,nadm,nadmt)
       use gcdp_const
       use gcdp_system
@@ -20,7 +20,7 @@ subroutine set_testpdm(ndm,ndmt,nadm,nadmt)
       integer nval,nprp
       integer ipsta,ipend
 ! work
-      integer jsta,jend,ierr,rrank
+      integer jsta,jend,ierr,rrank,i1,i2,i3,i4
       integer,allocatable :: jstap(:),jendp(:)
       integer,allocatable :: istatus(:)
       integer,allocatable :: ireqs(:),ireqr(:)
@@ -153,13 +153,22 @@ subroutine set_testpdm(ndm,ndmt,nadm,nadmt)
       do i=0,ndm-SI_ntpdm-1
         list_adm(nc)=i
         nc=nc+1
-      enddo
-      nadm=SI_ntpdm
+     enddo
+#ifdef TESTP_HYBRID
+! ndm is set to be nc (see above)
+     nadm=ndm
+#else     
+     nadm=SI_ntpdm
+#endif
 ! update the number of DM particles
-      ndmt=ndmt+SI_nttpdm
-      nadmt=SI_nttpdm
-      SI_ndm1t=ndmt
-      SI_ndm1=ndm
+     ndmt=ndmt+SI_nttpdm
+     nadmt=SI_nttpdm
+     SI_ndm1t=ndmt
+     SI_ndm1=ndm
+     if(myrank.eq.0) then
+        write(6,*) ' new ndm and ndmt=',ndm,ndmt
+        write(6,*) ' Ntottal test particle and in myrank 0 =',SI_nttpdm,SI_ntpdm
+     endif
 
 ! test output
 !      open(60,file='fixdm.asc',status='unknown')

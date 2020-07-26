@@ -361,6 +361,9 @@ program gcdp
 #ifdef TESTPDMF
         write(6,*) ' Use DM particle potential'
 #endif
+#ifdef TESTP_HYBRID
+        write(6,*) ' Use live DM particle potential'        
+#endif
 #ifdef TESTPEXTF
         write(6,*) ' Use external potential'
 #endif
@@ -391,6 +394,15 @@ program gcdp
 #endif
 #endif
 
+#ifdef TESTP_HYBRID
+! ***********************************************
+!  Set up test particle before ddecdm and dmtree
+!  allocate(ndm+SI_ntpdm) in set_ini      
+! ***********************************************
+        call set_testpdm(ndm,ndmt,nadm,nadmt)
+#endif
+
+        
 ! *** for time keeping (moved here since pv28.4)
 #ifdef WTIME
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -511,9 +523,9 @@ program gcdp
 #endif
 
 #ifdef TESTPDMF
-! *****************************
-!  Set up test particle
-! *****************************
+! ***********************************
+!  Set up test particle after treedm
+! ***********************************
         call set_testpdm(ndm,ndmt,nadm,nadmt)
 #endif
      
@@ -592,8 +604,11 @@ program gcdp
         call ldmtreebuild(ndm)
 #endif
 #endif
+! endif for DM (below)
 #endif
+! endif for TESTP (below)
 #endif
+! endif for SGRAV (below)
 #endif
 #ifdef WTIME
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)

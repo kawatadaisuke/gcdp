@@ -86,7 +86,11 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
       nivalb=3
 #endif
       nivaldm=2
+#ifdef TESTP_HYBRID
+      ndvaldm=13
+#else
       ndvaldm=10
+#endif
 #if defined(COSM) && defined(BOXSIM)
       nddmcon=14
 #else
@@ -751,7 +755,7 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         if(myrank.lt.SI_nof) then
           write(fileo,'(a17,i4.4,a4)') 'output/data/pdval',myrank,'.dat'
           open(62,file=fileo,status='unknown',form='unformatted')
-          write(62) npt,ndmt,SI_ndm1t,SI_a,TM_tot
+          write(62) npt,ndmt,SI_ndm1t,SI_a,TM_tot          
           write(62) nprocs,SI_nof,nivaldm,ndvaldm
         endif
 
@@ -761,7 +765,11 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
         tivs(0)=ng
         tivs(1)=ndm
         tivs(2)=ns
+#ifdef TESTP_HYBRID        
+        tivs(3)=SI_nttpdm
+#else
         tivs(3)=SI_ndm1
+#endif        
         tivs(4)=nag
         tivs(5)=nadm
         tivs(6)=nas
@@ -867,6 +875,20 @@ subroutine forcont(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg,step,totstep,lstep
             do i=0,npj-1 
               tdvs(i)=tadd_dm(i)
             enddo
+#ifdef TESTP_HYBRID               
+          else if(iv.eq.10) then
+            do i=0,npj-1 
+              tdvs(i)=rperi_dm(i)
+            enddo
+          else if(iv.eq.11) then
+            do i=0,npj-1 
+              tdvs(i)=rapo_dm(i)
+            enddo
+          else if(iv.eq.12) then
+            do i=0,npj-1 
+              tdvs(i)=zmax_dm(i)
+            enddo
+#endif
           endif
           if(myrank.lt.SI_nof) then
             write(62) (tdvs(i),i=0,npj-1)

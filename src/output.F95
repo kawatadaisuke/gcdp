@@ -31,7 +31,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       integer ngt,nst
       double precision mg,ms,mgt,mst,mmet,tnsn,mfdg,mfdgt,maxrhog,mdm
       integer nfdg,nfdgt
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
       integer idtps,pntps
 #endif
 ! * for file *
@@ -56,7 +56,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
       integer nval
       double precision ene(0:1),etot(0:1),momt(0:2)
 #endif
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
       double precision rp,rmp,eccp
 #endif
 ! *** for work ***
@@ -135,7 +135,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! *** for DM ***
       nivaldm=2
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
       ndvaldm=13
 #else
       ndvaldm=10
@@ -375,10 +375,13 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
       endif
 
-#ifdef TESTP
-
+#if defined(TESTP) || defined(TESTP_HYBRID)
 ! update rperi, rapo and zmax
+#ifdef TESTP      
       do i=ndm-SI_ntpdm,ndm-1
+#else
+      do i=0,ndm-1
+#endif            
         rp=dsqrt(x_dm(i)**2+y_dm(i)**2)
         if(rp.lt.rperi_dm(i)) then
           rperi_dm(i)=rp
@@ -393,7 +396,11 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
 
 ! starting (unique) ID of test particle
       idtps=ndmt-SI_nttpdm
+#ifdef TESTP
       do i=ndm-SI_ntpdm,ndm-1
+#else
+      do i=0,ndm-1
+#endif
         if(id_dm(i).ge.idtps.and.id_dm(i).lt.idtps+OF_nporb) then
           write(filename,'(a16,i6.6)') './output/data/id',id_dm(i)-idtps
           if(step.eq.0) then
@@ -1376,7 +1383,7 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
               write(filename,'(a20,i6.6,a1,i4.4)') &
                './output/data/bdvals',step,'n',myrank
               open(62,file=filename,status='unknown' &
-               ,form='unformatted')
+                   ,form='unformatted')
               write(62) npt,ndmt,SI_ndm1t,SI_a,TM_tot
               write(62) nprocs,SI_nof,nivaldm,ndvaldm
             endif
@@ -1387,7 +1394,11 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
             tivs(0)=ng
             tivs(1)=ndm
             tivs(2)=ns
-            tivs(3)=SI_ndm1
+#ifdef TESTP_HYBRID            
+            tivs(3)=SI_nttpdm
+#else
+            tivs(3)=SI_ndm1            
+#endif
             tivs(4)=nag
             tivs(5)=nadm
             tivs(6)=nas
@@ -1491,6 +1502,20 @@ subroutine output(npt,ndmt,np,ng,ndm,ns,step,totstep)
                 do i=0,npj-1 
                   tdvs(i)=tadd_dm(i)
                 enddo
+#ifdef TESTP_HYBRID               
+              else if(iv.eq.10) then
+                do i=0,npj-1 
+                  tdvs(i)=rperi_dm(i)
+                enddo
+              else if(iv.eq.11) then
+                do i=0,npj-1 
+                  tdvs(i)=rapo_dm(i)
+                enddo
+              else if(iv.eq.12) then
+                do i=0,npj-1 
+                  tdvs(i)=zmax_dm(i)
+                enddo
+#endif
               endif
               if(myrank.lt.SI_nof) then
                 write(62) (tdvs(i),i=0,npj-1)

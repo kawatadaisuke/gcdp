@@ -518,7 +518,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       nivalb=3
 #endif
       nivaldm=2
-      ndvaldm=10
+#ifdef TESTP_HYBRID
+      ndvaldm=13
+#else
+      ndvaldm=10      
+#endif
 #ifdef GAS
       ndbval=9
 ! since pv33.17.6
@@ -1407,7 +1411,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             stop
           endif
         endif
-
+#ifdef TESTP_HYBRID
+        call MPI_BCAST(SI_nttpdm,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)       
+#endif
         allocate(tivr(0:6))
 
         do ip=ipsta,ipend,ipd
@@ -1427,7 +1433,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
             ng=tivr(0)
             ndm=tivr(1)
             ns=tivr(2)
+#ifdef TESTP_HYBRID
+            SI_nttpdm=tivr(3)
+            SI_ndm1=ndm
+#else            
             SI_ndm1=tivr(3)
+#endif            
             nag=tivr(4)
             nadm=tivr(5)
             nas=tivr(6)
@@ -1534,6 +1545,20 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                 do i=0,npjr(ip)-1 
                   tadd_dm(i)=tdvr(i)
                 enddo
+#ifdef TESTP_HYBRID               
+              else if(iv.eq.10) then
+                do i=0,npj-1 
+                  tdvs(i)=rperi_dm(i+pntps)
+                enddo
+              else if(iv.eq.11) then
+                do i=0,npj-1 
+                  tdvs(i)=rapo_dm(i+pntps)
+                enddo
+              else if(iv.eq.12) then
+                do i=0,npj-1 
+                  tdvs(i)=zmax_dm(i+pntps)
+                enddo
+#endif
               endif
             endif
 

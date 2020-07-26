@@ -185,7 +185,7 @@ module gcdp_dm
        double precision,allocatable,save :: asc_dm(:),tc_dm(:)
 #endif
 
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
 ! define variables for Test particle simulation
        double precision,allocatable,save :: rperi_dm(:),rapo_dm(:),zmax_dm(:)
 #endif
@@ -432,7 +432,7 @@ module gcdp_system
 #ifdef FIXEDDMP
       integer,save :: SI_fiddm(0:1)
 #endif
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
 ! test particle ID range, total number and number within proc
       integer,save :: SI_nttpdm,SI_ntpdm
 ! number of orbit particle output

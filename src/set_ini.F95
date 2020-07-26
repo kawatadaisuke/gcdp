@@ -68,7 +68,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
       double precision kmmp
       double precision hmin,hmint,etahmax
 ! *** Initial parameter ***
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
       integer Ini_ncdt
 #endif
 ! *** Ini_hyd: 0: N-body only, 1: include gas in high reso region ***
@@ -149,7 +149,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           stop
         endif
 #endif
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
         read(50,*) Ini_ncdt
         read(50,*) OF_nporb
 #endif
@@ -976,10 +976,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DM
       if(flagfdm.eq.0) then
 
-#ifdef TESTPDMF
+#if defined(TESTPDMF) || defined(TESTP_HYBRID)
 ! add testp
         if(myrank.eq.0) then
-! *** read DM data only with rank 0 
+! *** read DM data only with rank 0
+! testp.dat can be created with gcdp-ana/bin2asc flagselp=2
           write(6,*) ' reading testp.dat'
           open(51,file='ini/testp.dat',status='old',form='unformatted')
           read(51) SI_nttpdm
@@ -1000,7 +1001,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         if(myrank.eq.0) then
           write(6,*) ' N Timestep and dt (Gyr) =',Ini_ncdt,TM_cdt*TMUGYR
           write(6,*) ' Number of particles orbit output =',OF_nporb
-        endif
+       endif
+#elif defined(TESTP_HYBRID)
+! not use constant timestep
+       TM_cdt = 0.0
 #endif
 
         if(myrank.eq.0) then
@@ -1021,7 +1025,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 ! allocate DM variables
         ndm=jend-jsta+1
+#ifdef TESTP_HYBRID
+        call allocate_dm_all(ndm+SI_ntpdm)
+#else
         call allocate_dm_all(ndm)
+#endif
 #ifdef TESTPEXTF
 ! test particle case, set ndm=ntest particle
         SI_ntpdm=ndm
@@ -2898,7 +2906,11 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #endif
 #ifdef TESTP
         write(60,'(a32)') '###  TEST particle SIMULAION ###'
-!                             123456789012345678901234567890123456
+#elif defined(TESTP_HYBRID)
+        write(60,'(a41)') '###  TEST particle + N-body SIMULAION ###'
+#endif
+!                          1234567890123456789012345678901234567890
+#if defined(TESTP) || defined(TESTP_HYBRID)
         write(60,'(a8,I10)') ' Ntestp=',SI_nttpdm
         write(60,'(a17,I10)') ' Np output orbit=',OF_nporb
         write(60,'(a13,1pE13.5)') ' timestep dt=',TM_cdt

@@ -633,6 +633,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 
 ! reallocate DM variables
 #ifdef TESTPDMF
+! ddecdm is called only for the initial step, before reading the test particles with TESTPDMF
       call reallocate_dm_int(ndm+SI_ntpdm)
 #else
       call reallocate_dm_int(ndm)
@@ -877,7 +878,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         stop
       endif
 
-#ifdef TESTP
+#if defined(TESTP) || defined(TESTP_HYBRID)
 ! *** for test particle sim
       nval=3
 
@@ -1180,6 +1181,15 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
         do i=0,nanp-1
           list_adm(i+nadm)=nalist(i)
         enddo
+#ifdef TESTP_HYBRID
+! update SI_ntpdm
+        SI_ntpdm=0        
+        do i=0,ndm-1
+           if(id_dm(i).ge.SI_nttpdm) then
+             SI_ntpdm=SI_ntpdm+1
+           endif
+        enddo
+#endif
 
         deallocate(nalist)
 

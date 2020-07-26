@@ -83,10 +83,10 @@
 !
 ! *****  adding particles *****
 ! *** add DM particles,
-#define ADD_DMPART
+! #define ADD_DMPART
 !
 ! *** add particles using exponential disk
-#define ADD_EXPDISK
+! #define ADD_EXPDISK
 !
 ! *** turn on Quadrupole moment on for tree
 ! This has to be off since pv34.3gtodm
@@ -133,6 +133,10 @@
 ! #define TESTPEXTF
 ! #undef TESTPEXTF
 !
+! *** test particle + N-body DM mode
+#define TESTP_HYBRID
+! #undef TESTP_HYBRID
+
 ! *** turn off self-gravity if text particle sim with an external potential
 #ifdef TESTPEXTF
 #undef SGRAV

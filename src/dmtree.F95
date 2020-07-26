@@ -5,7 +5,7 @@
 !  *************************************** 
 
 #ifdef DM
-subroutine dmtreebuild(np)      
+subroutine dmtreebuild(npin)      
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
@@ -14,8 +14,8 @@ subroutine dmtreebuild(np)
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: np
-      integer pn,nd 
+      integer,intent(in) :: npin
+      integer np,pn,nd 
       integer i,ierr
       integer level,npn
 ! * for finished tree (dmtr) *
@@ -54,6 +54,18 @@ subroutine dmtreebuild(np)
       integer,allocatable :: tivr(:),npjr(:),nd0(:)
       double precision,allocatable :: tdvr(:)
 
+! just for a count      
+#ifdef TESTP_HYBRID
+! only include N-body particles
+      np=0
+      do i=0,npin-1
+        if(id_dm(i).lt.SI_nttpdm) then
+          np=np+1
+        endif
+      enddo
+#else
+      np=npin
+#endif
 ! an expected maximum number of tree
       maxntr=np*3+nprocs*MAXNODESEND
 
@@ -71,10 +83,7 @@ subroutine dmtreebuild(np)
       allocate(c_nfp(0:np-1))
       allocate(label_nfp(0:np-1))
       allocate(snfp(0:np-1))
-
-      do i=0,np-1
-        pn_nfp(i)=i
-      enddo
+      
       level=0
       call dmmakeroot(np,0.0d0)
       next_dmtr(0)=0
@@ -104,13 +113,19 @@ subroutine dmtreebuild(np)
 
       numnfp=0
       numtr0=numdmtr
-      do i=0,np-1
+      do i=0,npin-1
+#ifdef TESTP_HYBRID
+        if(id_dm(i).lt.SI_nttpdm) then
+#endif     
         pn_nfp(numnfp)=i
         nd_nfp(numnfp)=numtr0
         label_nfp(numnfp)=0
         snfp(numnfp)=0
         c_nfp(numnfp)=0
         numnfp=numnfp+1
+#ifdef TESTP_HYBRID
+        endif
+#endif     
       enddo
       if(numnfp.eq.0) then
         goto 94
@@ -742,6 +757,9 @@ subroutine dmmakeroot(np,cz)
       max_z=-INF
       cz_dmtr(0)=cz
       do i=0,np-1
+#ifdef TESTP_HYBRID
+        if(id_dm(i).lt.SI_nttpdm) then
+#endif         
         if(dabs(x_dm(i)).gt.max_x) then
           max_x = dabs(x_dm(i))
         endif
@@ -751,6 +769,9 @@ subroutine dmmakeroot(np,cz)
         if(dabs(z_dm(i)-cz).gt.max_z) then
           max_z = dabs(z_dm(i)-cz)
         endif
+#ifdef TESTP_HYBRID
+        endif
+#endif         
       enddo
 ! *** get the maximum and minimum for all the particles ***
 ! *** maximum ***
@@ -786,6 +807,9 @@ subroutine dmmakeroot(np,cz)
       min_y=INF
       min_z = INF
       do i=0,np-1
+#ifdef TESTP_HYBRID
+        if(id_dm(i).lt.SI_nttpdm) then
+#endif         
         if(x_dm(i).lt.min_x) then
           min_x = x_dm(i)
         endif          
@@ -804,6 +828,9 @@ subroutine dmmakeroot(np,cz)
         if(z_dm(i).gt.max_z) then
           max_z = z_dm(i)
         endif
+#ifdef TESTP_HYBRID
+        endif
+#endif         
       enddo
 ! *** get the maximum and minimum for all the particles ***
 ! *** maximum ***
