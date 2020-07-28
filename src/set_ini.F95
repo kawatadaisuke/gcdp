@@ -993,7 +993,7 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         SI_ntpdm=jend-jsta+1
 #endif
 
-#ifdef TESTP
+#ifdef defined(TESTP) || defined(TESTP_HYBRID)
 ! pass number of timestep
         call MPI_BCAST(Ini_ncdt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
         TM_cdt=(TM_t0-TM_tot)/dble(Ini_ncdt)
