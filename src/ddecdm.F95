@@ -87,7 +87,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
             call allocate_dmtree(SI_ndm1)
           endif
 
-          call dmmakeroot(SI_ndm1,0.0d0)
+          call dmmakeroot(SI_ndm1,0.0d0,ndmt,1)
           idmr(0)=0
           idmr(1)=SI_ndm1-1
           cx0=cx_dmtr(0)

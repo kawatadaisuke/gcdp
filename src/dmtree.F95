@@ -5,7 +5,7 @@
 !  *************************************** 
 
 #ifdef DM
-subroutine dmtreebuild(npin)      
+subroutine dmtreebuild(npin,ndmt)      
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
@@ -14,7 +14,7 @@ subroutine dmtreebuild(npin)
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: npin
+      integer,intent(in) :: npin,ndmt
       integer np,pn,nd 
       integer i,ierr
       integer level,npn
@@ -59,7 +59,7 @@ subroutine dmtreebuild(npin)
 ! only include N-body particles
       np=0
       do i=0,npin-1
-        if(id_dm(i).lt.SI_nttpdm) then
+        if(id_dm(i).lt.ndmt-SI_nttpdm) then
           np=np+1
         endif
       enddo
@@ -85,7 +85,7 @@ subroutine dmtreebuild(npin)
       allocate(snfp(0:np-1))
       
       level=0
-      call dmmakeroot(np,0.0d0)
+      call dmmakeroot(npin,0.0d0,ndmt,0)
       next_dmtr(0)=0
       pare_tr(0)=-1
       daughter_dmtr(0)=1
@@ -115,7 +115,7 @@ subroutine dmtreebuild(npin)
       numtr0=numdmtr
       do i=0,npin-1
 #ifdef TESTP_HYBRID
-        if(id_dm(i).lt.SI_nttpdm) then
+        if(id_dm(i).lt.ndmt-SI_nttpdm) then
 #endif     
         pn_nfp(numnfp)=i
         nd_nfp(numnfp)=numtr0
@@ -727,7 +727,7 @@ end subroutine
 
 #ifdef DM	  
 ! *** Definition of makeroot() ***
-subroutine dmmakeroot(np,cz)
+subroutine dmmakeroot(np,cz,ndmt,flagall)
       use gcdp_const
       use gcdp_dm
       use gcdp_dmtree
@@ -736,7 +736,7 @@ subroutine dmmakeroot(np,cz)
       implicit none
       include 'mpif.h'
 
-      integer,intent(in) :: np
+      integer,intent(in) :: np,ndmt,flagall
       double precision,intent(in) :: cz
       integer i,ierr
 ! * max coordinate *      
@@ -758,7 +758,7 @@ subroutine dmmakeroot(np,cz)
       cz_dmtr(0)=cz
       do i=0,np-1
 #ifdef TESTP_HYBRID
-        if(id_dm(i).lt.SI_nttpdm) then
+        if(id_dm(i).lt.ndmt-SI_nttpdm.or.flagall.ne.0) then
 #endif         
         if(dabs(x_dm(i)).gt.max_x) then
           max_x = dabs(x_dm(i))
@@ -808,7 +808,7 @@ subroutine dmmakeroot(np,cz)
       min_z = INF
       do i=0,np-1
 #ifdef TESTP_HYBRID
-        if(id_dm(i).lt.SI_nttpdm) then
+        if(id_dm(i).lt.ndmt-SI_nttpdm.or.flagall.ne.0) then
 #endif         
         if(x_dm(i).lt.min_x) then
           min_x = x_dm(i)

@@ -510,9 +510,9 @@ program gcdp
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
         ntime=MPI_WTIME()
 #endif
-        call dmtreebuild(SI_ndm1)
+        call dmtreebuild(SI_ndm1,ndmt)
 #ifdef MULTI_LEV
-        call ldmtreebuild(ndm)
+        call ldmtreebuild(ndm,ndmt)
 #endif
 #ifdef WTIME
         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
@@ -599,9 +599,9 @@ program gcdp
 #ifndef TESTP
 #ifdef DM
 #ifndef FIXEDDMEPS
-        call dmtreebuild(SI_ndm1)
+        call dmtreebuild(SI_ndm1,ndmt)
 #ifdef MULTI_LEV
-        call ldmtreebuild(ndm)
+        call ldmtreebuild(ndm,ndmt)
 #endif
 #endif
 ! endif for DM (below)
@@ -1107,9 +1107,9 @@ program gcdp
 #ifdef SGRAV
 #ifdef DM
       if(nagravgt.gt.0.or.nadmt.gt.0) then
-        call dmtreebuild(SI_ndm1)
+        call dmtreebuild(SI_ndm1,ndmt)
 #ifdef MULTI_LEV
-        call ldmtreebuild(ndm)
+        call ldmtreebuild(ndm,ndmt)
 #endif
       endif
 #endif
@@ -1190,9 +1190,9 @@ program gcdp
 #ifdef DM
 #ifndef FIXEDDMEPS
       if(nadmt.gt.0.or.nagravgt.gt.0) then
-        call dmtreebuild(SI_ndm1)
+        call dmtreebuild(SI_ndm1,ndmt)
 #ifdef MULTI_LEV
-        call ldmtreebuild(ndm)
+        call ldmtreebuild(ndm,ndmt)
 #endif
       endif
 #endif

@@ -162,7 +162,11 @@ subroutine set_testpdm(ndm,ndmt,nadm,nadmt)
 #endif
 ! update the number of DM particles
      ndmt=ndmt+SI_nttpdm
+#ifdef TESTP_HYBRID     
+     nadmt=ndmt
+#else
      nadmt=SI_nttpdm
+#endif
      SI_ndm1t=ndmt
      SI_ndm1=ndm
      if(myrank.eq.0) then
