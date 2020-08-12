@@ -9,7 +9,7 @@ module gcdp_const
 
 ! GCD+ version
 ! please also copy .git/refs/heads/master to track the version
-      character*11,parameter :: GCDPVDATE='30/06/2017 '
+      character*11,parameter :: GCDPVDATE='12/08/2020 '
 
       double precision,parameter :: M_PI=3.141592653589793238d0
 ! delta timestep for domain decomposition ***

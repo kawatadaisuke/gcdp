@@ -399,7 +399,9 @@ program gcdp
 !  Set up test particle before ddecdm and dmtree
 !  allocate(ndm+SI_ntpdm) in set_ini      
 ! ***********************************************
-        call set_testpdm(ndm,ndmt,nadm,nadmt)
+        if(flagcont.eq.0) then        
+          call set_testpdm(ndm,ndmt,nadm,nadmt)
+        endif
 #endif
 
         

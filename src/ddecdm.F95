@@ -1185,7 +1185,7 @@ subroutine ddecdm(ndmt,ndm,nadm,step)
 ! update SI_ntpdm
         SI_ntpdm=0        
         do i=0,ndm-1
-           if(id_dm(i).ge.SI_nttpdm) then
+           if(id_dm(i).ge.ndm-SI_nttpdm) then
              SI_ntpdm=SI_ntpdm+1
            endif
         enddo

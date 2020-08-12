@@ -135,6 +135,10 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           stop
         endif
 #endif
+#if defined(TESTP) || defined(TESTP_HYBRID)
+        read(50,*)
+        read(50,*)        
+#endif        
         read(50,*) Ini_flagcop
         if(Ini_flagcop.ne.0) then
           read(50,*) step
@@ -665,6 +669,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           endif
 ! check consistency
 #ifdef DEL_DMPART
+          ndmt=indmt
+          SI_ndm1t=indm1t
+#elif defined(TESTP_HYBRID)
           ndmt=indmt
           SI_ndm1t=indm1t
 #else
@@ -1396,6 +1403,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 #ifdef DEL_DMPART
           ndmt=indmt
           SI_ndm1t=indm1t
+#elif defined(TESTP_HYBRID)
+          ndmt=indmt
+          SI_ndm1t=indm1t
 #else
           if(inpt.ne.npt.or.(indmt.ne.ndmt.or.indm1t.ne.SI_ndm1t)) then
             write(6,*) ' Error in cont.f: # of particles is inconsistent'
@@ -1412,7 +1422,9 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
           endif
         endif
 #ifdef TESTP_HYBRID
-        call MPI_BCAST(SI_nttpdm,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)       
+        call MPI_BCAST(SI_nttpdm,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        call MPI_BCAST(ndmt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+        SI_ndm1t=ndmt
 #endif
         allocate(tivr(0:6))
 
@@ -1449,6 +1461,12 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
         deallocate(tivr)
 
 ! allocate DM values
+#ifdef TESTP_HYBRID
+        if(myrank.eq.0) then
+          write(6,*) 'TESTP_HYBRID on'
+        endif
+        write(6,*) 'myrank,Ndmtot,Ndmtest,ndm,SI_ndm1t=',myrank,ndmt,SI_nttpdm,ndm,SI_ndm1t
+#endif
         call allocate_dm_all(ndm)
 
 ! *** read integer variables ***
@@ -1547,16 +1565,16 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
                 enddo
 #ifdef TESTP_HYBRID               
               else if(iv.eq.10) then
-                do i=0,npj-1 
-                  tdvs(i)=rperi_dm(i+pntps)
+                do i=0,npjr(ip)-1 
+                  rperi_dm(i)=tdvr(i)
                 enddo
               else if(iv.eq.11) then
-                do i=0,npj-1 
-                  tdvs(i)=rapo_dm(i+pntps)
+                do i=0,npjr(ip)-1 
+                  rapo_dm(i)=tdvr(i)
                 enddo
               else if(iv.eq.12) then
-                do i=0,npj-1 
-                  tdvs(i)=zmax_dm(i+pntps)
+                do i=0,npjr(ip)-1 
+                  zmax_dm(i)=tdvr(i)
                 enddo
 #endif
               endif
@@ -2085,12 +2103,15 @@ subroutine set_ini(npt,ndmt,np,ng,ndm,ns,nag,nadm,nas,nagravg &
 
 !      write(fileo,'(a6,i3.3,a4)') 'dmcont',myrank,'.dat'
 !      open(60,file=fileo,status='unknown')
+!      write(6,*) 'output ',fileo,' ndm,ndmt,nttpdm=',ndm,ndmt,SI_nttpdm
 !      do i=0,ndm-1
-!        write(60,'(13(1pE13.5),3I10,3(1pE13.5))') 
-!     &    xc_dm(i),yc_dm(i),zc_dm(i)
-!     &   ,vnx_dm(i),vny_dm(i),vnz_dm(i),m_p(i),lt_dm(i)
-!     &   ,dt_dm(i),eps_dm(i),xc_dm(i),yc_dm(i),zc_dm(i)
-!     &   ,i,id_dm(i),list_adm(i),dvx_dm(i),dvy_dm(i),dvz_dm(i)
+!        if(id_dm(i).lt.ndmt-SI_nttpdm) then
+!          write(60,'(12(1pE13.5),3I10,3(1pE13.5))') &
+!           xc_dm(i),yc_dm(i),zc_dm(i) &
+!          ,vnx_dm(i),vny_dm(i),vnz_dm(i),m_dm(i),lt_dm(i) &
+!          ,dt_dm(i),xc_dm(i),yc_dm(i),zc_dm(i) &
+!          ,i,id_dm(i),list_adm(i),dvx_dm(i),dvy_dm(i),dvz_dm(i)
+!        endif
 !      enddo 
 !      close(60)
 !      stop
